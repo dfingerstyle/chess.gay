@@ -58,6 +58,15 @@ function OnlineCounter({ userId }: { userId: string | null }) {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem('chessgay:theme');
+      document.documentElement.dataset.theme = saved === 'sakura' || saved === 'sea' ? saved : 'starry';
+    } catch {
+      document.documentElement.dataset.theme = 'starry';
+    }
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return;
     let active = true;
     let channel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
