@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './CasinoStage.css';
 
@@ -31,6 +31,8 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
   animationKey: number;
   onAnimationComplete?: () => void;
 }) {
+  const completionRef = useRef(onAnimationComplete);
+  useEffect(() => { completionRef.current = onAnimationComplete; }, [onAnimationComplete]);
   const [revealing, setRevealing] = useState(false);
   const [revealed, setRevealed] = useState<CasinoVisualResult | null>(null);
   const number = result ? resultNumber(result.outcome) : 0;
@@ -49,10 +51,10 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
     const timer = window.setTimeout(() => {
       setRevealed(result);
       setRevealing(false);
-      onAnimationComplete?.();
+      completionRef.current?.();
     }, duration);
     return () => window.clearTimeout(timer);
-  }, [animationKey, game, result, onAnimationComplete]);
+  }, [animationKey, game, result]);
 
   const outcomeLabel = result?.outcome || 'Waiting for the next round';
   const coinSide = outcomeLabel.toLowerCase().includes('tails') ? 'TAILS' : 'HEADS';
