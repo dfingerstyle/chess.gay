@@ -97,7 +97,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
     const memberRows=(memberResult.data||[]) as Omit<Member,'profile'>[];
     const userIds=[...new Set(memberRows.map(row=>row.user_id))];
     const profileResult=userIds.length?await supabase.from('profiles').select('id,username,display_name').in('id',userIds):{data:[]};
-    const profileMap=new Map(((profileResult.data||[]) as Profile[]).map(profile=>[profile.id,profile]));
+    const profileMap=new Map(((profileResult.data||[]) as Profile[]).map(profile=>[profile.id,profile] as [string,Profile]));
     setSelectedTable(tableResult.data as CasinoTable);
     setMembers(memberRows.map(row=>({...row,profile:profileMap.get(row.user_id)})));
     const nextRound=(roundResult.data||null) as Round|null;
