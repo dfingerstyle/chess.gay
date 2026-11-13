@@ -1,3 +1,4 @@
+import './GamePage.css';
 import { useEffect, useMemo, useState } from 'react';
 import { claimableDraw, chooseCpuMove, gameStatus, initialPosition, legalMoves, makeMove, moveText, pieceColor, PIECES, squareName, type Move, type Position } from '../lib/chess';
 
