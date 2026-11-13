@@ -5,7 +5,7 @@ A free chess and community platform. No subscriptions, premium tiers, paywalled 
 ## Product decisions
 
 - **Membership:** completely free. Chess, puzzles, lessons, game review and community features are intended to be available to everyone.
-- **Visual identity:** pure-black default theme with warm ivory typography and restrained antique-brass accents. Additional themes will be optional.
+- **Visual identity:** pure black, white and neutral grey only; no gold/brass accents, with restrained roundness and smooth modern interactions. Additional themes will be optional.
 - **Public website and app:** public landing site plus signed-in player experience.
 - **Discovery:** public searchable player directory and recommendations.
 - **Profiles:** public by default, with privacy controls planned for individual profile fields.
@@ -48,7 +48,7 @@ The Phase 1 foundation branch adds:
 - Profile editor for display name, bio and curated chess-piece avatar presets.
 - Responsive layouts for desktop and mobile.
 
-The existing Supabase client, authentication flow and `profiles` migration are preserved. The UI now uses a rounded monochrome black-and-white visual system, and the product specification reflects guest-first access. No new database schema changes are required for these Phase 1 screens.
+The existing Supabase client, authentication flow and `profiles` migration are preserved. The UI is being refined toward a rounded monochrome black-and-white visual system. The product specification is the source of truth for guest-first access and the planned playable game systems. No new database schema changes are required for these Phase 1 screens.
 
 The app includes clearly labelled section pages for chess, training, community, casino, cosmetics, tournaments and administration. These are product navigation/status surfaces, not completed underlying systems yet.
 
@@ -70,3 +70,12 @@ The player directory requires the existing public SELECT policy on `profiles`; p
 - Admin permissions, ratings, wallet balances, casino outcomes and marketplace trades must be validated server-side.
 - Do not use user-editable auth metadata for authorization.
 - E2EE must use a vetted protocol; do not invent cryptography.
+
+
+## Playable game requirements
+
+The Chess area must launch real games, not a decorative preview or a coming-soon page. Required modes are standard two-player chess and four-player chess (free-for-all and 2v2), plus public matchmaking and private lobbies. Each private lobby generates a unique join code. Hosts can configure time controls, teams/seats, variants and custom starting positions, including an all-queen setup. Customization also covers boards, pieces, sounds, animations and game UI.
+
+Realtime Presence is for online/seat presence; Broadcast is for low-latency events. Authoritative moves, clocks, matchmaking and results must be validated server-side. Four-player rules require their own tested engine. The site should feel active through genuine online presence, verified activity and subtle motion—never fake player counts, sample chat presented as live, or fabricated games.
+
+These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
