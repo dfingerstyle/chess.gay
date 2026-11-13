@@ -112,7 +112,7 @@ The current development branch has a hybrid home hub and separate activity pages
 
 The current foundation reuses the existing Supabase Auth client and `public.profiles` table. Existing columns support username, display name, bio and avatar preset identifier. Public directory reads use the current public profile read policy; edits use the current owner-only update policy. The online counter uses ephemeral Supabase Realtime Presence and does not persist visitor data.
 
-New migrations now add persistent farm plots and fishing logs, row-level security for owner-only reads, server-validated planting/harvesting/fishing functions and XP awards. More profile fields, privacy preferences, cosmetic ownership and staff permissions will receive carefully designed migrations before those features are implemented.
+New migrations add persistent farm plots and fishing logs, owner-only RLS reads, server-validated planting/harvesting/fishing functions and XP awards; six curated profile banner styles; and private multiplayer lobbies with hashed codes, member-only RLS, server-validated seats and Realtime updates. More profile fields, privacy preferences, cosmetic ownership and staff permissions will receive carefully designed migrations before those features are implemented.
 
 
 ## Playable chess, multiplayer and customization requirements
@@ -157,7 +157,7 @@ A game page must launch a real playable game. A decorative board, preview, disab
 4. Add four-player free-for-all and 2v2, then the custom setup editor and all-queen preset.
 5. Add chess intelligence, puzzles and learning; then social, community, cosmetics, economy and administration.
 
-These are product requirements, not claims that the systems are already implemented. Local standard chess is playable, but online matchmaking, lobbies and four-player chess remain unimplemented.
+These are product requirements, not claims that the systems are already implemented. Local standard chess and private lobby creation/joining are implemented. Online move submission, matchmaking, starting games from lobbies and the four-player rules engine remain unimplemented.
 
 
 ## Implementation status — 14 November 2026
