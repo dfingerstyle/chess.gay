@@ -163,7 +163,7 @@ function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: 
   return <div className="app-page-heading"><div className="eyebrow"><span className="eyebrow-line" /> {eyebrow}</div><h1>{title}</h1><p>{description}</p></div>;
 }
 
-function Dashboard({ profile, guestName, onDiscover, onEditProfile, onFeature }: { profile: Profile | null; guestName: string; onDiscover: () => void; onEditProfile: () => void; onFeature: (page: Page) => void }) {
+function Dashboard({ profile, profileLoading, guestName, onDiscover, onEditProfile, onFeature }: { profile: Profile | null; profileLoading: boolean; guestName: string; onDiscover: () => void; onEditProfile: () => void; onFeature: (page: Page) => void }) {
   const displayName = profile?.display_name || profile?.username || guestName;
   return (
     <section className="app-page dashboard-page">
@@ -192,7 +192,7 @@ function Dashboard({ profile, guestName, onDiscover, onEditProfile, onFeature }:
             <Avatar value={profile?.avatar_url} label="Your avatar" size="large" />
             <div><strong>{displayName}</strong><small>@{profile?.username || guestName.toLowerCase().replace(/[^a-z0-9]/g, '')}</small></div>
           </div>
-          <p>{profile?.bio || (profile ? 'Add a little about yourself. Your public profile is your calling card.' : 'You are playing as a guest. Create an account to save progress and unlock the full platform.')}</p>
+          <p>{profileLoading ? 'Loading your player profile…' : profile?.bio || (profile ? 'Add a little about yourself. Your public profile is your calling card.' : 'You are signed in. Your account is active, but a player profile has not been created yet.')}</p>
           <button className="dashboard-action" onClick={onEditProfile} disabled={!profile}>CUSTOMISE PROFILE <span>{profile ? '↗' : 'REGISTER TO SAVE'}</span></button>
         </article>
       </div>
@@ -431,7 +431,7 @@ export default function App() {
           {user && <button onClick={() => { setPage('dashboard'); setMenuOpen(false); }}>DASHBOARD</button>}
         </nav>
         <OnlineCounter userId={user?.id ?? null} />
-        <div className="header-actions"><button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user && !user.is_anonymous ? 'MY DASHBOARD' : user?.is_anonymous ? 'GUEST SESSION' : 'SIGN IN'} <span>↗</span></button>{(!user || user.is_anonymous) && <button className="header-guest" onClick={() => user ? setPage('dashboard') : continueAsGuest()}>{user?.is_anonymous ? 'MY GAME ROOM' : 'PLAY NOW'}</button>}</div>
+        <div className="header-actions"><button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{authLoading ? 'RESTORING SESSION…' : user && !user.is_anonymous ? 'MY DASHBOARD' : user?.is_anonymous ? 'GUEST SESSION' : 'SIGN IN'} <span>↗</span></button>{(!user || user.is_anonymous) && <button className="header-guest" onClick={() => user ? setPage('dashboard') : continueAsGuest()}>{user?.is_anonymous ? 'MY GAME ROOM' : 'PLAY NOW'}</button>}</div>
       </header>
 
       {page === 'home' && <>
@@ -452,7 +452,7 @@ export default function App() {
         <section className="ticker" aria-label="Platform values"><div>PLAY WITH PURPOSE <b>✳</b> STAY FOR THE PEOPLE <b>✳</b> MAKE YOUR NEXT MOVE <b>✳</b> THE WHOLE GAME IS FREE <b>✳</b></div></section>
         <section className="games-section section-pad" id="games">
           <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LINEUP</div><h2>Choose your<br /><em>kind of trouble.</em></h2></div><p>One home for thoughtful games, useful training, ridiculous comebacks, and the people you'll want to play again.</p></div>
-          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 03</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
+          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 08</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
         </section>
         <section className="community-section section-pad" id="community">
           <div className="community-ornament">♘</div>
@@ -463,7 +463,7 @@ export default function App() {
         <footer className="site-footer"><a className="brand footer-brand" href="#top" onClick={event => { event.preventDefault(); setPage('home'); }}><span className="brand-mark">♞</span><span>chess<span className="brand-dot">.</span>gay</span></a><span className="footer-note">A WORK IN PROGRESS. A WORLD IN THE MAKING.</span><button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>BACK TO TOP ↑</button><div className="footer-bottom"><span>© 2026 CHESS.GAY</span><span>PLAY NICE. THINK SHARP.</span><span>BUILT ONE MOVE AT A TIME.</span></div></footer>
       </>}
 
-      {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
+      {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} profileLoading={profileLoading} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
       {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
       {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
       {['learn','community','tournaments','admin','farm','fishing','work','workshop','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={!user || user.is_anonymous} />}
