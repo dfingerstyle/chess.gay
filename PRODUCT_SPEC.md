@@ -3,6 +3,15 @@
 **Status:** living product blueprint  
 **Membership:** completely free; no subscription tiers or paywalled core features.
 
+## Access and identity model
+
+- Browsing and starting as a guest requires no login, email or registration.
+- First visit creates a random nickname stored locally on that device; the guest can play immediately.
+- Guests can explore public areas and guest-available play. Creating an account unlocks persistent cross-device identity, saved game history, rating, friends, messages, inventory, personalisation and all account-dependent features.
+- Registration offers a user-selected identifier: username OR email, plus a password. Email is optional when username is chosen.
+- Username/password authentication requires a secure server-side identifier-to-authentication mapping and recovery design. Supabase Auth does not natively accept usernames, so this must not be faked in the browser or by exposing account email addresses.
+- Guest-to-account upgrade should preserve the guest nickname and migrate eligible guest progress after ownership is verified.
+
 ## Product identity
 
 chess.gay is a free chess, learning, community and gaming platform. Chess.com is a major product reference for feature breadth and usability, while chess.gay keeps its own brand, original interface, copy and visual identity.
@@ -64,9 +73,9 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 ## Visual system
 
 - True black (#000000) as the default page background.
-- Raised panels use near-black, not generic dark grey.
-- Ivory text and accessible muted text.
-- Antique brass/gold accent, used sparingly.
+- Pure white primary text and controls; grey is reserved for secondary text and borders.
+- No gold/brass accent palette.
+- Rounded cards, pill controls, smooth transitions and a modern, minimal interface.
 - Serif editorial headings and highly legible sans-serif UI.
 - Reduced-motion and high-contrast support.
 - Mobile bottom navigation and a More drawer; desktop persistent navigation.
@@ -91,6 +100,10 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 6. **Administration and launch:** staff permissions, moderation, anti-cheat, auditability, accessibility, performance and security review.
 
 ## Phase 1 implementation notes
+
+The current development branch also introduces a local guest identity with a generated nickname, guest dashboard access, section navigation and honest status pages for chess, learning, community, casino, shop, tournaments and administration. These pages describe the planned modules and explicitly disclose that their underlying systems are not yet live. Guest nicknames are currently stored only in the local browser and are not yet server-backed or portable across devices.
+
+
 
 The current foundation reuses the existing Supabase Auth client and `public.profiles` table. Existing columns support username, display name, bio and avatar preset identifier. Public directory reads use the current public profile read policy; edits use the current owner-only update policy. The online counter uses ephemeral Supabase Realtime Presence and does not persist visitor data.
 
