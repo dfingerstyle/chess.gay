@@ -304,3 +304,106 @@ body { font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFon
  .feature-page-grid { grid-template-columns:1fr; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+
+/* Final visual direction: restrained, modern, monochrome. */
+:root {
+  color-scheme: dark !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  --bg:#000 !important; --panel:#0a0a0b !important; --panel-raised:#111113 !important;
+  --cream:#f5f5f7 !important; --muted:#a1a1aa !important; --rust:#fff !important;
+  --line:rgba(255,255,255,.12) !important; --serif:Inter,ui-sans-serif,system-ui,sans-serif !important;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace !important;
+  background:#000 !important; color:#f5f5f7 !important;
+}
+html,body,#root { background:#000 !important; color:#f5f5f7 !important; }
+body { letter-spacing:-.01em; }
+::selection { background:#fff !important; color:#000 !important; }
+.announcement { background:#fff !important; color:#000 !important; }
+.announcement-dot { background:#000 !important; }
+.site-header { background:rgba(0,0,0,.88) !important; border-color:#202024 !important; backdrop-filter:blur(24px); }
+.brand-mark,.brand-dot,.hero h1 em,h1 em,h2 em,.manifesto em,.eyebrow,.note-star,.mode-icon,.card-link span,
+.chat-input b,.mode-tag,.dashboard-kicker,.dashboard-card-icon,.free-platform-note span,.player-card-arrow,
+.directory-search>span,.empty-state>span,.public-profile-identity h1 em,.back-link,.auth-kicker,
+.profile-editor h2 em,.profile-editor label,.editor-label,.auth-panel h2 em,.auth-panel label,.account-piece,
+.online-counter strong { color:#fff !important; }
+.eyebrow-line { background:#fff !important; }
+.nav-links a,.nav-links button,.header-cta,.text-link,.back-top { color:#d4d4d8 !important; }
+.header-cta { border:1px solid #3f3f46 !important; border-radius:999px !important; }
+.header-cta span { color:#fff !important; }
+.header-guest,.button-primary,.dashboard-action-primary,.auth-submit { background:#fff !important; color:#000 !important; border:1px solid #fff !important; border-radius:999px !important; }
+.header-guest { padding:11px 17px; cursor:pointer; }
+.button-primary:hover,.dashboard-action-primary:hover,.auth-submit:hover:not(:disabled),.header-guest:hover { background:#e4e4e7 !important; color:#000 !important; }
+.button,.header-cta,.header-guest,.dashboard-action,.auth-submit { font-family:Inter,ui-sans-serif,system-ui,sans-serif !important; font-weight:650 !important; letter-spacing:-.01em !important; }
+.hero h1,h1,h2,h3,.section-heading h2,.community-copy h2,.manifesto p,.brand,.dashboard-welcome-card h2,
+.dashboard-card-heading h3,.profile-summary strong,.player-card-copy strong,.empty-state h2 {
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif !important; letter-spacing:-.055em !important;
+}
+.hero h1 { font-size:clamp(52px,7.1vw,92px) !important; line-height:.98 !important; font-weight:750 !important; }
+.hero-lede,.section-heading>p,.community-copy>p,.app-page-heading p,.dashboard-welcome-card p { color:#a1a1aa !important; }
+.art-glow { background:radial-gradient(circle,rgba(255,255,255,.1),transparent 68%) !important; }
+.board-frame { background:#0a0a0b !important; border:1px solid #303036 !important; border-radius:22px !important; box-shadow:0 25px 80px #000 !important; transform:none !important; }
+.chessboard { border:4px solid #161619 !important; border-radius:8px !important; overflow:hidden; }
+.square.light { background:#e5e5e7 !important; }
+.square.dark { background:#55555d !important; }
+.black-piece { color:#101014 !important; }
+.white-piece { color:#fff !important; }
+.board-topline,.board-caption,.side-note { color:#a1a1aa !important; }
+.art-stamp { background:#000 !important; border:1px solid #fff !important; color:#fff !important; border-radius:999px !important; }
+.ticker { background:#09090b !important; border-color:#242428 !important; color:#d4d4d8 !important; }
+.ticker b { color:#fff !important; }
+.games-section,.community-section,.manifesto,.site-footer { background:#000 !important; color:#f5f5f7 !important; }
+.games-section .eyebrow,.section-heading h2 em,.community-copy h2 em,.manifesto em { color:#fff !important; }
+.mode-card,.mode-card:nth-child(2),.mode-card:nth-child(3) { background:#0a0a0b !important; border:1px solid #242428 !important; border-radius:24px !important; color:#f5f5f7 !important; }
+.mode-card:hover { background:#141417 !important; border-color:#55555d !important; }
+.mode-card-top,.mode-card p,.section-heading>p { color:#a1a1aa !important; }
+.card-link { color:#fff !important; border-color:#52525b !important; }
+.chat-preview,.dashboard-card,.dashboard-stat,.player-card,.directory-search,.profile-editor,.auth-panel,
+.dashboard-welcome-card,.feature-status,.feature-page-grid article,.feature-grid button,.profile-coming-soon {
+  background:#0a0a0b !important; border:1px solid #27272a !important; border-radius:22px !important;
+}
+.chat-preview { box-shadow:0 25px 70px #000 !important; }
+.chat-avatar { background:#27272a !important; color:#fff !important; border-radius:50% !important; }
+.bubble-them { background:#202024 !important; color:#f4f4f5 !important; border-radius:16px 16px 16px 5px !important; }
+.bubble-you { background:#fff !important; color:#000 !important; border-radius:16px 16px 5px 16px !important; }
+.chat-input { border-color:#3f3f46 !important; border-radius:999px !important; }
+.manifesto { border-color:#27272a !important; }
+.app-page { background:#000 !important; }
+.app-page-heading h1 { font-size:clamp(42px,5.5vw,68px) !important; font-weight:750 !important; letter-spacing:-.06em !important; }
+.app-page-heading h1 em { color:#fff !important; }
+.dashboard-welcome-card { background:radial-gradient(ellipse at 85% 10%,#1c1c21 0%,#0a0a0b 55%) !important; border-radius:28px !important; }
+.dashboard-welcome-mark { color:rgba(255,255,255,.08) !important; }
+.dashboard-stat,.dashboard-card { border-color:#27272a !important; border-radius:22px !important; }
+.dashboard-action { background:#111113 !important; color:#f5f5f7 !important; border:1px solid #303036 !important; border-radius:14px !important; }
+.dashboard-action span { color:#a1a1aa !important; }
+.dashboard-action:hover:not(:disabled),.player-card:hover { border-color:#777780 !important; background:#19191d !important; }
+.dashboard-action-primary { background:#fff !important; color:#000 !important; }
+.dashboard-action-primary span { color:#333 !important; }
+.player-avatar { border-color:#45454d !important; background:linear-gradient(145deg,#303036,#09090b 72%) !important; color:#fff !important; }
+.directory-search input,.profile-editor input,.profile-editor textarea,.auth-panel input { color:#fff !important; background:#111113 !important; border:1px solid #3f3f46 !important; border-radius:13px !important; }
+.directory-search { border-radius:14px !important; }
+.player-card { border-color:#27272a !important; border-radius:18px !important; }
+.directory-message { border-radius:14px !important; border-color:#52525b !important; background:#111113 !important; color:#fff !important; }
+.empty-state { border-color:#3f3f46 !important; border-radius:22px !important; }
+.public-profile-banner { border:1px solid #303036 !important; border-radius:24px !important; background:radial-gradient(ellipse at 75% 20%,#24242a,#09090b 65%) !important; }
+.profile-coming-soon { border-color:#303036 !important; border-radius:18px !important; }
+.profile-editor-backdrop,.auth-backdrop { background:rgba(0,0,0,.82) !important; backdrop-filter:blur(18px); }
+.profile-editor,.auth-panel { border-color:#3f3f46 !important; border-radius:26px !important; }
+.auth-close { color:#fff !important; }
+.auth-intro,.auth-footnote { color:#a1a1aa !important; }
+.auth-panel label,.auth-kicker { color:#fff !important; }
+.auth-panel input:focus,.profile-editor input:focus,.profile-editor textarea:focus { border-color:#fff !important; box-shadow:0 0 0 2px #ffffff1a !important; }
+.auth-submit { background:#fff !important; color:#000 !important; }
+.auth-switches button { color:#e4e4e7 !important; }
+.auth-footnote { border-color:#303036 !important; }
+.account-card { background:#141417 !important; border:1px solid #303036 !important; border-radius:16px !important; }
+.account-piece { color:#fff !important; }
+.online-indicator { background:#5ee6a8 !important; }
+.feature-grid button { border-radius:22px !important; }
+.feature-grid button:hover { border-color:#71717a !important; background:#17171b !important; }
+.feature-page-grid article { border-radius:16px !important; }
+.feature-status { border-radius:18px !important; }
+.back-link { border:0; background:transparent; cursor:pointer; color:#d4d4d8 !important; }
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline:2px solid #fff !important; outline-offset:3px !important; }
+@media(max-width:650px) { .app-page { padding:54px 6% 80px !important; } .hero h1 { font-size:clamp(48px,14vw,72px) !important; } .mode-card { border-radius:20px !important; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
