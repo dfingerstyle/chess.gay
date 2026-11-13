@@ -195,7 +195,7 @@ export function FishingPage({ user, onBack, onStartGuest }: ActivityProps) {
       <div><span className="dashboard-kicker">FISHING SPOT · MOONLIT POND</span><h2>Cast your line.</h2><p>Common Minnow · Uncommon Bass · Legendary Golden Koi</p><button className="activity-primary" onClick={cast} disabled={busy || cooldownMs > 0}>{busy ? 'WAIT FOR A BITE…' : cooldownMs > 0 ? 'NEXT CAST IN ' + formatTime(cooldownMs) : 'CAST LINE · +5 XP'}</button></div>
     </div>}
     {lastCatch && <div className="last-catch-card"><span>{lastCatch.fish_id === 'golden_koi' ? '🐠' : '🐟'}</span><div><small>FRESH CATCH</small><strong>{lastCatch.fish_name}</strong><p>Added to inventory · +{lastCatch.xp_earned} XP</p></div></div>}
-    <div className="fishing-inventory-panel"><div><span className="dashboard-kicker">YOUR CATCHES</span><h2>Fishing collection</h2></div><div className="fishing-catch-grid">{['minnow','bass','golden_koi'].map(id => {
+    <div className="fishing-inventory-panel"><div className="fishing-inventory-heading"><div><span className="dashboard-kicker">YOUR CATCHES</span><h2>Fishing collection</h2></div><button onClick={() => void refresh()} disabled={loading || busy}>↻ REFRESH</button></div><div className="fishing-catch-grid">{['minnow','bass','golden_koi'].map(id => {
       const owned = inventory[id] || 0;
       const item = items.find(entry => entry.id === id);
       return <article key={id}><span>{id === 'golden_koi' ? '🐠' : '🐟'}</span><strong>{fishNames[id]}</strong><small>{owned} OWNED · {item?.sell_price ?? 0} COINS EACH</small><button onClick={() => sellFish(id)} disabled={busy || owned === 0}>SELL ONE</button></article>;
