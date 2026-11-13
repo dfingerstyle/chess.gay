@@ -407,3 +407,18 @@ body { letter-spacing:-.01em; }
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline:2px solid #fff !important; outline-offset:3px !important; }
 @media(max-width:650px) { .app-page { padding:54px 6% 80px !important; } .hero h1 { font-size:clamp(48px,14vw,72px) !important; } .mode-card { border-radius:20px !important; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+/* Neutralise every remaining accent and decorative label from the old palette */
+.community-points span:first-child,.community-points span,.manifesto-number,.manifesto-flourish,
+.footer-note,.footer-bottom,.back-top,.preview-disclaimer,.chat-menu,.chat-head small,
+.bubble small,.hero-note,.hero-bottomline,.side-note,.board-topline,.board-caption,
+.mode-card-top,.mode-tag,.ticker b,.art-stamp,.note-star,.section-heading .eyebrow,
+.brand-mark,.brand-dot,.hero h1 em,.section-heading h2 em,.community-copy h2 em,
+.manifesto em,.online-counter strong,.dashboard-kicker,.dashboard-card-icon,
+.free-platform-note span,.player-card-arrow,.directory-search>span,.empty-state>span,
+.public-profile-identity h1 em,.profile-coming-soon>span,.profile-editor label,
+.auth-kicker,.auth-panel label,.account-piece { color:#f5f5f7 !important; }
+.announcement,.announcement-dot,.button-primary,.dashboard-action-primary,
+.auth-submit,.header-guest { background:#fff !important; color:#000 !important; }
+.art-glow { background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%) !important; }
+.community-ornament { color:rgba(255,255,255,.035) !important; }
