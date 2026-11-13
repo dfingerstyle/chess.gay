@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './CasinoStage.css';
+import { playCasinoCue } from '../lib/casinoAudio';
 
 export type CasinoGame = 'roulette' | 'coinflip' | 'dice';
 export type CasinoVisualResult = {
   outcome: string;
-  won: boolean;
-  net: number;
+  won?: boolean;
+  net?: number;
   payout_multiplier?: number;
   win_probability?: string;
 };
@@ -25,14 +26,18 @@ function resultNumber(outcome: string) {
   return Number.isInteger(parsed) && parsed >= 0 && parsed <= 36 ? parsed : 0;
 }
 
-export default function CasinoStage({ game, result, animationKey, onAnimationComplete }: {
+export default function CasinoStage({ game, result, animationKey, onAnimationComplete, soundEnabled = false, soundVolume = 0.35 }: {
   game: CasinoGame;
   result: CasinoVisualResult | null;
   animationKey: number;
   onAnimationComplete?: () => void;
+  soundEnabled?: boolean;
+  soundVolume?: number;
 }) {
   const completionRef = useRef(onAnimationComplete);
+  const soundRef = useRef({ enabled: soundEnabled, volume: soundVolume });
   useEffect(() => { completionRef.current = onAnimationComplete; }, [onAnimationComplete]);
+  useEffect(() => { soundRef.current = { enabled: soundEnabled, volume: soundVolume }; }, [soundEnabled, soundVolume]);
   const [revealing, setRevealing] = useState(false);
   const [revealed, setRevealed] = useState<CasinoVisualResult | null>(null);
   const number = result ? resultNumber(result.outcome) : 0;
@@ -47,10 +52,12 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
     if (!result || animationKey === 0) { setRevealing(false); setRevealed(null); return; }
     setRevealed(null);
     setRevealing(true);
+    if (soundRef.current.enabled) playCasinoCue(game, soundRef.current.volume);
     const duration = game === 'roulette' ? 4700 : 1900;
     const timer = window.setTimeout(() => {
       setRevealed(result);
       setRevealing(false);
+      if (soundRef.current.enabled) playCasinoCue(result.won === undefined ? 'win' : result.won ? 'win' : 'loss', soundRef.current.volume);
       completionRef.current?.();
     }, duration);
     return () => window.clearTimeout(timer);
@@ -109,10 +116,10 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
           <><span className="stage-result-kicker">THE HOUSE IS WAITING</span><strong className="stage-result-wait">...</strong><small>Revealing the server-generated result</small></>
         ) : revealed ? (
           <>
-            <span className="stage-result-kicker">{revealed.won ? 'LUCK FAVOURED YOU' : 'BETTER LUCK NEXT ROUND'}</span>
+            <span className="stage-result-kicker">{revealed.won === undefined ? 'ROUND RESULT' : revealed.won ? 'LUCK FAVOURED YOU' : 'BETTER LUCK NEXT ROUND'}</span>
             <strong className={game === 'roulette' ? `stage-result-number ${wheelColour}` : 'stage-result-number'}>{game === 'roulette' ? number : game === 'coinflip' ? coinSide : dieNumber}</strong>
             <small>{game === 'roulette' ? wheelColour.toUpperCase() : game === 'coinflip' ? 'COIN FLIP' : dieNumber <= 3 ? 'LOW' : 'HIGH'}</small>
-            <b className={revealed.net >= 0 ? 'stage-result-profit' : 'stage-result-loss'}>{revealed.net > 0 ? '+' : ''}{revealed.net.toLocaleString()} COINS</b>
+            {typeof revealed.net === 'number' && <b className={revealed.net >= 0 ? 'stage-result-profit' : 'stage-result-loss'}>{revealed.net > 0 ? '+' : ''}{revealed.net.toLocaleString()} COINS</b>}
           </>
         ) : (
           <><span className="stage-result-kicker">PLACE YOUR BET</span><strong className="stage-result-wait">READY?</strong><small>The result is generated securely by the server.</small></>
