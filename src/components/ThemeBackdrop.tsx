@@ -155,8 +155,8 @@ export default function ThemeBackdrop() {
         if (!shooting && Math.random() < .006) shooting = { x: random(width * .3, width), y: random(0, height * .35), life: 0 };
         if (shooting) {
           for (let i = 0; i < 9; i++) {
-            context.fillStyle = 'rgba(255,255,255,' + ((1 - i / 9) * (1 - shooting.life / 45)).toFixed(2) + ')';
-            context.fillRect(Math.floor(shooting.x + i * 1.6), Math.floor(shooting.y - i * .8), 1, 1);
+            ctx.fillStyle = 'rgba(255,255,255,' + ((1 - i / 9) * (1 - shooting.life / 45)).toFixed(2) + ')';
+            ctx.fillRect(Math.floor(shooting.x + i * 1.6), Math.floor(shooting.y - i * .8), 1, 1);
           }
           shooting.x -= 1.8;
           shooting.y += .9;
@@ -179,7 +179,7 @@ export default function ThemeBackdrop() {
           bubble.y -= bubble.speed;
           bubble.x += Math.sin(time * .003 + bubble.phase) * .15;
           if (bubble.y < -2) { bubble.y = height; bubble.x = random(0, width); }
-          pixel(context, 'rgba(200,235,255,.55)', bubble.x, bubble.y, bubble.size, bubble.size);
+          pixel(ctx, 'rgba(200,235,255,.55)', bubble.x, bubble.y, bubble.size, bubble.size);
         }
         for (const swimmer of fish) {
           swimmer.x += swimmer.direction * swimmer.speed;
