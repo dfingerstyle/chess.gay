@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
+import AuthPanel from './components/AuthPanel';
+import { supabase } from './lib/supabase';
 
 const pieces = [
   ['♜','♞','♝','♛','♚','♝','♞','♜'],
@@ -35,6 +38,17 @@ function Chessboard() {
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
   return (
     <main>
       <div className="announcement"><span className="announcement-dot" /> THE CLUB IS TAKING SHAPE <span className="announcement-divider">/</span> A NEW KIND OF GAME ROOM</div>
@@ -46,7 +60,7 @@ export default function App() {
           <a href="#community" onClick={() => setMenuOpen(false)}>THE CLUB</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>OUR STORY</a>
         </nav>
-        <a className="header-cta" href="#games">EXPLORE <span>↗</span></a>
+        <button className="header-cta account-cta" onClick={() => setAuthOpen(true)}>{user ? "MY ACCOUNT" : "SIGN IN"} <span>↗</span></button>
       </header>
 
       <section className="hero" id="top">
@@ -116,6 +130,7 @@ export default function App() {
         <a className="back-top" href="#top">BACK TO TOP ↑</a>
         <div className="footer-bottom"><span>© 2026 CHESS.GAY</span><span>PLAY NICE. THINK SHARP.</span><span>BUILT ONE MOVE AT A TIME.</span></div>
       </footer>
+      {authOpen && <AuthPanel user={user} onClose={() => setAuthOpen(false)} onSignedOut={() => setUser(null)} />}
     </main>
   );
 }
