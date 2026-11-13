@@ -7,7 +7,7 @@ import ArcadePage from './components/ArcadePage';
 import ThemeBackdrop from './components/ThemeBackdrop';
 import { supabase } from './lib/supabase';
 
-type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin';
+type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio';
 type Profile = {
   id: string;
   username: string;
@@ -39,10 +39,15 @@ const pieces = [
   ['♖','♘','♗','♕','♔','♗','♘','♖'],
 ];
 
-const modes = [
-  { number: '01', title: 'Chess', detail: 'Play friends, find opponents, or practise against bots.', tag: 'THE MAIN EVENT', icon: '♞' },
-  { number: '02', title: 'The Arcade', detail: 'Play arcade games using free virtual coins. No real-money gambling.', tag: 'COMING INTO FOCUS', icon: '✳' },
-  { number: '03', title: 'The Club', detail: 'Find players, add friends, join clubs and chat.', tag: 'YOUR PEOPLE', icon: '♧' },
+const modes: Array<{number:string;title:string;detail:string;tag:string;icon:string;page:Page}> = [
+  { number: '01', title: 'Chess', detail: 'Play a local game now; online matchmaking is being built.', tag: 'THE MAIN EVENT', icon: '♞', page: 'chess' },
+  { number: '02', title: 'Farming', detail: 'Grow crops, harvest them and build your little corner of the world.', tag: 'WORLD IN DEVELOPMENT', icon: '🥕', page: 'farm' },
+  { number: '03', title: 'Fishing', detail: 'Cast a line, discover catches and fill your collection.', tag: 'WORLD IN DEVELOPMENT', icon: '🐟', page: 'fishing' },
+  { number: '04', title: 'Work', detail: 'Earn coins through jobs and contracts.', tag: 'ECONOMY', icon: '⚒', page: 'work' },
+  { number: '05', title: 'Board Workshop', detail: 'Shape your board style and build your own chess look.', tag: 'CUSTOMIZATION', icon: '▦', page: 'workshop' },
+  { number: '06', title: 'Player Studio', detail: 'Make your profile feel like yours.', tag: 'CUSTOMIZATION', icon: '✦', page: 'studio' },
+  { number: '07', title: 'The Arcade', detail: 'Play arcade games using free virtual coins.', tag: 'VIRTUAL COINS', icon: '✳', page: 'casino' },
+  { number: '08', title: 'The Club', detail: 'Find players and explore the community.', tag: 'YOUR PEOPLE', icon: '♧', page: 'community' },
 ];
 
 function getAvatarPreset(value: string | null | undefined): AvatarPreset {
@@ -198,7 +203,7 @@ function Dashboard({ profile, guestName, onDiscover, onEditProfile, onFeature }:
 
 function GuestDashboard({ nickname, onRegister, onFeature }: { nickname: string; onRegister: () => void; onFeature: (page: Page) => void }) { return <section className="app-page"><PageHeading eyebrow="GUEST SESSION" title={<>Welcome, <em>{nickname}.</em></>} description="You are playing as a guest. No account or email is needed. Your nickname is saved on this device."/><div className="dashboard-welcome-card"><div><span className="dashboard-kicker">GUEST ACCOUNT</span><h2>You're ready to play.</h2><p>Play as a guest, or create a free account to save games, ratings and friends across devices.</p><button className="dashboard-action dashboard-action-primary" onClick={onRegister}>CREATE A FREE ACCOUNT <span>↗</span></button></div><div className="dashboard-welcome-mark">♞</div></div><div className="feature-grid"><button onClick={()=>onFeature('chess')}>♟<strong>Chess</strong><small>Play and compete</small></button><button onClick={()=>onFeature('learn')}>✳<strong>Learn</strong><small>Puzzles and lessons</small></button><button onClick={()=>onFeature('casino')}>◉<strong>Casino</strong><small>Virtual coins only</small></button><button onClick={()=>onFeature('community')}>♧<strong>Community</strong><small>Players and clubs</small></button></div></section>; }
 
-function FeaturePage({ page, onBack, onRegister }: { page: Page; onBack: () => void; onRegister: () => void }) { const data: Record<string,{eyebrow:string,title:string,desc:string,items:string[],status:string}> = {chess:{eyebrow:'THE BOARD',title:'Chess',desc:'Ranked and casual games, friends, bots, tournaments, spectating and game history.',items:['Quick play and matchmaking','Ranked, casual and custom games','Bullet, blitz, rapid and classical','Chess bots and spectating','Game clocks, move history and rematches'],status:'Chess gameplay is the next major build milestone. The current board preview is decorative; live games are not online yet.'},learn:{eyebrow:'GET SHARPER',title:'Puzzles & learning',desc:'A complete training space from first principles to advanced calculation.',items:['Daily puzzles and puzzle rating','Puzzle Rush and head-to-head battles','Lessons and structured courses','Opening explorer and repertoire','Stockfish game review and mistake training'],status:'Training systems and engine analysis are planned; no fake puzzle or engine results are shown.'},community:{eyebrow:'FIND YOUR PEOPLE',title:'Community',desc:'Friends, clubs, conversations, events and a place to build rivalries.',items:['Player directory and public profiles','Friend requests and message requests','End-to-end encrypted private messaging','Group chats and in-game chat','Clubs, tournaments, events and leaderboards'],status:'Player discovery is in the current foundation. Messaging, clubs and tournaments are subsequent builds.'},casino:{eyebrow:'THE ARCADE',title:'Virtual casino',desc:'Optional virtual-coin games. No deposits, no cash-outs, no real-money gambling.',items:['Virtual coin wallet and transaction history','Roulette, blackjack, poker and dice','Slots, coinflip and risk ladder','Server-verified outcomes and limits','Regional and age restrictions before launch'],status:'Not live yet. No real-money gambling or purchasable competitive advantage. Wallet and game outcomes must be server-authoritative.'},shop:{eyebrow:'MAKE IT YOURS',title:'Cosmetics & shop',desc:'A purely optional cosmetic collection. Core chess and learning remain free.',items:['Boards and chess-piece sets','Avatars, frames and banners','Move, capture and victory effects','Inventory and equipped items','Secure cosmetic marketplace'],status:'Shop, inventory and trading are planned. No paid membership or premium chess tier.'},tournaments:{eyebrow:'PLAY FOR SOMETHING',title:'Tournaments & events',desc:'Community events for casual players and serious competitors alike.',items:['Arena and Swiss tournaments','Club competitions and team events','Leaderboards and seasonal challenges','Live event pages and spectating','Achievements and fair-play awards'],status:'Tournament engine and event scheduling are not implemented yet.'},admin:{eyebrow:'HOUSE CONTROL',title:'Administration',desc:'A separate protected control centre with contextual moderation tools.',items:['Staff roles and granular permissions','Reports, moderation and appeals','Account restrictions and audit logs','Economy, shop and marketplace oversight','Anti-cheat, security and platform configuration'],status:'Admin tools are not live. Every privileged action will be server-authorised and audited.'}}; const d=data[page]||data.chess; return <section className="app-page"><button className="back-link" onClick={onBack}>← BACK TO YOUR GAME ROOM</button><PageHeading eyebrow={d.eyebrow} title={<>{d.title} <em>is coming.</em></>} description={d.desc}/><div className="feature-page-grid">{d.items.map((item,i)=><article key={item}><span>{String(i+1).padStart(2,'0')}</span><strong>{item}</strong></article>)}</div><div className="feature-status"><strong>HONEST STATUS</strong><p>{d.status}</p></div><button className="dashboard-action dashboard-action-primary feature-register" onClick={onRegister}>CREATE A FREE ACCOUNT <span>↗</span></button></section>; }
+function FeaturePage({ page, onBack, onRegister, showRegister }: { page: Page; onBack: () => void; onRegister: () => void; showRegister: boolean }) { const data: Record<string,{eyebrow:string,title:string,desc:string,items:string[],status:string}> = {chess:{eyebrow:'THE BOARD',title:'Chess',desc:'Ranked and casual games, friends, bots, tournaments, spectating and game history.',items:['Quick play and matchmaking','Ranked, casual and custom games','Bullet, blitz, rapid and classical','Chess bots and spectating','Game clocks, move history and rematches'],status:'Chess gameplay is the next major build milestone. The current board preview is decorative; live games are not online yet.'},learn:{eyebrow:'GET SHARPER',title:'Puzzles & learning',desc:'A complete training space from first principles to advanced calculation.',items:['Daily puzzles and puzzle rating','Puzzle Rush and head-to-head battles','Lessons and structured courses','Opening explorer and repertoire','Stockfish game review and mistake training'],status:'Training systems and engine analysis are planned; no fake puzzle or engine results are shown.'},community:{eyebrow:'FIND YOUR PEOPLE',title:'Community',desc:'Friends, clubs, conversations, events and a place to build rivalries.',items:['Player directory and public profiles','Friend requests and message requests','End-to-end encrypted private messaging','Group chats and in-game chat','Clubs, tournaments, events and leaderboards'],status:'Player discovery is in the current foundation. Messaging, clubs and tournaments are subsequent builds.'},casino:{eyebrow:'THE ARCADE',title:'Virtual casino',desc:'Optional virtual-coin games. No deposits, no cash-outs, no real-money gambling.',items:['Virtual coin wallet and transaction history','Roulette, blackjack, poker and dice','Slots, coinflip and risk ladder','Server-verified outcomes and limits','Regional and age restrictions before launch'],status:'Not live yet. No real-money gambling or purchasable competitive advantage. Wallet and game outcomes must be server-authoritative.'},shop:{eyebrow:'MAKE IT YOURS',title:'Cosmetics & shop',desc:'A purely optional cosmetic collection. Core chess and learning remain free.',items:['Boards and chess-piece sets','Avatars, frames and banners','Move, capture and victory effects','Inventory and equipped items','Secure cosmetic marketplace'],status:'Shop, inventory and trading are planned. No paid membership or premium chess tier.'},tournaments:{eyebrow:'PLAY FOR SOMETHING',title:'Tournaments & events',desc:'Community events for casual players and serious competitors alike.',items:['Arena and Swiss tournaments','Club competitions and team events','Leaderboards and seasonal challenges','Live event pages and spectating','Achievements and fair-play awards'],status:'Tournament engine and event scheduling are not implemented yet.'},admin:{eyebrow:'HOUSE CONTROL',title:'Administration',desc:'A separate protected control centre with contextual moderation tools.',items:['Staff roles and granular permissions','Reports, moderation and appeals','Account restrictions and audit logs','Economy, shop and marketplace oversight','Anti-cheat, security and platform configuration'],status:'Admin tools are not live. Every privileged action will be server-authorised and audited.'},farm:{eyebrow:'THE GARDEN',title:'Farming',desc:'A proper crop-growing loop is planned: seeds, plots, growth, harvesting, inventory and orders.',items:['Buy seeds and choose a plot','Plant, water and tend crops','Harvest crops into your inventory','Complete market orders or sell harvests','Unlock plots, tools and new seeds'],status:'Farming is not connected to the shared wallet yet. Carrot seeds currently have no usable planting action; this page is a roadmap, not a fake farm.'},fishing:{eyebrow:'THE WATERS',title:'Fishing',desc:'Explore fishing spots, catch different species and build a collection.',items:['Choose a fishing location','Use rods, bait and equipment','Catch common and rare fish','Sell catches or fulfil requests','Unlock better gear and new waters'],status:'Fishing gameplay is not implemented yet. Fishing equipment in the shop does not currently unlock a fishing activity.'},work:{eyebrow:'MAKE YOUR COINS',title:'Work',desc:'A reliable way to earn coins through shifts, jobs and contracts.',items:['Take timed work shifts','Complete daily and weekly contracts','Earn XP alongside shared coins','Unlock tools and specialist jobs','Track wages in wallet history'],status:'The existing hourly work action is available in the Arcade. Contracts and XP progression are not implemented.'},workshop:{eyebrow:'MAKE IT YOURS',title:'BOARD WORKSHOP',desc:'Customize the chessboard, pieces and visual feedback, then save your presets.',items:['Board and square colour palettes','Chess-piece sets and scale','Move, capture and check highlights','Coordinates and board orientation','Save, equip and share presets'],status:'A full board editor is not implemented yet. This destination is reserved for the editor; no custom board settings are falsely presented as saved.'},studio:{eyebrow:'YOUR IDENTITY',title:'PLAYER STUDIO',desc:'Create a profile that feels like yours, with banners, avatars, frames and showcases.',items:['Avatar and display name','Profile banner and background','Frames, titles and achievement badges','Profile layout and showcase slots','Privacy and profile visibility'],status:'The current profile editor supports display name, bio and six preset avatars only. Banner uploads, frames, titles and privacy controls are still to be built.'}}; const d=data[page]||data.chess; return <section className="app-page"><button className="back-link" onClick={onBack}>← BACK TO YOUR GAME ROOM</button><PageHeading eyebrow={d.eyebrow} title={<>{d.title} <em>is in the works.</em></>} description={d.desc}/><div className="feature-page-grid">{d.items.map((item,i)=><article key={item}><span>{String(i+1).padStart(2,'0')}</span><strong>{item}</strong></article>)}</div><div className="feature-status"><strong>HONEST STATUS</strong><p>{d.status}</p></div>{showRegister && <button className="dashboard-action dashboard-action-primary feature-register" onClick={onRegister}>CREATE A FREE ACCOUNT <span>↗</span></button>}</section>; }
 
 function Discover({ profiles, loading, error, onOpenProfile }: { profiles: Profile[]; loading: boolean; error: string; onOpenProfile: (profile: Profile) => void }) {
   const [search, setSearch] = useState('');
@@ -310,6 +315,8 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [page, setPage] = useState<Page>('home');
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -319,15 +326,31 @@ export default function App() {
   const [guestName, setGuestName] = useState(() => { try { const old = localStorage.getItem('chessgay:guest-name'); if (old) return old; const name = ['QuietKnight','VelvetRook','RapidBishop','MoonlitPawn','LuckyQueen'][Math.floor(Math.random()*5)] + Math.floor(100+Math.random()*900); localStorage.setItem('chessgay:guest-name',name); return name; } catch { return 'Guest' + Math.floor(1000+Math.random()*9000); } });
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
     let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active) setUser(data.session?.user ?? null);
-    });
+    let authEventSeen = false;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventSeen = true;
       setUser(session?.user ?? null);
-      if (session?.user) setPage(current => current === 'home' ? 'dashboard' : current);
-      else setPage('home');
+      setAuthLoading(false);
+      if (session?.user && !session.user.is_anonymous) {
+        setPage(current => current === 'home' ? 'dashboard' : current);
+      } else if (!session?.user) {
+        setPage('home');
+      }
+    });
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!active || authEventSeen) return;
+      setUser(error ? null : data.session?.user ?? null);
+      setAuthLoading(false);
+    }).catch(() => {
+      if (active && !authEventSeen) {
+        setUser(null);
+        setAuthLoading(false);
+      }
     });
     return () => {
       active = false;
@@ -337,12 +360,23 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    if (!user || !supabase) {
+    if (!user || user.is_anonymous || !supabase) {
       setMyProfile(null);
+      setProfileLoading(false);
       return () => { active = false; };
     }
-    supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at').eq('id', user.id).single()
-      .then(({ data }) => { if (active && data) setMyProfile(data as Profile); });
+    setProfileLoading(true);
+    void supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at').eq('id', user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!active) return;
+        setMyProfile(data as Profile | null);
+        setProfileLoading(false);
+      }).catch(() => {
+        if (active) {
+          setMyProfile(null);
+          setProfileLoading(false);
+        }
+      });
     return () => { active = false; };
   }, [user]);
 
@@ -397,7 +431,7 @@ export default function App() {
           {user && <button onClick={() => { setPage('dashboard'); setMenuOpen(false); }}>DASHBOARD</button>}
         </nav>
         <OnlineCounter userId={user?.id ?? null} />
-        <div className="header-actions"><button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user ? 'MY DASHBOARD' : 'SIGN IN'} <span>↗</span></button>{!user && <button className="header-guest" onClick={continueAsGuest}>PLAY NOW</button>}</div>
+        <div className="header-actions"><button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user && !user.is_anonymous ? 'MY DASHBOARD' : user?.is_anonymous ? 'GUEST SESSION' : 'SIGN IN'} <span>↗</span></button>{(!user || user.is_anonymous) && <button className="header-guest" onClick={() => user ? setPage('dashboard') : continueAsGuest()}>{user?.is_anonymous ? 'MY GAME ROOM' : 'PLAY NOW'}</button>}</div>
       </header>
 
       {page === 'home' && <>
@@ -418,7 +452,7 @@ export default function App() {
         <section className="ticker" aria-label="Platform values"><div>PLAY WITH PURPOSE <b>✳</b> STAY FOR THE PEOPLE <b>✳</b> MAKE YOUR NEXT MOVE <b>✳</b> THE WHOLE GAME IS FREE <b>✳</b></div></section>
         <section className="games-section section-pad" id="games">
           <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LINEUP</div><h2>Choose your<br /><em>kind of trouble.</em></h2></div><p>One home for thoughtful games, useful training, ridiculous comebacks, and the people you'll want to play again.</p></div>
-          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 03</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.title === 'Chess' ? 'chess' : mode.title === 'The Arcade' ? 'casino' : 'discover')}>EXPLORE <span>↗</span></button></div></article>)}</div>
+          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 03</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
         </section>
         <section className="community-section section-pad" id="community">
           <div className="community-ornament">♘</div>
@@ -429,10 +463,10 @@ export default function App() {
         <footer className="site-footer"><a className="brand footer-brand" href="#top" onClick={event => { event.preventDefault(); setPage('home'); }}><span className="brand-mark">♞</span><span>chess<span className="brand-dot">.</span>gay</span></a><span className="footer-note">A WORK IN PROGRESS. A WORLD IN THE MAKING.</span><button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>BACK TO TOP ↑</button><div className="footer-bottom"><span>© 2026 CHESS.GAY</span><span>PLAY NICE. THINK SHARP.</span><span>BUILT ONE MOVE AT A TIME.</span></div></footer>
       </>}
 
-      {page === 'dashboard' && (user ? <Dashboard profile={myProfile} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} /> : <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} />)}
+      {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
       {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
       {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
-      {['learn','community','tournaments','admin'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} />}
+      {['learn','community','tournaments','admin','farm','fishing','work','workshop','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={!user || user.is_anonymous} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
