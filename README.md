@@ -97,6 +97,7 @@ The branch now includes a first real playable and economy vertical slice:
 - **Farming:** four persistent plots, carrot seed and shovel requirements, five-minute server-tracked growth, harvest into inventory, and +10 XP per harvest. Harvested carrots can be sold in the Shop.
 - **Fishing:** persistent catch log, rod requirement, server-side rarity rolls for Minnow/Bass/Golden Koi, 30-second cooldown, inventory rewards and +5 XP per catch.
 - **Shared progression:** one wallet and inventory across activities; XP and levels are updated server-side. Work shifts now award +5 XP in addition to 100–250 coins.
+- **Private multiplayer lobbies:** server-generated hashed invite codes, two-player and four-player FFA/2v2 room settings, server-validated seat assignment, host close/leave actions and realtime seat updates. Lobby creation and code-join attempts have server-side cooldowns. The online move engine is not connected yet.
 - **Guest account linking:** anonymous players can link an email to their current guest identity rather than starting a new account. Supabase manual identity linking must be enabled; password setup follows email verification.
 
 To use a persistent guest wallet, anonymous sign-ins must be enabled in Supabase Auth. The site will create an anonymous Supabase account without asking for an email or password. A normal registered account also works. Local chess does not require an account.
