@@ -53,7 +53,6 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   const [maxPlayers,setMaxPlayers]=useState('6');
   const [minBet,setMinBet]=useState('10');
   const [maxBet,setMaxBet]=useState('1000');
-  const [inviteCode,setInviteCode]=useState('');
   const [createdCode,setCreatedCode]=useState('');
   const [joinCode,setJoinCode]=useState('');
   const [role,setRole]=useState<'player'|'spectator'>('player');
@@ -68,7 +67,6 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   const [message,setMessage]=useState('');
   const settling=useRef(false);
 
-  const isMember=members.some(member=>member.user_id===user.id);
   const myMembership=members.find(member=>member.user_id===user.id);
   const isHost=selectedTable?.host_id===user.id;
   const choices=useMemo(()=>selectedTable?.game_type==='roulette'?(ROULETTE_CHOICES[betType]||[]):selectedTable?.game_type==='coinflip'?['heads','tails']:['low','high'],[selectedTable?.game_type,betType]);
@@ -80,9 +78,9 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
     const rows=(data||[]) as CasinoTable[];
     if(rows.length){
       const ids=rows.map(row=>row.id);
-      const {data:memberRows}=await supabase.from('casino_table_members').select('table_id').in('table_id',ids);
+      const {data:memberRows}=await supabase.from('casino_table_members').select('table_id,role').in('table_id',ids);
       const counts=new Map<string,number>();
-      (memberRows||[]).forEach((row:{table_id:string})=>counts.set(row.table_id,(counts.get(row.table_id)||0)+1));
+      (memberRows||[]).filter((row:{role:string})=>row.role==='player').forEach((row:{table_id:string})=>counts.set(row.table_id,(counts.get(row.table_id)||0)+1));
       setTables(rows.map(row=>({...row,member_count:counts.get(row.id)||0})));
     }else setTables([]);
   },[]);
@@ -117,6 +115,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   },[selectedTableId]);
 
   useEffect(()=>{void refreshTables();},[refreshTables]);
+  useEffect(()=>{if(!selectedTable)return;setBetType('colour');setBetChoice(selectedTable.game_type==='roulette'?'red':selectedTable.game_type==='coinflip'?'heads':'low');},[selectedTable?.id,selectedTable?.game_type]);
   useEffect(()=>{
     if(!selectedTableId||!supabase)return;
     void refreshSelected();
@@ -280,7 +279,6 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   useEffect(()=>{if(view==='leaderboard')void loadLeaderboard();if(view==='history')void loadHistory();if(view==='challenges')void loadChallenges();},[view]);
 
   const tableView=selectedTableId&&selectedTable;
-  const myBets=bets.filter(bet=>bet.user_id===user.id);
   const isSpectator=myMembership?.role==='spectator';
 
   return (
@@ -295,7 +293,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
           <div className="casino-room-main">
             <div className="casino-room-topbar">
               <div><span className="casino-multi-kicker">{selectedTable.visibility.toUpperCase()} TABLE · {selectedTable.status.toUpperCase()}</span><h3>{GAME_LABEL[selectedTable.game_type]} · ROUND {round?.round_number||'—'}</h3></div>
-              <button className="casino-outline-button" onClick={leaveTable} disabled={busy}>LEAVE TABLE</button>
+              <div className="casino-room-actions">{selectedTable.visibility==='private'&&createdCode&&<span className="casino-room-code">INVITE CODE <b>{createdCode}</b><button onClick={()=>void navigator.clipboard?.writeText(createdCode)}>COPY</button></span>}<button className="casino-outline-button" onClick={leaveTable} disabled={busy}>LEAVE TABLE</button></div>
             </div>
             <div className="casino-room-members">
               {members.map(member=><div className="casino-seat" key={member.user_id}><span className="casino-seat-avatar">{member.role==='spectator'?'◉':'♟'}</span><span><b>{member.profile?.display_name||member.profile?.username||'Player'}</b><small>{member.role==='spectator'?'SPECTATOR':member.user_id===selectedTable.host_id?'HOST':'PLAYER '+member.seat}</small></span>{member.user_id===user.id&&<i>YOU</i>}</div>)}
