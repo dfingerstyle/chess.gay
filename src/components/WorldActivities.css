@@ -51,3 +51,7 @@
 .last-catch-card>span{font-size:32px}.last-catch-card div{display:grid;gap:3px}.last-catch-card small{font-size:8px;color:var(--acc);letter-spacing:.1em}.last-catch-card strong{font:700 18px 'Pixelify Sans',monospace}.last-catch-card p{font-size:10px;color:var(--muted);margin:0}
 @media(max-width:1000px){.farm-plot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.activity-wallet{gap:6px}.activity-wallet>div{padding:10px}.activity-wallet strong{font-size:19px}.farm-tool-row,.farm-plot-grid,.fishing-catch-grid{grid-template-columns:1fr}.fishing-cast-card,.work-shift-card,.fishing-rod-card,.activity-gate{align-items:stretch;flex-direction:column}.fishing-scene{min-height:130px}.farm-plot-card p{min-height:0}.farm-tool{flex-wrap:wrap}.farm-tool>div{min-width:100px}}
+
+.fishing-inventory-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fishing-inventory-heading>button{border:1px solid var(--line);border-radius:6px;padding:8px 11px;background:var(--panel-2);color:var(--text);font-size:9px;font-weight:700;cursor:pointer}
+.fishing-inventory-heading>button:disabled{opacity:.4;cursor:wait}
