@@ -20,6 +20,65 @@ const modes = [
   { number: '03', title: 'The Club', detail: 'Find your people. Private messages, group chats, rivalries, and late-night rematches.', tag: 'YOUR PEOPLE', icon: '♧' },
 ];
 
+
+function OnlineCounter({ userId }: { userId: string | null }) {
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    async function start() {
+      let guestId = sessionStorage.getItem('chessgay:guest-presence-id');
+      if (!guestId) {
+        guestId = crypto.randomUUID();
+        sessionStorage.setItem('chessgay:guest-presence-id', guestId);
+      }
+      const identity = userId ? 'account:' + userId : 'guest:' + guestId;
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(identity));
+      const personKey = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      if (!active || !supabase) return;
+
+      channel = supabase.channel('global:online-counter', {
+        config: { presence: { key: crypto.randomUUID() } },
+      });
+      const refresh = () => {
+        if (!channel) return;
+        const state = channel.presenceState() as Record<string, Array<{ personKey?: string }>>;
+        const uniquePeople = new Set(
+          Object.values(state).flat().map(entry => entry.personKey).filter((key): key is string => Boolean(key)),
+        );
+        setCount(uniquePeople.size);
+      };
+      channel.on('presence', { event: 'sync' }, refresh);
+      channel.subscribe(async status => {
+        if (status === 'SUBSCRIBED' && channel) {
+          await channel.track({ personKey });
+          refresh();
+        }
+      });
+    }
+
+    void start();
+    return () => {
+      active = false;
+      if (channel && supabase) {
+        void channel.untrack();
+        void supabase.removeChannel(channel);
+      }
+    };
+  }, [userId]);
+
+  return (
+    <div className="online-counter" aria-live="polite" aria-label={count === null ? 'Online player count loading' : count + ' people online now'}>
+      <span className="online-indicator" />
+      <strong>{count === null ? '—' : count.toLocaleString()}</strong>
+      <span>ONLINE NOW</span>
+    </div>
+  );
+}
+
 function Chessboard() {
   return (
     <div className="board-frame" aria-label="Decorative chessboard preview">
@@ -60,6 +119,7 @@ export default function App() {
           <a href="#community" onClick={() => setMenuOpen(false)}>THE CLUB</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>OUR STORY</a>
         </nav>
+        <OnlineCounter userId={user?.id ?? null} />
         <button className="header-cta account-cta" onClick={() => setAuthOpen(true)}>{user ? "MY ACCOUNT" : "SIGN IN"} <span>↗</span></button>
       </header>
 
