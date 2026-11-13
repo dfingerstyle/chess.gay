@@ -151,7 +151,7 @@ A game page must launch a real playable game. A decorative board, preview, disab
 - Guests remain able to play guest-available modes. Account-only features such as cross-device history and ratings must be clearly distinguished; do not force email registration for a guest game.
 
 ### Updated delivery order
-1. Finish the responsive monochrome foundation and make the site feel active using genuine presence and verified live activity.
+1. Finish the responsive dark pixel-art themed foundation and make the site feel active using genuine presence and verified live activity.
 2. Ship playable standard chess locally with legal moves, promotion, check/checkmate/draw, clocks and history.
 3. Add online play, private lobbies and generated join codes, secure joining, realtime seats, matchmaking and reconnect.
 4. Add four-player free-for-all and 2v2, then the custom setup editor and all-queen preset.
