@@ -19,8 +19,10 @@ export default function ThemeBackdrop() {
   useEffect(() => {
     const canvasElement = canvasRef.current;
     if (!canvasElement) return;
-    const ctx = canvasElement.getContext('2d');
-    if (!ctx) return;
+    const canvasNode = canvasElement as HTMLCanvasElement;
+    const maybeContext = canvasNode.getContext('2d');
+    if (!maybeContext) return;
+    const ctx = maybeContext as CanvasRenderingContext2D;
 
     const scale = 4;
     let width = 1;
@@ -47,8 +49,8 @@ export default function ThemeBackdrop() {
       theme = nextTheme;
       width = Math.max(1, Math.ceil(window.innerWidth / scale));
       height = Math.max(1, Math.ceil(window.innerHeight / scale));
-      canvasElement.width = width;
-      canvasElement.height = height;
+      canvasNode.width = width;
+      canvasNode.height = height;
       base = document.createElement('canvas');
       base.width = width;
       base.height = height;
