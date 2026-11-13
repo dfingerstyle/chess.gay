@@ -101,3 +101,8 @@
 .casino-multi-disclaimer{margin:15px 0 0;color:#837a92;font-size:8px;line-height:1.5}
 @media(max-width:850px){.casino-tables-layout,.casino-room-layout,.casino-challenges-layout{grid-template-columns:1fr}.casino-room-side{display:grid;grid-template-columns:1fr 1fr;gap:10px}.casino-room-rules{margin-top:0}}
 @media(max-width:580px){.casino-multiplayer{padding:13px}.casino-multi-heading{align-items:flex-start;flex-direction:column}.casino-multi-wallet{width:100%}.casino-table-card{align-items:flex-start;flex-wrap:wrap}.casino-table-actions{width:100%;padding-left:57px}.casino-table-actions button{flex:1}.casino-room-side{display:flex;flex-direction:column}.casino-bet-form{grid-template-columns:1fr}.casino-bet-form button{grid-column:auto}.casino-room-topbar{align-items:flex-start;flex-direction:column}.casino-challenge-card{flex-wrap:wrap}}
+
+.casino-room-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.casino-room-code{display:flex;align-items:center;gap:7px;color:#bba36b;font-size:8px;font-weight:900;letter-spacing:.1em}
+.casino-room-code b{color:#f0d48e;font:700 14px 'Pixelify Sans',monospace;letter-spacing:.14em}
+.casino-room-code button{border:1px solid rgba(199,167,94,.3);border-radius:5px;background:rgba(199,167,94,.08);padding:5px 7px;color:#e4c77f;font-size:7px;font-weight:900;cursor:pointer}
