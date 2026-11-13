@@ -185,10 +185,10 @@ The current development branch has moved beyond the original static foundation f
 Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymous Sign-Ins** in the Supabase Auth provider settings. This allows a guest to get a server-backed identity without entering an email or password. If the provider is disabled, the arcade will explain that guest-wallet creation is unavailable; local chess remains playable.
 
 ### Not yet implemented
-- Online multiplayer and server-authoritative move submission.
-- Public matchmaking.
-- Private lobby creation, generated codes, invite links and realtime seat updates.
-- Four-player chess (free-for-all and 2v2).
+- Online multiplayer move submission, clocks and server-authoritative results.
+- Public matchmaking and public queue management.
+- Starting a game from a private lobby, shareable deep links and reconnecting players.
+- Four-player chess rules engine and playable FFA/2v2 matches.
 - Custom starting-position editor and all-queen preset.
 - Full Player Studio: the current profile editor supports display name, bio, six preset avatars and six server-saved banner styles. Personal image uploads, frames, titles, privacy settings and other cloud-synced customization are not yet implemented.
 - Board presets are currently browser-local, not synced across devices.
