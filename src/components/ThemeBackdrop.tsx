@@ -17,9 +17,10 @@ export default function ThemeBackdrop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    if (!canvas || !context) return;
+    const canvasElement = canvasRef.current;
+    if (!canvasElement) return;
+    const ctx = canvasElement.getContext('2d');
+    if (!ctx) return;
 
     const scale = 4;
     let width = 1;
@@ -46,8 +47,8 @@ export default function ThemeBackdrop() {
       theme = nextTheme;
       width = Math.max(1, Math.ceil(window.innerWidth / scale));
       height = Math.max(1, Math.ceil(window.innerHeight / scale));
-      canvas.width = width;
-      canvas.height = height;
+      canvasElement.width = width;
+      canvasElement.height = height;
       base = document.createElement('canvas');
       base.width = width;
       base.height = height;
@@ -143,13 +144,13 @@ export default function ThemeBackdrop() {
 
     function render(time: number) {
       if (!base) return;
-      context.imageSmoothingEnabled = false;
-      context.drawImage(base, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(base, 0, 0);
       if (theme === 'starry') {
         for (const star of stars) {
           const alpha = Math.round((.15 + .85 * Math.max(0, Math.sin(time * .001 * star.size + star.phase))) * 4) / 4;
-          context.fillStyle = 'rgba(' + star.tint + ',' + alpha + ')';
-          context.fillRect(star.x, star.y, star.size, star.size);
+          ctx.fillStyle = 'rgba(' + star.tint + ',' + alpha + ')';
+          ctx.fillRect(star.x, star.y, star.size, star.size);
         }
         if (!shooting && Math.random() < .006) shooting = { x: random(width * .3, width), y: random(0, height * .35), life: 0 };
         if (shooting) {
@@ -170,7 +171,7 @@ export default function ThemeBackdrop() {
           petal.x += .2 + gust * (.5 + petal.size * .25) + Math.sin(time * .002 + petal.phase) * .25;
           if (petal.y > height - 5 || petal.x > width + 4) petals[i] = { x: random(-width * .3, width), y: -2, speed: random(.12, .32), phase: random(0, 6.3), size: Math.random() < .3 ? 2 : 1, color: petal.color };
           const current = petals[i];
-          pixel(context, current.color, current.x, current.y, current.size, current.size);
+          pixel(ctx, current.color, current.x, current.y, current.size, current.size);
         }
       }
       if (theme === 'sea') {
@@ -184,7 +185,7 @@ export default function ThemeBackdrop() {
           swimmer.x += swimmer.direction * swimmer.speed;
           if (swimmer.direction > 0 && swimmer.x > width + 12) { swimmer.x = -12; swimmer.y = random(8, height - 20); }
           if (swimmer.direction < 0 && swimmer.x < -12) { swimmer.x = width + 12; swimmer.y = random(8, height - 20); }
-          drawFish(context, swimmer, time);
+          drawFish(ctx, swimmer, time);
         }
       }
     }
@@ -194,7 +195,7 @@ export default function ThemeBackdrop() {
       raf = window.requestAnimationFrame(loop);
     }
 
-    function setTheme(next: string | null) {
+    function setTheme(next: string | null | undefined) {
       const chosen: Theme = next === 'sakura' || next === 'sea' ? next : 'starry';
       build(chosen);
       window.cancelAnimationFrame(raf);
