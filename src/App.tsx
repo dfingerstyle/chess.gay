@@ -343,16 +343,19 @@ export default function App() {
         setPage('home');
       }
     });
-    void supabase.auth.getSession().then(({ data, error }) => {
-      if (!active || authEventSeen) return;
-      setUser(error ? null : data.session?.user ?? null);
-      setAuthLoading(false);
-    }).catch(() => {
-      if (active && !authEventSeen) {
-        setUser(null);
+    void (async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!active || authEventSeen) return;
+        setUser(error ? null : data.session?.user ?? null);
         setAuthLoading(false);
+      } catch {
+        if (active && !authEventSeen) {
+          setUser(null);
+          setAuthLoading(false);
+        }
       }
-    });
+    })();
     return () => {
       active = false;
       subscription.unsubscribe();
@@ -468,7 +471,7 @@ export default function App() {
       {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
       {page === 'workshop' && <BoardWorkshop onBack={() => setPage('dashboard')} />}
       {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
-      {['learn','community','tournaments','admin','farm','fishing','work','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={!user || user.is_anonymous} />}
+      {['learn','community','tournaments','admin','farm','fishing','work','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
