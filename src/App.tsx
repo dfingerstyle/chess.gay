@@ -409,7 +409,7 @@ export default function App() {
     let active = true;
     setDirectoryLoading(true);
     setDirectoryError('');
-    supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at')
+    supabase.from('profiles').select('id, username, display_name, bio, avatar_url, banner_style, created_at')
       .order('created_at', { ascending: false }).limit(60)
       .then(({ data, error }) => {
         if (!active) return;
