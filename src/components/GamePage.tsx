@@ -9,7 +9,7 @@ type Clock = { white: number; black: number };
 const START_SECONDS: Record<string, number> = { '1 min': 60, '3 min': 180, '10 min': 600, '30 min': 1800 };
 const formatClock = (seconds: number) => Math.floor(Math.max(0, seconds) / 60) + ':' + String(Math.max(0, seconds) % 60).padStart(2, '0');
 
-export default function GamePage({ onBack }: { onBack: () => void }) {
+export default function GamePage({ onBack, onOnline }: { onBack: () => void; onOnline: () => void }) {
   const [mode, setMode] = useState<Mode>('cpu');
   const [timeControl, setTimeControl] = useState('10 min');
   const [history, setHistory] = useState<Position[]>([initialPosition()]);
@@ -148,7 +148,7 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
   return (
     <section className="app-page live-game-page">
       <div className="game-page-toolbar">
-        <button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button>
+        <div className="game-toolbar-actions"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><button className="online-lobby-link" onClick={onOnline}>ONLINE LOBBIES ↗</button></div>
         <div className="theme-switcher" aria-label="Choose visual theme">
           <span>THEME</span>
           {(['starry', 'sakura', 'sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}
