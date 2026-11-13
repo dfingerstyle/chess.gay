@@ -8,13 +8,22 @@ type Game = 'coinflip' | 'dice' | 'roulette';
 type Theme = 'starry' | 'sakura' | 'sea';
 type Item = { id: string; name: string; kind: string; rarity: string; buy_price: number | null; sell_price: number | null; description: string };
 type Transaction = { id: number; amount: number; reason: string; created_at: string };
-type PlayResult = { game: string; bet: number; choice: string; outcome: string; won: boolean; net: number; balance: number };
+type PlayResult = { game: string; bet: number; choice: string; outcome: string; won: boolean; net: number; balance: number; payout_multiplier?: number; win_probability?: string };
 
 const GAMES: Array<{ id: Game; name: string; description: string; choices: Array<{ id: string; label: string }> }> = [
   { id: 'coinflip', name: 'Coinflip', description: 'Pick heads or tails. A win returns your stake plus the same amount.', choices: [{ id: 'heads', label: 'Heads' }, { id: 'tails', label: 'Tails' }] },
   { id: 'dice', name: 'High or low', description: 'Roll one six-sided die. Low is 1–3; high is 4–6.', choices: [{ id: 'low', label: 'Low · 1–3' }, { id: 'high', label: 'High · 4–6' }] },
   { id: 'roulette', name: 'Roulette', description: 'Pick red or black. Zero is green and neither side wins.', choices: [{ id: 'red', label: 'Red' }, { id: 'black', label: 'Black' }] },
 ];
+
+const ROULETTE_TYPES = [
+  { id: 'colour', label: 'COLOUR', options: [{id:'red',label:'Red',chance:'18/37 · 48.65%',payout:'1:1'},{id:'black',label:'Black',chance:'18/37 · 48.65%',payout:'1:1'}] },
+  { id: 'number', label: 'NUMBER', options: Array.from({length:37},(_,n)=>({id:'number_'+n,label:String(n),chance:'1/37 · 2.70%',payout:'35:1'})) },
+  { id: 'parity', label: 'ODD / EVEN', options: [{id:'odd',label:'Odd',chance:'18/37 · 48.65%',payout:'1:1'},{id:'even',label:'Even',chance:'18/37 · 48.65%',payout:'1:1'}] },
+  { id: 'range', label: 'LOW / HIGH', options: [{id:'low',label:'1–18',chance:'18/37 · 48.65%',payout:'1:1'},{id:'high',label:'19–36',chance:'18/37 · 48.65%',payout:'1:1'}] },
+  { id: 'dozen', label: 'DOZENS', options: [{id:'dozen1',label:'1st dozen · 1–12',chance:'12/37 · 32.43%',payout:'2:1'},{id:'dozen2',label:'2nd dozen · 13–24',chance:'12/37 · 32.43%',payout:'2:1'},{id:'dozen3',label:'3rd dozen · 25–36',chance:'12/37 · 32.43%',payout:'2:1'}] },
+  { id: 'column', label: 'COLUMNS', options: [{id:'column1',label:'Column 1',chance:'12/37 · 32.43%',payout:'2:1'},{id:'column2',label:'Column 2',chance:'12/37 · 32.43%',payout:'2:1'},{id:'column3',label:'Column 3',chance:'12/37 · 32.43%',payout:'2:1'}] },
+] as const;
 
 const iconFor = (kind: string) => kind === 'tool' ? '⚒' : kind === 'fish' ? '🐟' : kind === 'seed' ? '🌱' : kind === 'crop' ? '🥕' : '♟';
 
@@ -25,6 +34,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [game, setGame] = useState<Game>('coinflip');
   const [choice, setChoice] = useState('heads');
+  const [rouletteType, setRouletteType] = useState('colour');
   const [bet, setBet] = useState('25');
   const [result, setResult] = useState<PlayResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -103,7 +113,10 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   }
 
   const activeGame = GAMES.find(option => option.id === game)!;
+  const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
+  const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
   function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0].id); setResult(null); setMessage(''); }
+  function changeRouletteType(next: string) { const group = ROULETTE_TYPES.find(option => option.id === next)!; setRouletteType(next); setChoice(group.options[0].id); setResult(null); }
 
   return (
     <section className="app-page arcade-page">
@@ -126,8 +139,23 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                   <p>{activeGame.description}</p>
                   <label>YOUR BET <span>1–5,000 COINS</span></label>
                   <input className="arcade-bet-input" type="number" min="1" max="5000" step="1" value={bet} onChange={event => setBet(event.target.value)} />
-                  <label>YOUR PICK</label>
-                  <div className="arcade-choice-row">{activeGame.choices.map(option => <button key={option.id} className={choice === option.id ? 'active' : ''} onClick={() => setChoice(option.id)}>{option.label}</button>)}</div>
+                  {game === 'roulette' ? (
+                    <div className="roulette-bet-builder">
+                      <label>BET TYPE <span>EUROPEAN · SINGLE ZERO</span></label>
+                      <div className="roulette-type-tabs">{ROULETTE_TYPES.map(option=><button key={option.id} className={rouletteType===option.id?'active':''} onClick={()=>changeRouletteType(option.id)}>{option.label}</button>)}</div>
+                      <label>YOUR PICK <span>{rouletteBet.chance} CHANCE · {rouletteBet.payout} PROFIT</span></label>
+                      <div className={rouletteType==='number'?'roulette-number-grid':'arcade-choice-row roulette-pick-row'}>
+                        {rouletteGroup.options.map(option=><button key={option.id} className={choice===option.id?'active':''} onClick={()=>{setChoice(option.id);setResult(null);}}>{option.label}</button>)}
+                      </div>
+                      <p className="roulette-odds-note">37 equally likely pockets · 0 is green · standard payouts · 2.70% house edge (97.30% RTP)</p>
+                    </div>
+                  ) : (
+                    <>
+                      <label>YOUR PICK <span>{game==='coinflip'?'50% CHANCE · 1:1 PROFIT':'50% CHANCE · 1:1 PROFIT'}</span></label>
+                      <div className="arcade-choice-row">{activeGame.choices.map(option => <button key={option.id} className={choice === option.id ? 'active' : ''} onClick={() => setChoice(option.id)}>{option.label}</button>)}</div>
+                      <p className="roulette-odds-note">Fair odds · 50% chance · no built-in house edge on this game.</p>
+                    </>
+                  )}
                   <button className="arcade-primary" onClick={play} disabled={busy || balance === null}>{busy ? 'THE TABLE IS SPINNING…' : 'PLACE BET'}</button>
                   {result && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
                 </div>
