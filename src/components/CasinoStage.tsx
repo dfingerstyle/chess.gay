@@ -25,10 +25,11 @@ function resultNumber(outcome: string) {
   return Number.isInteger(parsed) && parsed >= 0 && parsed <= 36 ? parsed : 0;
 }
 
-export default function CasinoStage({ game, result, animationKey }: {
+export default function CasinoStage({ game, result, animationKey, onAnimationComplete }: {
   game: CasinoGame;
   result: CasinoVisualResult | null;
   animationKey: number;
+  onAnimationComplete?: () => void;
 }) {
   const [revealing, setRevealing] = useState(false);
   const [revealed, setRevealed] = useState<CasinoVisualResult | null>(null);
@@ -48,9 +49,10 @@ export default function CasinoStage({ game, result, animationKey }: {
     const timer = window.setTimeout(() => {
       setRevealed(result);
       setRevealing(false);
+      onAnimationComplete?.();
     }, duration);
     return () => window.clearTimeout(timer);
-  }, [animationKey, game, result]);
+  }, [animationKey, game, result, onAnimationComplete]);
 
   const outcomeLabel = result?.outcome || 'Waiting for the next round';
   const coinSide = outcomeLabel.toLowerCase().includes('tails') ? 'TAILS' : 'HEADS';
