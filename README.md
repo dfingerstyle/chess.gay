@@ -79,7 +79,7 @@ The Chess area must launch real games, not a decorative preview or a coming-soon
 
 Realtime Presence is for online/seat presence; Broadcast is for low-latency events. Authoritative moves, clocks, matchmaking and results must be validated server-side. Four-player rules require their own tested engine. The site should feel active through genuine online presence, verified activity and subtle motion—never fake player counts, sample chat presented as live, or fabricated games.
 
-These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
+These are product requirements, not claims that the systems are already implemented. Local standard chess is playable; online multiplayer and four-player chess remain future milestones.
 
 
 ## Current playable build (phase-1-foundation)
