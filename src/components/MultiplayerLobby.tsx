@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import './MultiplayerLobby.css';
@@ -63,14 +64,15 @@ export default function MultiplayerLobby({ user, onBack, onStartGuest }: LobbyPa
     setLobbyId(result.lobby_id);
   }
 
-  async function joinLobby(event: React.FormEvent<HTMLFormElement>) {
+  async function joinLobby(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if(!supabase) return;
     setBusy(true);setMessage('');
     const {data,error}=await supabase.rpc('join_private_lobby',{p_code:joinCode});
     setBusy(false);
     if(error){setMessage(error.message);return;}
-    const result=data as JoinResult;
+    const result=data as JoinResult & { error?: string };
+    if(result.error){setMessage(result.error);return;}
     setInviteCode('');
     setLobbyId(result.lobby_id);
   }
