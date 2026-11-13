@@ -380,6 +380,7 @@ export default function App() {
           <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>
           <button onClick={() => { setPage('casino'); setMenuOpen(false); }}>CASINO</button>
           <button onClick={() => { setPage('shop'); setMenuOpen(false); }}>SHOP</button>
+          <button onClick={() => { setPage('tournaments'); setMenuOpen(false); }}>EVENTS</button>
           {user && <button onClick={() => { setPage('dashboard'); setMenuOpen(false); }}>DASHBOARD</button>}
         </nav>
         <OnlineCounter userId={user?.id ?? null} />
