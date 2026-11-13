@@ -44,7 +44,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
   }) as CSSProperties, [targetRotation]);
 
   useEffect(() => {
-    if (!result || animationKey === 0) return;
+    if (!result || animationKey === 0) { setRevealing(false); setRevealed(null); return; }
     setRevealed(null);
     setRevealing(true);
     const duration = game === 'roulette' ? 4700 : 1900;
