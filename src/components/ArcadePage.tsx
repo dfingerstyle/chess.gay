@@ -2,9 +2,12 @@ import './ArcadePage.css';
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import CasinoStage from './CasinoStage';
+import CasinoMultiplayer from './CasinoMultiplayer';
 
 type Page = 'casino' | 'shop';
 type Game = 'coinflip' | 'dice' | 'roulette';
+type CasinoView = 'lobby' | 'games' | 'multiplayer';
 type Theme = 'starry' | 'sakura' | 'sea';
 type Item = { id: string; name: string; kind: string; rarity: string; buy_price: number | null; sell_price: number | null; description: string };
 type Transaction = { id: number; amount: number; reason: string; created_at: string };
@@ -32,7 +35,10 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [items, setItems] = useState<Item[]>([]);
   const [inventory, setInventory] = useState<Record<string, number>>({});
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [game, setGame] = useState<Game>('coinflip');
+  const [game, setGame] = useState<Game>('roulette');
+  const [casinoView, setCasinoView] = useState<CasinoView>('lobby');
+  const [animationKey, setAnimationKey] = useState(0);
+  const [revealing, setRevealing] = useState(false);
   const [choice, setChoice] = useState('heads');
   const [rouletteType, setRouletteType] = useState('colour');
   const [bet, setBet] = useState('25');
@@ -79,6 +85,8 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
     setBusy(false);
     if (error) { setMessage(error.message); return; }
     setResult(data as PlayResult);
+    setAnimationKey(key => key + 1);
+    setRevealing(true);
     await refresh();
   }
 
@@ -115,14 +123,14 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const activeGame = GAMES.find(option => option.id === game)!;
   const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
   const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
-  function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0].id); setResult(null); setMessage(''); }
+  function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0].id); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
   function changeRouletteType(next: string) { const group = ROULETTE_TYPES.find(option => option.id === next)!; setRouletteType(next); setChoice(group.options[0].id); setResult(null); }
 
   return (
     <section className="app-page arcade-page">
       <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div></div>
       <div className="game-page-heading arcade-heading">
-        <div><div className="eyebrow"><span className="eyebrow-line" /> {page === 'casino' ? 'THE ARCADE' : 'MAKE IT YOURS'}</div><h1>{page === 'casino' ? <>Play for <em>coins.</em></> : <>The <em>shop.</em></>}</h1><p>Virtual coins only. No real-money deposits, withdrawals or cash prizes.</p></div>
+        <div><div className="eyebrow"><span className="eyebrow-line" /> {page === 'casino' ? 'THE MIDNIGHT CLUB' : 'MAKE IT YOURS'}</div><h1>{page === 'casino' ? <>Enter the <em>casino.</em></> : <>The <em>shop.</em></>}</h1><p>Virtual coins only. No real-money deposits, withdrawals or cash prizes.</p></div>
         <div className="wallet-display"><span>YOUR BALANCE</span><strong>{balance === null ? '—' : balance.toLocaleString()} <small>coins</small></strong></div>
       </div>
 
@@ -131,9 +139,35 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
       ) : (
         <>
           {page === 'casino' ? (
+            <>
+              <div className="casino-primary-nav">
+                <button className={casinoView==='lobby'?'active':''} onClick={()=>setCasinoView('lobby')}>CASINO LOBBY</button>
+                <button className={casinoView==='games'?'active':''} onClick={()=>setCasinoView('games')}>PLAY GAMES</button>
+                <button className={casinoView==='multiplayer'?'active':''} onClick={()=>setCasinoView('multiplayer')}>MULTIPLAYER TABLES</button>
+              </div>
+              {casinoView==='lobby' && (
+                <div className="casino-lobby">
+                  <div className="casino-lobby-banner">
+                    <span className="dashboard-kicker">THE MIDNIGHT CLUB · VIRTUAL COINS ONLY</span>
+                    <h2>Step inside <em>the house.</em></h2>
+                    <p>Choose a game, take a seat at a live table or challenge another player.</p>
+                    <div className="casino-lobby-stats"><span>EUROPEAN ROULETTE</span><span>LIVE MULTIPLAYER</span><span>FAIR SERVER RESULTS</span></div>
+                  </div>
+                  <div className="casino-lobby-grid">
+                    <button className="casino-lobby-card roulette-card" onClick={()=>changeGame('roulette')}><span className="casino-lobby-art">◎</span><span className="dashboard-kicker">THE CLASSIC</span><strong>Roulette</strong><small>37 pockets · 0–36 · standard bets</small><b>ENTER TABLE ↗</b></button>
+                    <button className="casino-lobby-card coin-card" onClick={()=>changeGame('coinflip')}><span className="casino-lobby-art">◐</span><span className="dashboard-kicker">50 / 50</span><strong>Coin Flip</strong><small>Heads or tails. Double-or-nothing.</small><b>FLIP A COIN ↗</b></button>
+                    <button className="casino-lobby-card dice-card" onClick={()=>changeGame('dice')}><span className="casino-lobby-art">⚄</span><span className="dashboard-kicker">TEST YOUR LUCK</span><strong>Dice</strong><small>Call low or high before the roll.</small><b>ROLL THE DICE ↗</b></button>
+                    <button className="casino-lobby-card multiplayer-card" onClick={()=>setCasinoView('multiplayer')}><span className="casino-lobby-art">♟</span><span className="dashboard-kicker">PLAY TOGETHER</span><strong>Live Tables</strong><small>Public rooms, private tables and spectators.</small><b>FIND A TABLE ↗</b></button>
+                  </div>
+                  <div className="casino-lobby-bottom"><div><span className="dashboard-kicker">PLAYER CHALLENGES</span><strong>Bet against a friend.</strong><small>Send a coinflip challenge with an agreed virtual stake.</small></div><button className="arcade-secondary" onClick={()=>setCasinoView('multiplayer')}>OPEN MULTIPLAYER ↗</button></div>
+                </div>
+              )}
+              {casinoView==='multiplayer' && <CasinoMultiplayer user={user} balance={balance} onBalanceChange={()=>void refresh()} />}
+              {casinoView==='games' && (
             <div className="arcade-grid">
               <div className="arcade-main-column">
                 <div className="arcade-game-tabs">{GAMES.map(option => <button key={option.id} className={game === option.id ? 'active' : ''} onClick={() => changeGame(option.id)}>{option.name}</button>)}</div>
+                <CasinoStage game={game} result={result} animationKey={animationKey} onAnimationComplete={()=>setRevealing(false)} />
                 <div className="arcade-game-card">
                   <div className="arcade-card-top"><div><span className="dashboard-kicker">VIRTUAL TABLE</span><h2>{activeGame.name}</h2></div><span className="arcade-game-symbol">{game === 'coinflip' ? '◐' : game === 'dice' ? '⚄' : '◎'}</span></div>
                   <p>{activeGame.description}</p>
@@ -156,8 +190,8 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                       <p className="roulette-odds-note">Fair odds · 50% chance · no built-in house edge on this game.</p>
                     </>
                   )}
-                  <button className="arcade-primary" onClick={play} disabled={busy || balance === null}>{busy ? 'THE TABLE IS SPINNING…' : 'PLACE BET'}</button>
-                  {result && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>{result.payout_multiplier ? `Payout: ${result.payout_multiplier}:1 profit · Win chance: ${result.win_probability || '—'}` : ''}</small><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
+                  <button className="arcade-primary" onClick={play} disabled={busy || revealing || balance === null}>{busy ? 'PLACING BET…' : revealing ? 'REVEALING RESULT…' : 'PLACE BET'}</button>
+                  {result && !revealing && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>{result.payout_multiplier ? `Payout: ${result.payout_multiplier}:1 profit · Win chance: ${result.win_probability || '—'}` : ''}</small><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
                 </div>
                 <div className="arcade-work-card"><div><span className="dashboard-kicker">EARN COINS</span><h2>Work a shift.</h2><p>Choose a shift and earn 100–250 coins. One shift per hour.</p></div><button className="arcade-secondary" onClick={work} disabled={busy}>START SHIFT · +100–250</button></div>
               </div>
@@ -166,6 +200,8 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                 <button className="arcade-shop-link" onClick={() => onNavigate('shop')}>VISIT THE SHOP <span>↗</span></button>
               </aside>
             </div>
+              )}
+            </>
           ) : (
             <div className="arcade-shop-layout">
               <div className="arcade-shop-grid">{items.map(item => <article className="arcade-item-card" key={item.id}><span className="arcade-item-icon">{iconFor(item.kind)}</span><span className="item-rarity">{item.rarity.toUpperCase()} · {item.kind.toUpperCase()}</span><h3>{item.name}</h3><p>{item.description}</p><div className="item-card-bottom"><strong>{item.buy_price === null ? 'NOT FOR SALE' : item.buy_price.toLocaleString() + ' coins'}</strong><span>OWNED × {inventory[item.id] || 0}</span></div><div className="item-actions">{item.buy_price !== null && <button onClick={() => buy(item)} disabled={busy}>BUY</button>}{item.sell_price !== null && <button onClick={() => sell(item)} disabled={busy || !(inventory[item.id] > 0)}>SELL · {item.sell_price}</button>}</div></article>)}</div>
