@@ -10,7 +10,7 @@
 - Guests can explore public areas and guest-available play. Creating an account unlocks persistent cross-device identity, saved game history, rating, friends, messages, inventory, personalisation and all account-dependent features.
 - Registration offers a user-selected identifier: username OR email, plus a password. Email is optional when username is chosen.
 - Username/password authentication requires a secure server-side identifier-to-authentication mapping and recovery design. Supabase Auth does not natively accept usernames, so this must not be faked in the browser or by exposing account email addresses.
-- Guest-to-account upgrade should preserve the guest nickname and migrate eligible guest progress after ownership is verified.
+- Guest-to-account upgrade links an email identity to the existing anonymous Supabase user so its user ID, wallet, inventory, farm plots and eligible progress remain attached. Email verification is required before setting a password. Linking a guest to a different pre-existing account requires a separate conflict/merge flow and is not yet implemented.
 
 ## Product identity
 
@@ -19,7 +19,7 @@ chess.gay is a free chess, learning, community and gaming platform. Chess.com is
 ### Confirmed product decisions
 
 - Public marketing website and full signed-in application.
-- Pure black, white and neutral grey only; no gold or brass accents.
+- Dark pixel-art world aesthetic with three retained colour themes: Starry Void (purple), Sakura (pink) and Deep Sea (cyan).
 - Responsive desktop, tablet, mobile and Chromebook experiences.
 - Customisable signed-in dashboard.
 - Competitive and casual chess have equal importance.
@@ -30,7 +30,7 @@ chess.gay is a free chess, learning, community and gaming platform. Chess.com is
 - Full profile customisation, but personal image uploads are disabled. Use curated platform avatars and shop cosmetics.
 - Dedicated full admin dashboard plus contextual moderation controls.
 - Casino, if launched, uses virtual coins only and no real-money deposits, cash-outs or withdrawals; legal and age restrictions still apply.
-- The platform is free. Optional cosmetics may be considered later, but no paid advantage or premium access tier.
+- The platform is free. One shared coin wallet connects all activities. Hybrid progression uses XP/levels for earned unlocks; cosmetics and convenience may be unlocked, but competitive advantages are never sold.
 
 ## Public website
 
@@ -61,8 +61,11 @@ Friends, requests, group conversations, E2EE private messages, clubs, tournament
 ### Profiles
 Username, display name, bio, curated avatar, curated banner, themes, layout, competitive statistics, achievements and equipped cosmetics. Competitive credentials must be distinguishable from decorative titles.
 
-### Economy and optional cosmetics
-Virtual wallet, transaction ledger, shop, inventory, cosmetic equipment and marketplace. Any financial-like state is server-authoritative, auditable and never purchasable for competitive advantage.
+### Economy and progression
+One shared virtual coin wallet and inventory across Work, Farming, Fishing, Shop, Marketplace and Arcade. XP and levels are separate from spendable coins. Hybrid progression unlocks activities, cosmetics, equipment and areas through play; no competitive advantage is sold. Wallet changes, item ownership, crop growth, catches, cooldowns and XP are server-authoritative and auditable.
+
+### Farming and fishing
+Farming uses persistent plots, seed consumption, growth timers, harvesting into inventory and selling crops through the shared Shop. Fishing uses owned equipment, server-side rarity rolls, cooldowns, a catch log and sellable inventory rewards.
 
 ### Casino
 Virtual coin games only, subject to legal review and age/regional restrictions. Server-authoritative outcomes, limits, cooldowns and transaction history.
@@ -72,13 +75,14 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 
 ## Visual system
 
-- True black (#000000) as the default page background.
-- Pure white primary text and controls; grey is reserved for secondary text and borders.
-- No gold/brass accent palette.
-- Rounded cards, pill controls, smooth transitions and a modern, minimal interface.
-- Highly legible modern sans-serif UI and clear typographic hierarchy.
-- Reduced-motion and high-contrast support.
-- Mobile bottom navigation and a More drawer; desktop persistent navigation.
+- Hybrid world hub as the homepage, with dedicated full-screen activity interfaces.
+- Starry Void: deep-purple night sky, pixel stars and shooting stars.
+- Sakura: pink blossom palette with falling petals and a moonlit landscape.
+- Deep Sea: cyan/blue underwater palette with bubbles, fish and light rays.
+- Inter for body/UI text and Pixelify Sans for display headings.
+- Translucent dark panels, restrained borders, subtle glow/hover states and modest corner radii.
+- Animated backgrounds and interactions must respect reduced-motion preferences.
+- Clear focus states, responsive desktop/mobile layouts and accessible controls.
 
 ## Architecture
 
@@ -92,22 +96,23 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 
 ## Delivery phases
 
-1. **Foundation:** theme, public website, authentication, dashboard, profiles, public directory and presence.
-2. **Chess core:** board, legal moves, clocks, ranked/casual, matchmaking, persistence and ratings.
-3. **Chess intelligence:** engine review, puzzles, lessons, openings and training.
-4. **Social:** friends, requests, E2EE chat, clubs and community.
-5. **Cosmetics and economy:** shop, inventory, wallet, marketplace and optional virtual casino.
-6. **Administration and launch:** staff permissions, moderation, anti-cheat, auditability, accessibility, performance and security review.
+1. **Foundation:** visual identity, hybrid world hub, guest/account identity, dashboard, profiles, directory and presence.
+2. **Local and online chess:** legal local chess first, then server-authoritative two-player games, matchmaking, lobbies and reconnect.
+3. **Four-player chess:** FFA and 2v2 using the shared lobby/matchmaking foundation.
+4. **World economy:** one wallet, XP/levels, Work, Farming, Fishing, inventory and shop.
+5. **Customization:** Board Workshop, Player Studio, cosmetics and account-backed presets.
+6. **Chess intelligence and social:** Stockfish, puzzles, friends, messaging, clubs and events.
+7. **Administration and launch:** staff permissions, moderation, anti-cheat, auditability, accessibility, performance and security review.
 
 ## Phase 1 implementation notes
 
-The current development branch also introduces a local guest identity with a generated nickname, guest dashboard access, section navigation and honest status pages for chess, learning, community, casino, shop, tournaments and administration. These pages describe the planned modules and explicitly disclose that their underlying systems are not yet live. Guest nicknames are currently stored only in the local browser and are not yet server-backed or portable across devices.
+The current development branch has a hybrid home hub and separate activity pages. Anonymous Supabase users are distinguished from registered users; session restoration is awaited before dashboard state is chosen. Guest players can link an email to the same anonymous identity. The local nickname remains browser-stored; email linking preserves the Supabase user ID and database-owned progress.
 
 
 
 The current foundation reuses the existing Supabase Auth client and `public.profiles` table. Existing columns support username, display name, bio and avatar preset identifier. Public directory reads use the current public profile read policy; edits use the current owner-only update policy. The online counter uses ephemeral Supabase Realtime Presence and does not persist visitor data.
 
-No schema migration is needed for the first Phase 1 UI pass. More profile fields, privacy preferences, cosmetic ownership and staff permissions will receive carefully designed migrations before those features are implemented.
+New migrations now add persistent farm plots and fishing logs, row-level security for owner-only reads, server-validated planting/harvesting/fishing functions and XP awards. More profile fields, privacy preferences, cosmetic ownership and staff permissions will receive carefully designed migrations before those features are implemented.
 
 
 ## Playable chess, multiplayer and customization requirements
@@ -152,10 +157,10 @@ A game page must launch a real playable game. A decorative board, preview, disab
 4. Add four-player free-for-all and 2v2, then the custom setup editor and all-queen preset.
 5. Add chess intelligence, puzzles and learning; then social, community, cosmetics, economy and administration.
 
-These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
+These are product requirements, not claims that the systems are already implemented. Local standard chess is playable, but online matchmaking, lobbies and four-player chess remain unimplemented.
 
 
-## Implementation status — 13 November 2026
+## Implementation status — 14 November 2026
 
 The current development branch has moved beyond the original static foundation for a first playable vertical slice.
 
@@ -165,7 +170,14 @@ The current development branch has moved beyond the original static foundation f
 - A persistent Supabase wallet for authenticated users and anonymous guest sessions, plus transaction history.
 - Server-side coinflip, high/low dice and European-style red/black roulette. Bets are 1–5,000 virtual coins; each round is resolved in a database function and the balance change is recorded atomically.
 - A work-shift earning action (100–250 coins, one-hour cooldown), server-side shop purchases and sales, and persistent inventory.
-- Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated backgrounds.
+- Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated pixel-art backgrounds.
+- Eight-destination hybrid world hub.
+- Board Workshop MVP with six colour palettes, custom square colours, live preview and local named presets.
+- Farming with four persistent plots, carrot seeds, shovel requirement, five-minute growth, harvest-to-inventory and +10 XP.
+- Fishing with rod requirement, server-side catch rarity, Minnow/Bass/Golden Koi inventory, 30-second cooldown, catch log and +5 XP.
+- Work shifts award 100–250 coins and +5 XP, subject to one-hour cooldown.
+- XP and level progression share the existing wallet record; coins remain a separate spendable balance.
+- Anonymous guest accounts can link an email to the same Supabase identity; manual identity linking must be enabled in Auth settings.
 - The internal wallet-adjustment function is no longer executable by anon or authenticated clients. Public economy RPCs validate auth, validate inputs and perform balance changes server-side.
 
 ### Setup requirement
@@ -177,6 +189,8 @@ Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymo
 - Private lobby creation, generated codes, invite links and realtime seat updates.
 - Four-player chess (free-for-all and 2v2).
 - Custom starting-position editor and all-queen preset.
+- Full Player Studio: the existing profile editor still only supports display name, bio and six preset avatars; banners, frames, titles, privacy settings and cloud-synced customization are not yet implemented.
+- Board presets are currently browser-local, not synced across devices.
 - Stockfish analysis and the wider training system.
 - Friends, messaging, clubs, tournaments and the remaining community features.
 
