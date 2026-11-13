@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import AuthPanel from './components/AuthPanel';
 import GamePage from './components/GamePage';
 import ArcadePage from './components/ArcadePage';
+import ThemeBackdrop from './components/ThemeBackdrop';
 import { supabase } from './lib/supabase';
 
 type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin';
@@ -379,6 +380,7 @@ export default function App() {
 
   return (
     <main>
+      <ThemeBackdrop />
       <div className="announcement"><span className="announcement-dot" /> CHESS.GAY IS FREE TO PLAY <span className="announcement-divider">/</span> NO PREMIUM TIERS. JUST THE GAME.</div>
       <header className="site-header">
         <a className="brand" href="#top" onClick={event => { event.preventDefault(); setPage('home'); }} aria-label="chess.gay home"><span className="brand-mark">♞</span><span>chess<span className="brand-dot">.</span>gay</span></a>
