@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { claimableDraw, chooseCpuMove, gameStatus, initialPosition, legalMoves, makeMove, moveText, pieceColor, PIECES, squareName, type Move, type Position } from '../lib/chess';
 
 type Mode = 'cpu' | 'local';
@@ -18,7 +17,8 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
   const [promotion, setPromotion] = useState<Move[] | null>(null);
   const [clock, setClock] = useState<Clock>({ white: 600, black: 600 });
   const [clockStarted, setClockStarted] = useState(false);
-  const [timeoutWinner, setTimeoutWinner] = useState<'White' | 'Black' | null>(null);
+  const [finishedText, setFinishedText] = useState('');
+  const [claimedDraw, setClaimedDraw] = useState('');
   const [message, setMessage] = useState('');
   const [theme, setTheme] = useState<Theme>(() => {
     try { const saved = localStorage.getItem('chessgay:theme'); return saved === 'sakura' || saved === 'sea' ? saved : 'starry'; }
@@ -33,21 +33,10 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
 
   const position = history[history.length - 1];
   const status = useMemo(() => gameStatus(history), [history]);
-  const ended = status.done || timeoutWinner !== null;
+  const ended = status.done || finishedText !== '' || claimedDraw !== '';
   const legal = useMemo(() => legalMoves(position), [position]);
   const destinations = selected === null ? [] : legal.filter(move => move.from === selected).map(move => move.to);
-  const capturedWhite = moves.reduce((list, move, index) => {
-    const before = history[index];
-    const captured = before.board[move.to] !== '.' ? before.board[move.to] : move.flag === 'ep' ? (before.turn === 1 ? 'p' : 'P') : '.';
-    if (captured !== '.') list.push(captured);
-    return list;
-  }, [] as string[]).filter(piece => piece === piece.toUpperCase() ? false : true);
-  const capturedBlack = moves.reduce((list, move, index) => {
-    const before = history[index];
-    const captured = before.board[move.to] !== '.' ? before.board[move.to] : move.flag === 'ep' ? (before.turn === 1 ? 'p' : 'P') : '.';
-    if (captured !== '.') list.push(captured);
-    return list;
-  }, [] as string[]).filter(piece => piece === piece.toUpperCase());
+
 
   function restart(nextMode = mode, nextTime = timeControl) {
     setMode(nextMode);
@@ -58,7 +47,8 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
     setPromotion(null);
     setClock({ white: START_SECONDS[nextTime], black: START_SECONDS[nextTime] });
     setClockStarted(false);
-    setTimeoutWinner(null);
+    setFinishedText('');
+    setClaimedDraw('');
     setMessage('');
     setFlipped(false);
   }
@@ -116,14 +106,14 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
       const side = position.turn === 1 ? 'white' : 'black';
       setClock(current => {
         const next = Math.max(0, current[side] - 1);
-        if (next === 0) setTimeoutWinner(side === 'white' ? 'Black' : 'White');
+        if (next === 0) setFinishedText((side === 'white' ? 'Black' : 'White') + ' wins on time.');
         return { ...current, [side]: next };
       });
     }, 1000);
     return () => window.clearInterval(timer);
   }, [clockStarted, ended, position.turn]);
 
-  const displayStatus = timeoutWinner ? timeoutWinner + ' wins on time.' : status.text;
+  const displayStatus = claimedDraw ? 'Draw claimed — ' + claimedDraw + '.' : finishedText || status.text;
   const drawClaim = claimableDraw(history);
 
   function undo() {
@@ -133,13 +123,14 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
     setMoves(current => current.slice(0, -count));
     setSelected(null);
     setPromotion(null);
-    setTimeoutWinner(null);
+    setFinishedText('');
+    setClaimedDraw('');
     setMessage('Last move undone. Clocks are not rewound.');
   }
 
   function resign() {
     if (ended) return;
-    setTimeoutWinner(position.turn === 1 ? 'Black' : 'White');
+    setFinishedText((position.turn === 1 ? 'Black' : 'White') + ' wins by resignation.');
     setMessage((position.turn === 1 ? 'White' : 'Black') + ' resigned.');
   }
 
@@ -168,7 +159,9 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
             {Array.from({ length: 64 }, (_, index) => {
               const row = Math.floor(index / 8);
               const file = index % 8;
-              const square = row * 16 + file;
+              const boardRow = flipped ? 7 - row : row;
+              const boardFile = flipped ? 7 - file : file;
+              const square = boardRow * 16 + boardFile;
               const piece = position.board[square];
               const legalTarget = destinations.includes(square);
               const last = moves[moves.length - 1];
@@ -183,8 +176,8 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
                 aria-label={squareName(square) + (piece !== '.' ? ' ' + piece : '')}
                 disabled={ended || Boolean(promotion) || (mode === 'cpu' && position.turn === -1)}
               >
-                {(file === 0) && <span className="rank-coordinate">{8 - row}</span>}
-                {(row === 7) && <span className="file-coordinate">{'abcdefgh'[file]}</span>}
+                {(file === 0) && <span className="rank-coordinate">{8 - boardRow}</span>}
+                {(row === 7) && <span className="file-coordinate">{'abcdefgh'[boardFile]}</span>}
                 {piece !== '.' && <span className={'game-piece ' + (pieceColor(piece) === 1 ? 'white-game-piece' : 'black-game-piece')}>{PIECES[piece]}</span>}
                 {legalTarget && <span className={piece === '.' ? 'legal-dot' : 'legal-capture'} />}
               </button>;
@@ -216,7 +209,7 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
           <div className="move-history-card">
             <div className="move-history-heading"><span className="dashboard-kicker">MOVE HISTORY</span><span>{moves.length}</span></div>
             {moves.length === 0 ? <p className="empty-moves">The first move is yours.</p> : <ol>{moves.map((move, index) => <li key={index}><span>{Math.floor(index / 2) + 1}{index % 2 === 0 ? '.' : '...'}</span><strong>{moveText(move)}</strong></li>)}</ol>}
-            {drawClaim && !ended && <button className="draw-claim-button" onClick={() => { setMessage('Draw claimed by ' + drawClaim + '.'); setTimeoutWinner('White'); }}>CLAIM DRAW · {drawClaim.toUpperCase()}</button>}
+            {drawClaim && !ended && <button className="draw-claim-button" onClick={() => { setClaimedDraw(drawClaim); setMessage('Draw claimed by ' + drawClaim + '.'); }}>CLAIM DRAW · {drawClaim.toUpperCase()}</button>}
           </div>
           {message && <p className="game-message" role="status">{message}</p>}
         </aside>
