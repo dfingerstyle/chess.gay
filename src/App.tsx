@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import AuthPanel from './components/AuthPanel';
 import { supabase } from './lib/supabase';
 
-type Page = 'home' | 'dashboard' | 'discover' | 'profile';
+type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin';
 type Profile = {
   id: string;
   username: string;
@@ -146,11 +146,11 @@ function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: 
   return <div className="app-page-heading"><div className="eyebrow"><span className="eyebrow-line" /> {eyebrow}</div><h1>{title}</h1><p>{description}</p></div>;
 }
 
-function Dashboard({ profile, onDiscover, onEditProfile }: { profile: Profile | null; onDiscover: () => void; onEditProfile: () => void }) {
-  const displayName = profile?.display_name || profile?.username || 'Player';
+function Dashboard({ profile, guestName, onDiscover, onEditProfile, onFeature }: { profile: Profile | null; guestName: string; onDiscover: () => void; onEditProfile: () => void; onFeature: (page: Page) => void }) {
+  const displayName = profile?.display_name || profile?.username || guestName;
   return (
     <section className="app-page dashboard-page">
-      <PageHeading eyebrow="YOUR GAME ROOM" title={<>Welcome back, <em>{displayName}.</em></>} description="Your chess.gay home base. Your next move starts here." />
+      <PageHeading eyebrow="YOUR GAME ROOM" title={<>Welcome, <em>{displayName}.</em></>} description="Your chess.gay home base. Your next move starts here." />
       <div className="dashboard-welcome-card">
         <div><span className="dashboard-kicker">THE BOARD IS YOURS</span><h2>Ready when <em>you are.</em></h2><p>Chess.gay is free to play. Your account and your progress stay yours.</p></div>
         <div className="dashboard-welcome-mark">♞</div>
@@ -163,24 +163,30 @@ function Dashboard({ profile, onDiscover, onEditProfile }: { profile: Profile | 
       <div className="dashboard-lower-grid">
         <article className="dashboard-card">
           <div className="dashboard-card-heading"><div><span className="dashboard-kicker">QUICK ACCESS</span><h3>Find your next move</h3></div><span className="dashboard-card-icon">↗</span></div>
-          <button className="dashboard-action dashboard-action-primary" disabled>PLAY CHESS <span>COMING IN PHASE 2</span></button>
+          <button className="dashboard-action dashboard-action-primary" onClick={() => onFeature('chess')}>PLAY CHESS <span>OPEN CHESS</span></button>
           <button className="dashboard-action" onClick={onDiscover}>DISCOVER PLAYERS <span>↗</span></button>
           <button className="dashboard-action" onClick={onEditProfile}>EDIT YOUR PROFILE <span>↗</span></button>
+          <button className="dashboard-action" onClick={() => onFeature('casino')}>THE CASINO <span>VIRTUAL COINS</span></button>
+          <button className="dashboard-action" onClick={() => onFeature('learn')}>PUZZLES & LESSONS <span>TRAIN</span></button>
         </article>
         <article className="dashboard-card profile-summary-card">
           <div className="dashboard-card-heading"><div><span className="dashboard-kicker">YOUR IDENTITY</span><h3>Player profile</h3></div><span className="dashboard-card-icon">♟</span></div>
           <div className="profile-summary">
             <Avatar value={profile?.avatar_url} label="Your avatar" size="large" />
-            <div><strong>{displayName}</strong><small>@{profile?.username || 'loading profile'}</small></div>
+            <div><strong>{displayName}</strong><small>@{profile?.username || guestName.toLowerCase().replace(/[^a-z0-9]/g, '')}</small></div>
           </div>
-          <p>{profile?.bio || 'Add a little about yourself. Your public profile is your calling card.'}</p>
-          <button className="dashboard-action" onClick={onEditProfile}>CUSTOMISE PROFILE <span>↗</span></button>
+          <p>{profile?.bio || (profile ? 'Add a little about yourself. Your public profile is your calling card.' : 'You are playing as a guest. Create an account to save progress and unlock the full platform.')}</p>
+          <button className="dashboard-action" onClick={onEditProfile} disabled={!profile}>CUSTOMISE PROFILE <span>{profile ? '↗' : 'REGISTER TO SAVE'}</span></button>
         </article>
       </div>
       <div className="free-platform-note"><span>✳</span> NO PREMIUM TIERS. NO PAYWALLED CHESS. THE WHOLE GAME IS FREE.</div>
     </section>
   );
 }
+
+function GuestDashboard({ nickname, onRegister, onFeature }: { nickname: string; onRegister: () => void; onFeature: (page: Page) => void }) { return <section className="app-page"><PageHeading eyebrow="GUEST SESSION" title={<>Welcome, <em>{nickname}.</em></>} description="No account, no email, no waiting. You are in. Your guest identity is saved on this device."/><div className="dashboard-welcome-card"><div><span className="dashboard-kicker">PLAY FIRST. REGISTER WHENEVER.</span><h2>Your seat is <em>ready.</em></h2><p>Explore the platform as a guest. Create a free account later to save your games, ratings, friends and progress across devices.</p><button className="dashboard-action dashboard-action-primary" onClick={onRegister}>CREATE A FREE ACCOUNT <span>↗</span></button></div><div className="dashboard-welcome-mark">♞</div></div><div className="feature-grid"><button onClick={()=>onFeature('chess')}>♟<strong>Chess</strong><small>Play and compete</small></button><button onClick={()=>onFeature('learn')}>✳<strong>Learn</strong><small>Puzzles and lessons</small></button><button onClick={()=>onFeature('casino')}>◉<strong>Casino</strong><small>Virtual coins only</small></button><button onClick={()=>onFeature('community')}>♧<strong>Community</strong><small>Players and clubs</small></button></div></section>; }
+
+function FeaturePage({ page, onBack, onRegister }: { page: Page; onBack: () => void; onRegister: () => void }) { const data: Record<string,{eyebrow:string,title:string,desc:string,items:string[],status:string}> = {chess:{eyebrow:'THE BOARD',title:'Chess',desc:'Ranked and casual games, friends, bots, tournaments, spectating and game history.',items:['Quick play and matchmaking','Ranked, casual and custom games','Bullet, blitz, rapid and classical','Chess bots and spectating','Game clocks, move history and rematches'],status:'Chess gameplay is the next major build milestone. The current board preview is decorative; live games are not online yet.'},learn:{eyebrow:'GET SHARPER',title:'Puzzles & learning',desc:'A complete training space from first principles to advanced calculation.',items:['Daily puzzles and puzzle rating','Puzzle Rush and head-to-head battles','Lessons and structured courses','Opening explorer and repertoire','Stockfish game review and mistake training'],status:'Training systems and engine analysis are planned; no fake puzzle or engine results are shown.'},community:{eyebrow:'FIND YOUR PEOPLE',title:'Community',desc:'Friends, clubs, conversations, events and a place to build rivalries.',items:['Player directory and public profiles','Friend requests and message requests','End-to-end encrypted private messaging','Group chats and in-game chat','Clubs, tournaments, events and leaderboards'],status:'Player discovery is in the current foundation. Messaging, clubs and tournaments are subsequent builds.'},casino:{eyebrow:'THE ARCADE',title:'Virtual casino',desc:'Optional virtual-coin games. No deposits, no cash-outs, no real-money gambling.',items:['Virtual coin wallet and transaction history','Roulette, blackjack, poker and dice','Slots, coinflip and risk ladder','Server-verified outcomes and limits','Regional and age restrictions before launch'],status:'Not live yet. No real-money gambling or purchasable competitive advantage. Wallet and game outcomes must be server-authoritative.'},shop:{eyebrow:'MAKE IT YOURS',title:'Cosmetics & shop',desc:'A purely optional cosmetic collection. Core chess and learning remain free.',items:['Boards and chess-piece sets','Avatars, frames and banners','Move, capture and victory effects','Inventory and equipped items','Secure cosmetic marketplace'],status:'Shop, inventory and trading are planned. No paid membership or premium chess tier.'},tournaments:{eyebrow:'PLAY FOR SOMETHING',title:'Tournaments & events',desc:'Community events for casual players and serious competitors alike.',items:['Arena and Swiss tournaments','Club competitions and team events','Leaderboards and seasonal challenges','Live event pages and spectating','Achievements and fair-play awards'],status:'Tournament engine and event scheduling are not implemented yet.'},admin:{eyebrow:'HOUSE CONTROL',title:'Administration',desc:'A separate protected control centre with contextual moderation tools.',items:['Staff roles and granular permissions','Reports, moderation and appeals','Account restrictions and audit logs','Economy, shop and marketplace oversight','Anti-cheat, security and platform configuration'],status:'Admin tools are not live. Every privileged action will be server-authorised and audited.'}}; const d=data[page]||data.chess; return <section className="app-page"><button className="back-link" onClick={onBack}>← BACK TO YOUR GAME ROOM</button><PageHeading eyebrow={d.eyebrow} title={<>{d.title} <em>is coming.</em></>} description={d.desc}/><div className="feature-page-grid">{d.items.map((item,i)=><article key={item}><span>{String(i+1).padStart(2,'0')}</span><strong>{item}</strong></article>)}</div><div className="feature-status"><strong>HONEST STATUS</strong><p>{d.status}</p></div><button className="dashboard-action dashboard-action-primary feature-register" onClick={onRegister}>CREATE A FREE ACCOUNT <span>↗</span></button></section>; }
 
 function Discover({ profiles, loading, error, onOpenProfile }: { profiles: Profile[]; loading: boolean; error: string; onOpenProfile: (profile: Profile) => void }) {
   const [search, setSearch] = useState('');
@@ -298,6 +304,7 @@ export default function App() {
   const [directoryLoading, setDirectoryLoading] = useState(false);
   const [directoryError, setDirectoryError] = useState('');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [guestName, setGuestName] = useState(() => { try { const old = localStorage.getItem('chessgay:guest-name'); if (old) return old; const name = ['QuietKnight','VelvetRook','RapidBishop','MoonlitPawn','LuckyQueen'][Math.floor(Math.random()*5)] + Math.floor(100+Math.random()*900); localStorage.setItem('chessgay:guest-name',name); return name; } catch { return 'Guest' + Math.floor(1000+Math.random()*9000); } });
 
   useEffect(() => {
     if (!supabase) return;
@@ -347,6 +354,8 @@ export default function App() {
     return () => { active = false; };
   }, [page]);
 
+  function continueAsGuest() { setPage('dashboard'); setAuthOpen(false); }
+
   function openProfile(profile: Profile) {
     setSelectedProfile(profile);
     setPage('profile');
@@ -365,11 +374,16 @@ export default function App() {
         <button className="mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? 'CLOSE' : 'MENU'} <span>☰</span></button>
         <nav className={menuOpen ? 'nav-links open' : 'nav-links'}>
           <button onClick={() => { setPage('home'); setMenuOpen(false); }}>HOME</button>
-          <button onClick={() => { setPage('discover'); setMenuOpen(false); }}>DISCOVER</button>
+          <button onClick={() => { setPage('chess'); setMenuOpen(false); }}>CHESS</button>
+          <button onClick={() => { setPage('learn'); setMenuOpen(false); }}>LEARN</button>
+          <button onClick={() => { setPage('discover'); setMenuOpen(false); }}>PLAYERS</button>
+          <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>
+          <button onClick={() => { setPage('casino'); setMenuOpen(false); }}>CASINO</button>
+          <button onClick={() => { setPage('shop'); setMenuOpen(false); }}>SHOP</button>
           {user && <button onClick={() => { setPage('dashboard'); setMenuOpen(false); }}>DASHBOARD</button>}
         </nav>
         <OnlineCounter userId={user?.id ?? null} />
-        <button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user ? 'MY DASHBOARD' : 'SIGN IN'} <span>↗</span></button>
+        <div className="header-actions"><button className="header-cta account-cta" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user ? 'MY DASHBOARD' : 'SIGN IN'} <span>↗</span></button>{!user && <button className="header-guest" onClick={continueAsGuest}>PLAY NOW</button>}</div>
       </header>
 
       {page === 'home' && <>
@@ -379,7 +393,7 @@ export default function App() {
             <h1>Your move.<br /><em>Your world.</em></h1>
             <p className="hero-lede">A free place to play, compete, learn, and find your people. No subscriptions. No paywalled chess. Pull up a chair.</p>
             <div className="hero-actions">
-              <button className="button button-primary" onClick={() => user ? setPage('dashboard') : setAuthOpen(true)}>{user ? 'OPEN YOUR DASHBOARD' : 'JOIN THE CLUB'} <span>↗</span></button>
+              <button className="button button-primary" onClick={() => user ? setPage('dashboard') : continueAsGuest()}>{user ? 'OPEN YOUR DASHBOARD' : 'PLAY AS GUEST'} <span>↗</span></button>
               <button className="text-link" onClick={() => setPage('discover')}>DISCOVER PLAYERS <span>→</span></button>
             </div>
             <div className="hero-note"><span className="note-star">✳</span><span>THE WHOLE GAME. FREE FOR EVERYONE.</span></div>
@@ -401,7 +415,8 @@ export default function App() {
         <footer className="site-footer"><a className="brand footer-brand" href="#top" onClick={event => { event.preventDefault(); setPage('home'); }}><span className="brand-mark">♞</span><span>chess<span className="brand-dot">.</span>gay</span></a><span className="footer-note">A WORK IN PROGRESS. A WORLD IN THE MAKING.</span><button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>BACK TO TOP ↑</button><div className="footer-bottom"><span>© 2026 CHESS.GAY</span><span>PLAY NICE. THINK SHARP.</span><span>BUILT ONE MOVE AT A TIME.</span></div></footer>
       </>}
 
-      {page === 'dashboard' && (user ? <Dashboard profile={myProfile} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} /> : <section className="app-page"><PageHeading eyebrow="YOUR GAME ROOM" title={<>Take your <em>seat.</em></>} description="Sign in to open your personal dashboard." /><button className="button button-primary" onClick={() => setAuthOpen(true)}>SIGN IN <span>↗</span></button></section>)}
+      {page === 'dashboard' && (user ? <Dashboard profile={myProfile} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} /> : <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} />)}
+      {['chess','learn','community','casino','shop','tournaments','admin'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
