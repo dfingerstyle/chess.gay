@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import './BoardWorkshop.css';
 
 type BoardPreset = { id: string; name: string; light: string; dark: string };
@@ -61,7 +62,7 @@ export default function BoardWorkshop({ onBack }: { onBack: () => void }) {
     <div className="workshop-layout">
       <div className="workshop-preview-card">
         <div className="workshop-card-heading"><div><span className="dashboard-kicker">LIVE PREVIEW</span><h2>Your board</h2></div><span className="workshop-mark">♞</span></div>
-        <div className="workshop-board" style={{ '--board-light': light, '--board-dark': dark } as React.CSSProperties}>
+        <div className="workshop-board" style={{ '--board-light': light, '--board-dark': dark } as CSSProperties}>
           {PIECES.map((piece, index) => <div key={index} className={((Math.floor(index / 8) + index % 8) % 2 === 0) ? 'workshop-square light' : 'workshop-square dark'}>{piece && <span>{piece}</span>}</div>)}
         </div>
         <div className="workshop-colour-row"><span><i style={{ background: light }} /> LIGHT SQUARE</span><span><i style={{ background: dark }} /> DARK SQUARE</span></div>
