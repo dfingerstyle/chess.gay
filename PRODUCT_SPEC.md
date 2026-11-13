@@ -153,3 +153,31 @@ A game page must launch a real playable game. A decorative board, preview, disab
 5. Add chess intelligence, puzzles and learning; then social, community, cosmetics, economy and administration.
 
 These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
+
+
+## Implementation status — 13 November 2026
+
+The current development branch has moved beyond the original static foundation for a first playable vertical slice.
+
+### Implemented now
+- Local standard chess with legal move generation and validation, captures, castling, en passant, promotion, check, checkmate, stalemate, insufficient-material draws, threefold-repetition claims, fivefold-repetition automatic draws, 50-move claims and 75-move automatic draws.
+- Playable pass-and-play and a lightweight CPU opponent, selectable time controls, clocks, move list, undo, resignation and board orientation.
+- A persistent Supabase wallet for authenticated users and anonymous guest sessions, plus transaction history.
+- Server-side coinflip, high/low dice and European-style red/black roulette. Bets are 1–5,000 virtual coins; each round is resolved in a database function and the balance change is recorded atomically.
+- A work-shift earning action (100–250 coins, one-hour cooldown), server-side shop purchases and sales, and persistent inventory.
+- Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated backgrounds.
+- The internal wallet-adjustment function is no longer executable by anon or authenticated clients. Public economy RPCs validate auth, validate inputs and perform balance changes server-side.
+
+### Setup requirement
+Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymous Sign-Ins** in the Supabase Auth provider settings. This allows a guest to get a server-backed identity without entering an email or password. If the provider is disabled, the arcade will explain that guest-wallet creation is unavailable; local chess remains playable.
+
+### Not yet implemented
+- Online multiplayer and server-authoritative move submission.
+- Public matchmaking.
+- Private lobby creation, generated codes, invite links and realtime seat updates.
+- Four-player chess (free-for-all and 2v2).
+- Custom starting-position editor and all-queen preset.
+- Stockfish analysis and the wider training system.
+- Friends, messaging, clubs, tournaments and the remaining community features.
+
+Do not describe these unfinished systems as live. The CPU opponent is a lightweight legal-move bot, not Stockfish. The casino uses virtual coins only; there are no real-money deposits, withdrawals or cash-equivalent prizes.
