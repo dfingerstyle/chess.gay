@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 
 type Page = 'casino' | 'shop';
 type Game = 'coinflip' | 'dice' | 'roulette';
+type Theme = 'starry' | 'sakura' | 'sea';
 type Item = { id: string; name: string; kind: string; rarity: string; buy_price: number | null; sell_price: number | null; description: string };
 type Transaction = { id: number; amount: number; reason: string; created_at: string };
 type PlayResult = { game: string; bet: number; choice: string; outcome: string; won: boolean; net: number; balance: number };
@@ -29,6 +30,9 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [guestBusy, setGuestBusy] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => { try { const saved = localStorage.getItem('chessgay:theme'); return saved === 'sakura' || saved === 'sea' ? saved : 'starry'; } catch { return 'starry'; } });
+
+  useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('chessgay:theme', theme); } catch { /* storage can be unavailable */ } }, [theme]);
 
   const refresh = useCallback(async () => {
     if (!supabase || !user) return;
@@ -103,7 +107,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
 
   return (
     <section className="app-page arcade-page">
-      <button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button>
+      <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div></div>
       <div className="game-page-heading arcade-heading">
         <div><div className="eyebrow"><span className="eyebrow-line" /> {page === 'casino' ? 'THE ARCADE' : 'MAKE IT YOURS'}</div><h1>{page === 'casino' ? <>Play for <em>coins.</em></> : <>The <em>shop.</em></>}</h1><p>Virtual coins only. No real-money deposits, withdrawals or cash prizes.</p></div>
         <div className="wallet-display"><span>YOUR BALANCE</span><strong>{balance === null ? '—' : balance.toLocaleString()} <small>coins</small></strong></div>
