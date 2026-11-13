@@ -6,6 +6,7 @@ import GamePage from './components/GamePage';
 import ArcadePage from './components/ArcadePage';
 import ThemeBackdrop from './components/ThemeBackdrop';
 import BoardWorkshop from './components/BoardWorkshop';
+import { FarmPage, FishingPage, WorkPage } from './components/WorldActivities';
 import { supabase } from './lib/supabase';
 
 type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio';
@@ -406,6 +407,16 @@ export default function App() {
 
   function continueAsGuest() { setPage('dashboard'); setAuthOpen(false); }
 
+  async function startGuestSession() {
+    if (!supabase) { setAuthOpen(true); return; }
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) setAuthOpen(true);
+    } catch {
+      setAuthOpen(true);
+    }
+  }
+
   function openProfile(profile: Profile) {
     setSelectedProfile(profile);
     setPage('profile');
@@ -470,8 +481,11 @@ export default function App() {
       {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} profileLoading={profileLoading} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
       {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
       {page === 'workshop' && <BoardWorkshop onBack={() => setPage('dashboard')} />}
+      {page === 'farm' && <FarmPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
+      {page === 'fishing' && <FishingPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
+      {page === 'work' && <WorkPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
-      {['learn','community','tournaments','admin','farm','fishing','work','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} />}
+      {['learn','community','tournaments','admin','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
