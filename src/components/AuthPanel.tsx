@@ -105,6 +105,7 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
             {user.is_anonymous && mode === 'signup' && <form onSubmit={handleSubmit}>
               <label htmlFor="auth-email">EMAIL ADDRESS TO LINK</label>
               <input id="auth-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
+              <p className="auth-footnote">Email identity linking must be enabled in Supabase Auth. After you verify the email, you can set a password from this panel.</p>
               {message && <p className="auth-message" role="status">{message}</p>}
               {error && <p className="auth-error" role="alert">{error}</p>}
               <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'SENDING…' : 'LINK EMAIL & SAVE PROGRESS'} <span>↗</span></button>
