@@ -173,6 +173,7 @@ The current development branch has moved beyond the original static foundation f
 - Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated pixel-art backgrounds.
 - Eight-destination hybrid world hub.
 - Board Workshop MVP with six colour palettes, custom square colours, live preview and local named presets.
+- Player Studio MVP with display name, bio, six curated avatars and six database-backed banner presets.
 - Farming with four persistent plots, carrot seeds, shovel requirement, five-minute growth, harvest-to-inventory and +10 XP.
 - Fishing with rod requirement, server-side catch rarity, Minnow/Bass/Golden Koi inventory, 30-second cooldown, catch log and +5 XP.
 - Work shifts award 100–250 coins and +5 XP, subject to one-hour cooldown.
@@ -189,7 +190,7 @@ Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymo
 - Private lobby creation, generated codes, invite links and realtime seat updates.
 - Four-player chess (free-for-all and 2v2).
 - Custom starting-position editor and all-queen preset.
-- Full Player Studio: the existing profile editor still only supports display name, bio and six preset avatars; banners, frames, titles, privacy settings and cloud-synced customization are not yet implemented.
+- Full Player Studio: the current profile editor supports display name, bio, six preset avatars and six server-saved banner styles. Personal image uploads, frames, titles, privacy settings and other cloud-synced customization are not yet implemented.
 - Board presets are currently browser-local, not synced across devices.
 - Stockfish analysis and the wider training system.
 - Friends, messaging, clubs, tournaments and the remaining community features.
