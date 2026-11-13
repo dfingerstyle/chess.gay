@@ -32,6 +32,16 @@ export default function GamePage({ onBack }: { onBack: () => void }) {
     try { localStorage.setItem('chessgay:theme', theme); } catch { /* storage can be unavailable */ }
   }, [theme]);
 
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('chessgay:board-style') || 'null') as { light?: string; dark?: string } | null;
+      if (saved?.light && saved?.dark) {
+        document.documentElement.style.setProperty('--board-light', saved.light);
+        document.documentElement.style.setProperty('--board-dark', saved.dark);
+      }
+    } catch { /* ignore invalid local board preferences */ }
+  }, []);
+
   const position = history[history.length - 1];
   const status = useMemo(() => gameStatus(history), [history]);
   const ended = status.done || finishedText !== '' || claimedDraw !== '';
