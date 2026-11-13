@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import AuthPanel from './components/AuthPanel';
 import { supabase } from './lib/supabase';
@@ -142,7 +142,7 @@ function Chessboard() {
   );
 }
 
-function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: ReactNode; description: string }) {
   return <div className="app-page-heading"><div className="eyebrow"><span className="eyebrow-line" /> {eyebrow}</div><h1>{title}</h1><p>{description}</p></div>;
 }
 
