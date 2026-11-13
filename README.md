@@ -79,3 +79,20 @@ The Chess area must launch real games, not a decorative preview or a coming-soon
 Realtime Presence is for online/seat presence; Broadcast is for low-latency events. Authoritative moves, clocks, matchmaking and results must be validated server-side. Four-player rules require their own tested engine. The site should feel active through genuine online presence, verified activity and subtle motion—never fake player counts, sample chat presented as live, or fabricated games.
 
 These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
+
+
+## Current playable build (phase-1-foundation)
+
+The branch now includes a first real playable and economy vertical slice:
+
+- **Local standard chess:** legal move selection, captures, castling, en passant, promotion, check/checkmate, stalemate, insufficient material, repetition and move-count draw handling, clocks, move history, undo, board flip, pass-and-play and a lightweight legal-move CPU opponent.
+- **Virtual arcade:** server-resolved coinflip, high/low dice and red/black roulette. Stakes are limited to 1–5,000 virtual coins per round.
+- **Persistent wallet:** Supabase wallet balances, immutable transaction history, work-shift earnings (100–250 coins, one-hour cooldown), shop purchases, item sales and inventory.
+- **Security:** balance changes and game outcomes are database RPCs; direct client access to the internal balance-adjustment function is revoked. Economy RPCs validate the authenticated user and lock the wallet row before changing its balance.
+- **Themes:** Starry Void, Sakura and Deep Sea, with Inter body text, Pixelify Sans display typography and animated themed backgrounds.
+
+To use a persistent guest wallet, anonymous sign-ins must be enabled in Supabase Auth. The site will create an anonymous Supabase account without asking for an email or password. A normal registered account also works. Local chess does not require an account.
+
+**Still not implemented:** online multiplayer, public matchmaking, private lobby codes, four-player chess, the custom-position editor, Stockfish analysis, and the remaining social/community systems. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
+
+Virtual coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist.
