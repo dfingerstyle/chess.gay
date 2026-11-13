@@ -19,7 +19,7 @@ chess.gay is a free chess, learning, community and gaming platform. Chess.com is
 ### Confirmed product decisions
 
 - Public marketing website and full signed-in application.
-- Pure black is the default theme, with ivory text and restrained brass accents.
+- Pure black, white and neutral grey only; no gold or brass accents.
 - Responsive desktop, tablet, mobile and Chromebook experiences.
 - Customisable signed-in dashboard.
 - Competitive and casual chess have equal importance.
@@ -76,7 +76,7 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 - Pure white primary text and controls; grey is reserved for secondary text and borders.
 - No gold/brass accent palette.
 - Rounded cards, pill controls, smooth transitions and a modern, minimal interface.
-- Serif editorial headings and highly legible sans-serif UI.
+- Highly legible modern sans-serif UI and clear typographic hierarchy.
 - Reduced-motion and high-contrast support.
 - Mobile bottom navigation and a More drawer; desktop persistent navigation.
 
@@ -108,3 +108,48 @@ The current development branch also introduces a local guest identity with a gen
 The current foundation reuses the existing Supabase Auth client and `public.profiles` table. Existing columns support username, display name, bio and avatar preset identifier. Public directory reads use the current public profile read policy; edits use the current owner-only update policy. The online counter uses ephemeral Supabase Realtime Presence and does not persist visitor data.
 
 No schema migration is needed for the first Phase 1 UI pass. More profile fields, privacy preferences, cosmetic ownership and staff permissions will receive carefully designed migrations before those features are implemented.
+
+
+## Playable chess, multiplayer and customization requirements
+
+A game page must launch a real playable game. A decorative board, preview, disabled button or coming-soon card does not count as implementation.
+
+### Required game modes
+- Standard two-player chess with complete legal rules.
+- Four-player chess on a proper four-sided board, with four independent seats and turns. Support free-for-all and 2v2 teams.
+- Public matchmaking by mode, time control, rating range and variant, with visible queue state and cancellation.
+- Private lobbies. Creating a lobby generates a unique, human-readable join code. Players can join by entering that code or using a share link. The host can start, close, transfer ownership and configure seats.
+- Friends challenges, bots, spectating, rematches, clocks, move list, captured pieces, reconnect handling and persistent game history.
+
+### Custom games and player choice
+- Hosts can choose standard or four-player chess, free-for-all or teams, time control, increment, rated/casual, turn order and seat assignment.
+- Include a piece setup editor: place, remove and move pieces on starting squares; mirror/copy setups; save and share presets.
+- Include presets such as standard chess, all queens, queen-heavy, pawns-only, king-of-the-hill and other clearly defined variants. Chess960 may be added with correct castling support.
+- Per-game rules can configure castling, en passant, promotion choices, stalemate, check/checkmate, move timers and team/friendly-fire rules where applicable.
+- Validate kings, starting positions, turn order and variant-specific constraints before a lobby can start.
+- Customization also covers board themes, piece sets, sounds, animations, clocks, coordinates, move highlights, board orientation and accessibility.
+
+### Live platform behaviour
+- Realtime online count and player presence.
+- A live public activity feed for verified events such as games started/finished, tournaments and achievements, with privacy controls.
+- Live matchmaking/lobby status, player join/leave updates, clocks and game state.
+- Subtle motion, animated status indicators and responsive hover/focus states; respect reduced-motion preferences.
+- Never display fake players, fabricated chat messages, fake game counts or pretend live activity. Label sample content clearly.
+
+### Game integrity and architecture
+- Use a tested chess rules library for standard chess and a separately tested rules engine for four-player chess. Visual movement checks are not enough.
+- Server-authoritative validation for online moves, clocks, results, ratings, matchmaking and lobby settings. Realtime broadcasts are transport, not the source of truth.
+- Persist snapshots and move history; support reconnecting from the latest authoritative state.
+- Prevent stale/out-of-turn moves, duplicate submissions, illegal promotions, forged results and client-side clock manipulation.
+- Generate private lobby codes server-side; make them unique, non-sequential, rate-limited and store only a hash where practical. Check membership, capacity, lobby status and seat assignment server-side.
+- Matchmaking must claim queue entries atomically so users cannot enter multiple matches or be claimed twice.
+- Guests remain able to play guest-available modes. Account-only features such as cross-device history and ratings must be clearly distinguished; do not force email registration for a guest game.
+
+### Updated delivery order
+1. Finish the responsive monochrome foundation and make the site feel active using genuine presence and verified live activity.
+2. Ship playable standard chess locally with legal moves, promotion, check/checkmate/draw, clocks and history.
+3. Add online play, private lobbies and generated join codes, secure joining, realtime seats, matchmaking and reconnect.
+4. Add four-player free-for-all and 2v2, then the custom setup editor and all-queen preset.
+5. Add chess intelligence, puzzles and learning; then social, community, cosmetics, economy and administration.
+
+These are product requirements, not claims that the systems are already implemented. The current Phase 1 branch still has status pages in place of playable games.
