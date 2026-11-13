@@ -7,9 +7,10 @@ import ArcadePage from './components/ArcadePage';
 import ThemeBackdrop from './components/ThemeBackdrop';
 import BoardWorkshop from './components/BoardWorkshop';
 import { FarmPage, FishingPage, WorkPage } from './components/WorldActivities';
+import MultiplayerLobby from './components/MultiplayerLobby';
 import { supabase } from './lib/supabase';
 
-type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio';
+type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby';
 type Profile = {
   id: string;
   username: string;
@@ -192,6 +193,7 @@ function Dashboard({ profile, profileLoading, guestName, onDiscover, onEditProfi
         <article className="dashboard-card">
           <div className="dashboard-card-heading"><div><span className="dashboard-kicker">QUICK ACCESS</span><h3>Quick links</h3></div><span className="dashboard-card-icon">↗</span></div>
           <button className="dashboard-action dashboard-action-primary" onClick={() => onFeature('chess')}>PLAY CHESS <span>OPEN CHESS</span></button>
+          <button className="dashboard-action" onClick={() => onFeature('lobby')}>PRIVATE LOBBIES <span>2 / 4 PLAYERS</span></button>
           <button className="dashboard-action" onClick={onDiscover}>DISCOVER PLAYERS <span>↗</span></button>
           <button className="dashboard-action" onClick={onEditProfile}>EDIT YOUR PROFILE <span>↗</span></button>
           <button className="dashboard-action" onClick={() => onFeature('casino')}>THE CASINO <span>VIRTUAL COINS</span></button>
@@ -494,7 +496,8 @@ export default function App() {
       </>}
 
       {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} profileLoading={profileLoading} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
-      {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
+      {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} onOnline={() => setPage('lobby')} />}
+      {page === 'lobby' && <MultiplayerLobby user={user} onBack={() => setPage('chess')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'workshop' && <BoardWorkshop onBack={() => setPage('dashboard')} />}
       {page === 'farm' && <FarmPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} onShop={() => setPage('shop')} />}
       {page === 'fishing' && <FishingPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
