@@ -11,3 +11,37 @@
 .roulette-odds-note{margin:9px 0 0;color:var(--muted);font-size:9px;line-height:1.6}
 .arcade-result small+small{display:block;margin-top:5px}
 @media(max-width:540px){.roulette-type-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.roulette-number-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+.casino-primary-nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px;padding:8px;border:1px solid rgba(202,169,96,.18);border-radius:10px;background:rgba(9,8,18,.75)}
+.casino-primary-nav button{border:1px solid transparent;border-radius:7px;background:transparent;padding:11px 15px;color:#a99fb8;font-size:9px;font-weight:900;letter-spacing:.13em;cursor:pointer}
+.casino-primary-nav button.active,.casino-primary-nav button:hover{border-color:rgba(211,179,106,.4);background:rgba(199,167,94,.1);color:#e9c979}
+.casino-lobby{display:flex;flex-direction:column;gap:18px}
+.casino-lobby-banner{position:relative;overflow:hidden;padding:clamp(22px,4vw,42px);border:1px solid rgba(207,174,99,.25);border-radius:14px;background:radial-gradient(ellipse at 82% 25%,rgba(166,120,56,.2),transparent 40%),radial-gradient(ellipse at 10% 100%,rgba(111,72,160,.2),transparent 55%),linear-gradient(125deg,#171222,#090911 70%);box-shadow:inset 0 1px rgba(255,255,255,.06),0 18px 55px rgba(0,0,0,.2)}
+.casino-lobby-banner:after{content:"♛";position:absolute;right:7%;top:50%;transform:translateY(-50%) rotate(-12deg);font-size:clamp(100px,19vw,210px);line-height:1;color:rgba(212,177,103,.09);text-shadow:0 0 55px rgba(207,174,99,.15);pointer-events:none}
+.casino-lobby-banner h2{position:relative;z-index:1;margin:9px 0 7px;color:#f2e9d7;font:700 clamp(29px,4.6vw,53px) 'Pixelify Sans',monospace}
+.casino-lobby-banner h2 em{color:#d6b56f;font-style:normal}
+.casino-lobby-banner p{position:relative;z-index:1;max-width:520px;margin:0;color:#b5aabd;font-size:12px;line-height:1.7}
+.casino-lobby-stats{position:relative;z-index:1;display:flex;gap:16px;flex-wrap:wrap;margin-top:25px}
+.casino-lobby-stats span{color:#bba36b;font-size:8px;font-weight:900;letter-spacing:.14em}
+.casino-lobby-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.casino-lobby-card{position:relative;overflow:hidden;display:flex;min-height:220px;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:7px;padding:17px;border:1px solid rgba(199,167,94,.2);border-radius:12px;background:linear-gradient(150deg,rgba(35,26,43,.95),rgba(11,10,18,.98));text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.casino-lobby-card:hover{transform:translateY(-4px);border-color:rgba(221,188,112,.65);box-shadow:0 14px 35px rgba(0,0,0,.25),0 0 25px rgba(196,159,84,.08)}
+.casino-lobby-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 75% 20%,rgba(210,172,99,.16),transparent 55%)}
+.casino-lobby-card .dashboard-kicker,.casino-lobby-card strong,.casino-lobby-card small,.casino-lobby-card>b{position:relative;z-index:1}
+.casino-lobby-art{position:absolute;right:14px;top:8px;color:rgba(222,189,117,.22);font-size:clamp(65px,8vw,105px);line-height:1;text-shadow:0 0 28px rgba(208,168,91,.2);transition:transform .35s ease}
+.casino-lobby-card:hover .casino-lobby-art{transform:scale(1.1) rotate(-8deg)}
+.casino-lobby-card .dashboard-kicker{margin-top:auto;color:#c6a665!important;font-size:8px}
+.casino-lobby-card strong{color:#f2e9d9;font:700 23px 'Pixelify Sans',monospace}
+.casino-lobby-card small{color:#a99fb6;font-size:9px;line-height:1.5}
+.casino-lobby-card>b{margin-top:8px;color:#d9bb76;font-size:8px;letter-spacing:.15em}
+.roulette-card{background:radial-gradient(ellipse at 75% 20%,rgba(137,39,57,.24),transparent 52%),linear-gradient(150deg,#26151e,#0c0b13)}
+.coin-card{background:radial-gradient(ellipse at 75% 20%,rgba(197,158,76,.23),transparent 52%),linear-gradient(150deg,#282114,#0c0b13)}
+.dice-card{background:radial-gradient(ellipse at 75% 20%,rgba(109,93,163,.25),transparent 52%),linear-gradient(150deg,#1b1930,#0c0b13)}
+.multiplayer-card{background:radial-gradient(ellipse at 75% 20%,rgba(44,117,92,.2),transparent 52%),linear-gradient(150deg,#13231f,#0c0b13)}
+.casino-lobby-bottom{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 19px;border:1px solid rgba(199,167,94,.16);border-radius:10px;background:rgba(199,167,94,.045)}
+.casino-lobby-bottom>div{display:flex;flex-direction:column;gap:5px}
+.casino-lobby-bottom strong{color:#eee4d3;font:700 17px 'Pixelify Sans',monospace}
+.casino-lobby-bottom small{color:#a99fb6;font-size:9px}
+@media(max-width:900px){.casino-lobby-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.casino-primary-nav{display:grid;grid-template-columns:1fr}.casino-primary-nav button{text-align:center}.casino-lobby-grid{grid-template-columns:1fr 1fr}.casino-lobby-card{min-height:190px;padding:13px}.casino-lobby-card strong{font-size:18px}.casino-lobby-art{font-size:68px}.casino-lobby-bottom{align-items:flex-start;flex-direction:column}.casino-lobby-banner:after{right:-3%;font-size:130px}}
+@media(prefers-reduced-motion:reduce){.casino-lobby-card,.casino-lobby-art{transition:none}}
