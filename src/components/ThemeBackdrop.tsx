@@ -63,7 +63,7 @@ export default function ThemeBackdrop() {
       shooting = null;
 
       if (theme === 'starry') {
-        pixel(bg, '#04050a', 0, 0, width, height);
+        pixel(bg, '#0b0820', 0, 0, width, height);
         for (let i = 0; i < width * height / 90; i++) {
           stars.push({ x: random(0, width), y: random(0, height), phase: random(0, 6.3), size: Math.random() < .12 ? 2 : 1, tint: Math.random() < .2 ? '170,190,255' : '255,255,255' });
         }
