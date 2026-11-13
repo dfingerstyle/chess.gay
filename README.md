@@ -45,7 +45,7 @@ The Phase 1 foundation branch adds:
 - Signed-in dashboard shell.
 - Public player directory backed by the existing public `profiles` table.
 - Public profile view.
-- Profile editor for display name, bio and curated chess-piece avatar presets.
+- Profile editor for display name, bio, six curated chess-piece avatars and six curated profile banner presets.
 - Responsive layouts for desktop and mobile.
 
 The existing Supabase client and profiles foundation are preserved. Authentication now waits for session restoration, distinguishes anonymous guests from registered accounts, and avoids showing account-creation prompts to registered users. Guest email linking uses the same Supabase user identity so eligible wallet and inventory rows remain attached. The product specification is the source of truth for guest-first access and the planned playable game systems.
@@ -93,6 +93,7 @@ The branch now includes a first real playable and economy vertical slice:
 - **Themes:** Starry Void, Sakura and Deep Sea, with Inter body text, Pixelify Sans display typography and animated pixel-art backgrounds.
 - **Hybrid world hub:** eight clickable destinations for Chess, Farming, Fishing, Work, Board Workshop, Player Studio, Arcade and Community.
 - **Board Workshop MVP:** six preset palettes, custom light/dark square colours, live board preview, equip action and up to 12 named local presets. These settings currently sync only within the same browser/device.
+- **Player Studio MVP:** profile editor for display name, bio, six avatar presets and six server-saved banner styles. Personal image uploads, frames, titles and privacy controls are not yet implemented.
 - **Farming:** four persistent plots, carrot seed and shovel requirements, five-minute server-tracked growth, harvest into inventory, and +10 XP per harvest. Harvested carrots can be sold in the Shop.
 - **Fishing:** persistent catch log, rod requirement, server-side rarity rolls for Minnow/Bass/Golden Koi, 30-second cooldown, inventory rewards and +5 XP per catch.
 - **Shared progression:** one wallet and inventory across activities; XP and levels are updated server-side. Work shifts now award +5 XP in addition to 100–250 coins.
@@ -100,6 +101,6 @@ The branch now includes a first real playable and economy vertical slice:
 
 To use a persistent guest wallet, anonymous sign-ins must be enabled in Supabase Auth. The site will create an anonymous Supabase account without asking for an email or password. A normal registered account also works. Local chess does not require an account.
 
-**Still not implemented:** online multiplayer, public matchmaking, private lobby codes, four-player chess, custom starting positions and all-queen variants, Stockfish analysis, account-synced board presets, profile banners/uploads, and the remaining social/community systems. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
+**Still not implemented:** online multiplayer, public matchmaking, private lobby codes, four-player chess, custom starting positions and all-queen variants, Stockfish analysis, account-synced board presets, profile frames/titles, personal banner uploads, and the remaining social/community systems. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
 
 Virtual coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist.
