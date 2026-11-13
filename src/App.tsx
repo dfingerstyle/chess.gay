@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import AuthPanel from './components/AuthPanel';
+import GamePage from './components/GamePage';
+import ArcadePage from './components/ArcadePage';
 import { supabase } from './lib/supabase';
 
 type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin';
@@ -405,7 +407,7 @@ export default function App() {
         <section className="ticker" aria-label="Platform values"><div>PLAY WITH PURPOSE <b>✳</b> STAY FOR THE PEOPLE <b>✳</b> MAKE YOUR NEXT MOVE <b>✳</b> THE WHOLE GAME IS FREE <b>✳</b></div></section>
         <section className="games-section section-pad" id="games">
           <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LINEUP</div><h2>Choose your<br /><em>kind of trouble.</em></h2></div><p>One home for thoughtful games, useful training, ridiculous comebacks, and the people you'll want to play again.</p></div>
-          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 03</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => mode.title === 'The Club' ? setPage('discover') : setAuthOpen(true)}>EXPLORE <span>↗</span></button></div></article>)}</div>
+          <div className="mode-grid">{modes.map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 03</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.title === 'Chess' ? 'chess' : mode.title === 'The Arcade' ? 'casino' : 'discover')}>EXPLORE <span>↗</span></button></div></article>)}</div>
         </section>
         <section className="community-section section-pad" id="community">
           <div className="community-ornament">♘</div>
@@ -417,7 +419,9 @@ export default function App() {
       </>}
 
       {page === 'dashboard' && (user ? <Dashboard profile={myProfile} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} /> : <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} />)}
-      {['chess','learn','community','casino','shop','tournaments','admin'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} />}
+      {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} />}
+      {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
+      {['learn','community','tournaments','admin'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
