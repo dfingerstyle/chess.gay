@@ -1,24 +1,63 @@
 # chess.gay
 
-A warm, wood-and-paper inspired game room for chess, friends, and future game modes.
+A free chess and community platform. No subscriptions, premium tiers, paywalled core features or paid competitive advantages.
+
+## Product decisions
+
+- **Membership:** completely free. Chess, puzzles, lessons, game review and community features are intended to be available to everyone.
+- **Visual identity:** pure-black default theme with warm ivory typography and restrained antique-brass accents. Additional themes will be optional.
+- **Public website and app:** public landing site plus signed-in player experience.
+- **Discovery:** public searchable player directory and recommendations.
+- **Profiles:** public by default, with privacy controls planned for individual profile fields.
+- **Social privacy:** message requests must be accepted before a private conversation begins.
+- **Profile images:** curated platform-provided avatars and cosmetics only; personal image uploads are disabled.
+- **Administration:** dedicated protected admin dashboard plus contextual moderation tools.
+- **Online counter:** realtime presence-based count, deduplicated by player identity across tabs where possible.
 
 ## Stack
 
-- React + TypeScript + Vite
-- Supabase (authentication, database, realtime, storage)
+- React 19 + TypeScript + Vite
+- Supabase Auth, PostgreSQL, Realtime and Storage
 - Netlify deployment
+- Stockfish planned for chess legality, evaluation and analysis
 
 ## Local development
 
-1. Install Node.js 22 or later.
-2. Run `npm install`.
-3. Copy `.env.example` to `.env.local` when Supabase credentials are configured.
+1. Use Node.js 22 or later.
+2. Install dependencies with `npm install`.
+3. Copy `.env.example` to `.env.local` and provide the Supabase project URL and publishable key.
 4. Run `npm run dev`.
+5. Run `npm run build` before deploying.
 
-## Current status
+## Phase 1 status
 
-The first frontend landing-page milestone is in place. The chat card is an illustrative preview, not a live messaging feature. Authentication, chess gameplay, realtime chat, virtual currency, marketplace, and game modes still need implementation.
+The Phase 1 foundation branch adds:
+
+- Pure-black default visual system and matching authentication modal.
+- Public landing page with a realtime online presence counter.
+- Signed-in dashboard shell.
+- Public player directory backed by the existing public `profiles` table.
+- Public profile view.
+- Profile editor for display name, bio and curated chess-piece avatar presets.
+- Responsive layouts for desktop and mobile.
+
+The existing Supabase client, authentication flow and `profiles` migration are preserved. No new database schema changes are required for these Phase 1 screens.
+
+The player directory requires the existing public SELECT policy on `profiles`; profile editing uses the existing owner-only UPDATE policy. Realtime presence is ephemeral and does not create persistent visitor records.
+
+## Roadmap
+
+1. Foundation: public site, account, dashboard, profiles, discovery and presence.
+2. Chess: legal board, ranked/casual games, clocks, matchmaking, history and ratings.
+3. Chess intelligence: Stockfish review, puzzles, lessons, opening explorer and training.
+4. Social: friends, message requests, E2EE messaging, clubs and events.
+5. Economy and optional cosmetics: shop, inventory, virtual wallet and marketplace. Core chess remains free.
+6. Administration and launch: permissions, moderation, audit logs, anti-cheat, accessibility and security review.
 
 ## Security
 
-Only Supabase's publishable key belongs in browser environment variables. Never expose a Supabase service-role or secret key in frontend code. All privileged actions and economy/game outcomes must be validated server-side.
+- Only the Supabase publishable key belongs in browser environment variables.
+- Never expose a Supabase service-role or secret key in frontend code.
+- Admin permissions, ratings, wallet balances, casino outcomes and marketplace trades must be validated server-side.
+- Do not use user-editable auth metadata for authorization.
+- E2EE must use a vetted protocol; do not invent cryptography.
