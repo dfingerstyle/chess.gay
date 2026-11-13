@@ -25,7 +25,7 @@ export default function ThemeBackdrop() {
     let width = 1;
     let height = 1;
     let theme: Theme = 'starry';
-    let base: HTMLCanvasElement;
+    let base: HTMLCanvasElement | null = null;
     let stars: Star[] = [];
     let petals: Petal[] = [];
     let fish: Fish[] = [];
