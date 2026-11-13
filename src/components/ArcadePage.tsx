@@ -114,7 +114,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
       </div>
 
       {!user ? (
-        <div className="arcade-auth-card"><span className="arcade-large-icon">◉</span><div><h2>Activate your guest wallet.</h2><p>We use a free anonymous account to store your coins and purchases securely. No email or password is needed. Your guest session stays on this device until you link an account.</p><button className="arcade-primary" onClick={activateGuestWallet} disabled={guestBusy}>{guestBusy ? 'CREATING WALLET…' : 'START AS A GUEST · FREE'}</button><button className="arcade-secondary" onClick={onSignIn}>I ALREADY HAVE AN ACCOUNT</button></div></div>
+        <div className="arcade-auth-card"><span className="arcade-large-icon">◉</span><div><h2>Activate your guest wallet.</h2><p>We use a free anonymous account to store your coins and purchases securely. No email or password is needed. Your guest wallet stays with this anonymous session. Account linking and cross-device guest-wallet transfer are not implemented yet; signing out or clearing browser data can make it unrecoverable.</p><button className="arcade-primary" onClick={activateGuestWallet} disabled={guestBusy}>{guestBusy ? 'CREATING WALLET…' : 'START AS A GUEST · FREE'}</button><button className="arcade-secondary" onClick={onSignIn}>I ALREADY HAVE AN ACCOUNT</button></div></div>
       ) : (
         <>
           {page === 'casino' ? (
