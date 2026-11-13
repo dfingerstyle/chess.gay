@@ -1,1 +1,13 @@
 @import './GamePage.css';
+
+.roulette-bet-builder{margin-top:14px}
+.roulette-type-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:8px 0 15px}
+.roulette-type-tabs button,.roulette-pick-row button,.roulette-number-grid button{min-height:36px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:9px;font-weight:800;cursor:pointer}
+.roulette-type-tabs button.active,.roulette-pick-row button.active,.roulette-number-grid button.active{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,var(--panel-2));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 20%,transparent)}
+.roulette-number-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:8px 0 10px}
+.roulette-number-grid button{font-variant-numeric:tabular-nums}
+.roulette-number-grid button:first-child{background:#176b46;color:#fff;border-color:#238a5b}
+.roulette-pick-row{margin:8px 0 10px}
+.roulette-odds-note{margin:9px 0 0;color:var(--muted);font-size:9px;line-height:1.6}
+.arcade-result small+small{display:block;margin-top:5px}
+@media(max-width:540px){.roulette-type-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.roulette-number-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
