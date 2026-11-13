@@ -29,6 +29,13 @@ A free chess and community platform. No subscriptions, premium tiers, paywalled 
 4. Run `npm run dev`.
 5. Run `npm run build` before deploying.
 
+## Access model
+
+- Visitors can enter immediately as guests without login or email.
+- A random nickname is generated and stored locally in the browser.
+- Registered accounts are intended to unlock the complete platform and synchronise identity and progress.
+- Signup will let the player choose username or email as their login identifier. Username-only signup needs a secure server-side auth mapping and recovery flow; it is not yet implemented.
+
 ## Phase 1 status
 
 The Phase 1 foundation branch adds:
@@ -41,7 +48,9 @@ The Phase 1 foundation branch adds:
 - Profile editor for display name, bio and curated chess-piece avatar presets.
 - Responsive layouts for desktop and mobile.
 
-The existing Supabase client, authentication flow and `profiles` migration are preserved. No new database schema changes are required for these Phase 1 screens.
+The existing Supabase client, authentication flow and `profiles` migration are preserved. The UI now uses a rounded monochrome black-and-white visual system, and the product specification reflects guest-first access. No new database schema changes are required for these Phase 1 screens.
+
+The app includes clearly labelled section pages for chess, training, community, casino, cosmetics, tournaments and administration. These are product navigation/status surfaces, not completed underlying systems yet.
 
 The player directory requires the existing public SELECT policy on `profiles`; profile editing uses the existing owner-only UPDATE policy. Realtime presence is ephemeral and does not create persistent visitor records.
 
