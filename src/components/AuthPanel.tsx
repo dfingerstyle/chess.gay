@@ -44,7 +44,16 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
     setError('');
     setMessage('');
     try {
-      if (mode === 'signup') {
+      if (mode === 'signup' && user?.is_anonymous) {
+        const { error: authError } = await supabase.auth.updateUser({ email: email.trim() });
+        if (authError) throw authError;
+        setMessage('Verification email sent. Confirm it to link this email to your existing guest account. Your guest identity and saved data stay together.');
+      } else if (mode === 'signup' && user && !user.is_anonymous) {
+        const { error: authError } = await supabase.auth.updateUser({ password });
+        if (authError) throw authError;
+        setMessage('Password updated successfully.');
+        setPassword('');
+      } else if (mode === 'signup') {
         const { data, error: authError } = await supabase.auth.signUp({ email: email.trim(), password });
         if (authError) throw authError;
         setMessage(data.session
@@ -87,13 +96,28 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
         <div className="auth-kicker">♞ &nbsp; THE CLUB DOOR</div>
         {user ? (
           <>
-            <h2 id="auth-title">Welcome <em>back.</em></h2>
-            <p className="auth-intro">You're signed in. Your place at the board is waiting.</p>
+            <h2 id="auth-title">{user.is_anonymous ? <>Keep your <em>progress.</em></> : <>Welcome <em>back.</em></>}</h2>
+            <p className="auth-intro">{user.is_anonymous ? "You are playing as a guest. Link an email to this same guest account to keep its wallet and progress." : "You are signed in. Your place at the board is waiting."}</p>
             <div className="account-card">
               <span className="account-piece">♟</span>
-              <div><strong>{profile?.display_name || profile?.username || 'Player'}</strong><small>@{profile?.username || 'loading profile'}</small></div>
+              <div><strong>{profile?.display_name || profile?.username || (user.is_anonymous ? 'Guest player' : 'Player')}</strong><small>{user.is_anonymous ? 'GUEST SESSION · PROGRESS ON THIS DEVICE' : '@' + (profile?.username || 'player')}</small></div>
             </div>
-            <button className="auth-submit" onClick={handleSignOut}>SIGN OUT <span>↗</span></button>
+            {user.is_anonymous && mode === 'signup' && <form onSubmit={handleSubmit}>
+              <label htmlFor="auth-email">EMAIL ADDRESS TO LINK</label>
+              <input id="auth-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
+              {message && <p className="auth-message" role="status">{message}</p>}
+              {error && <p className="auth-error" role="alert">{error}</p>}
+              <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'SENDING…' : 'LINK EMAIL & SAVE PROGRESS'} <span>↗</span></button>
+            </form>}
+            {!user.is_anonymous && mode === 'signup' && <form onSubmit={handleSubmit}>
+              <label htmlFor="auth-password">SET YOUR PASSWORD</label>
+              <input id="auth-password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" />
+              {message && <p className="auth-message" role="status">{message}</p>}
+              {error && <p className="auth-error" role="alert">{error}</p>}
+              <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'SAVING…' : 'SAVE PASSWORD'} <span>↗</span></button>
+            </form>}
+            {user.is_anonymous ? <button className="auth-submit" onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>LINK AN EMAIL TO THIS GUEST</button> : <button className="auth-submit" onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>SET OR CHANGE PASSWORD</button>}
+            {user.is_anonymous ? <button className="auth-switches" onClick={onClose}>CONTINUE AS GUEST</button> : <button className="auth-submit" onClick={handleSignOut}>SIGN OUT <span>↗</span></button>}
           </>
         ) : (
           <>
