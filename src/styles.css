@@ -437,3 +437,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible 
   .mode-card { min-height: 260px; }
   .mode-card p { min-height: 0; }
 }
+
+
+/* Curated Player Studio banner collection */
+.banner-starry { background:radial-gradient(ellipse at 76% 18%,#5b3aa8 0%,#24154e 42%,#0b0820 100%) !important; }
+.banner-sakura { background:radial-gradient(ellipse at 78% 20%,#c65d91 0%,#642a60 42%,#21102f 100%) !important; }
+.banner-sea { background:radial-gradient(ellipse at 78% 20%,#168aa3 0%,#14506e 44%,#071d35 100%) !important; }
+.banner-ember { background:radial-gradient(ellipse at 78% 20%,#d47739 0%,#71352f 44%,#251326 100%) !important; }
+.banner-forest { background:radial-gradient(ellipse at 78% 20%,#6d9a5d 0%,#31543f 44%,#102b2a 100%) !important; }
+.banner-void { background:radial-gradient(ellipse at 78% 20%,#55556c 0%,#292938 44%,#09090e 100%) !important; }
+.profile-banner-preview { min-height:116px;display:flex;flex-direction:column;justify-content:end;gap:7px;padding:16px;border:1px solid var(--line);border-radius:10px;color:#fff;margin:10px 0;background-size:cover; }
+.profile-banner-preview span { font:600 8px var(--mono);letter-spacing:.15em;opacity:.8; }
+.profile-banner-preview strong { font:700 23px 'Pixelify Sans',monospace;text-shadow:0 2px 8px #0008; }
+.banner-picker { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 17px; }
+.banner-option { min-height:38px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:9px;cursor:pointer; }
+.banner-option.selected { border-color:var(--acc);color:var(--acc);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent); }
