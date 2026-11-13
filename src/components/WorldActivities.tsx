@@ -30,7 +30,7 @@ function WalletStrip({ wallet }: { wallet: Wallet | null }) {
   </div>;
 }
 
-export function FarmPage({ user, onBack, onStartGuest }: ActivityProps) {
+export function FarmPage({ user, onBack, onStartGuest, onShop }: ActivityProps & { onShop: () => void }) {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [plots, setPlots] = useState<Plot[]>([]);
   const [inventory, setInventory] = useState<Record<string,number>>({});
@@ -109,7 +109,7 @@ export function FarmPage({ user, onBack, onStartGuest }: ActivityProps) {
         {plot ? <button className="activity-primary" onClick={() => harvest(plotNo)} disabled={busy || remaining > 0}>{remaining > 0 ? 'GROWING…' : 'HARVEST CARROT'}</button> : <button className="activity-primary" onClick={() => plant(plotNo)} disabled={busy || !inventory.shovel || !inventory.carrot_seed}>PLANT A SEED</button>}
       </article>;
     })}</div>
-    <div className="activity-footnote"><strong>YOUR HARVEST</strong><span>Carrots in inventory: {inventory.carrot || 0}</span><span>Shop sale value: {item('carrot')?.sell_price ?? 45} coins each</span><button onClick={refresh} disabled={loading || busy}>↻ REFRESH</button></div>
+    <div className="activity-footnote"><strong>YOUR HARVEST</strong><span>Carrots in inventory: {inventory.carrot || 0}</span><span>Shop sale value: {item('carrot')?.sell_price ?? 45} coins each</span><button onClick={refresh} disabled={loading || busy}>↻ REFRESH</button><button onClick={onShop}>OPEN SHOP ↗</button></div>
     {message && <p className="activity-message" role="status">{message}</p>}
     <p className="activity-disclaimer">Coins, seeds, plots, harvests and XP are stored and validated by Supabase. Your crops continue growing while you are away.</p>
   </section>;
