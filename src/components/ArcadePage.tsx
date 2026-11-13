@@ -13,7 +13,7 @@ type PlayResult = { game: string; bet: number; choice: string; outcome: string; 
 const GAMES: Array<{ id: Game; name: string; description: string; choices: Array<{ id: string; label: string }> }> = [
   { id: 'coinflip', name: 'Coinflip', description: 'Pick heads or tails. A win returns your stake plus the same amount.', choices: [{ id: 'heads', label: 'Heads' }, { id: 'tails', label: 'Tails' }] },
   { id: 'dice', name: 'High or low', description: 'Roll one six-sided die. Low is 1–3; high is 4–6.', choices: [{ id: 'low', label: 'Low · 1–3' }, { id: 'high', label: 'High · 4–6' }] },
-  { id: 'roulette', name: 'Roulette', description: 'Pick red or black. Zero is green and neither side wins.', choices: [{ id: 'red', label: 'Red' }, { id: 'black', label: 'Black' }] },
+  { id: 'roulette', name: 'Roulette', description: 'European single-zero roulette. Choose a colour, number, parity, range, dozen or column. Payouts and chances are shown before every spin.', choices: [{ id: 'red', label: 'Red' }, { id: 'black', label: 'Black' }] },
 ];
 
 const ROULETTE_TYPES = [
@@ -157,7 +157,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                     </>
                   )}
                   <button className="arcade-primary" onClick={play} disabled={busy || balance === null}>{busy ? 'THE TABLE IS SPINNING…' : 'PLACE BET'}</button>
-                  {result && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
+                  {result && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>{result.payout_multiplier ? `Payout: ${result.payout_multiplier}:1 profit · Win chance: ${result.win_probability || '—'}` : ''}</small><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
                 </div>
                 <div className="arcade-work-card"><div><span className="dashboard-kicker">EARN COINS</span><h2>Work a shift.</h2><p>Choose a shift and earn 100–250 coins. One shift per hour.</p></div><button className="arcade-secondary" onClick={work} disabled={busy}>START SHIFT · +100–250</button></div>
               </div>
