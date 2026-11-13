@@ -1,3 +1,4 @@
+import './ArcadePage.css';
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -16,7 +17,7 @@ const GAMES: Array<{ id: Game; name: string; description: string; choices: Array
 
 const iconFor = (kind: string) => kind === 'tool' ? '⚒' : kind === 'fish' ? '🐟' : kind === 'seed' ? '🌱' : kind === 'crop' ? '🥕' : '♟';
 
-export default function ArcadePage({ page, user, onBack, onSignIn }: { page: Page; user: User | null; onBack: () => void; onSignIn: () => void }) {
+export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }: { page: Page; user: User | null; onBack: () => void; onSignIn: () => void; onNavigate: (page: Page) => void }) {
   const [balance, setBalance] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [inventory, setInventory] = useState<Record<string, number>>({});
@@ -130,13 +131,13 @@ export default function ArcadePage({ page, user, onBack, onSignIn }: { page: Pag
               </div>
               <aside className="arcade-side-column">
                 <div className="arcade-panel"><span className="dashboard-kicker">RECENT ACTIVITY</span><h3>Wallet history</h3>{transactions.length === 0 ? <p className="empty-moves">No transactions yet.</p> : <ul className="wallet-history">{transactions.map(tx => <li key={tx.id}><span><strong>{tx.reason.replaceAll(':', ' · ')}</strong><small>{new Date(tx.created_at).toLocaleString()}</small></span><b className={tx.amount >= 0 ? 'positive' : 'negative'}>{tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}</b></li>)}</ul>}</div>
-                <button className="arcade-shop-link" onClick={() => window.dispatchEvent(new CustomEvent('chessgay:navigate', { detail: 'shop' }))}>VISIT THE SHOP <span>↗</span></button>
+                <button className="arcade-shop-link" onClick={() => onNavigate('shop')}>VISIT THE SHOP <span>↗</span></button>
               </aside>
             </div>
           ) : (
             <div className="arcade-shop-layout">
               <div className="arcade-shop-grid">{items.map(item => <article className="arcade-item-card" key={item.id}><span className="arcade-item-icon">{iconFor(item.kind)}</span><span className="item-rarity">{item.rarity.toUpperCase()} · {item.kind.toUpperCase()}</span><h3>{item.name}</h3><p>{item.description}</p><div className="item-card-bottom"><strong>{item.buy_price === null ? 'NOT FOR SALE' : item.buy_price.toLocaleString() + ' coins'}</strong><span>OWNED × {inventory[item.id] || 0}</span></div><div className="item-actions">{item.buy_price !== null && <button onClick={() => buy(item)} disabled={busy}>BUY</button>}{item.sell_price !== null && <button onClick={() => sell(item)} disabled={busy || !(inventory[item.id] > 0)}>SELL · {item.sell_price}</button>}</div></article>)}</div>
-              <div className="arcade-panel"><span className="dashboard-kicker">YOUR INVENTORY</span><h3>What you own</h3>{Object.entries(inventory).filter(([, qty]) => qty > 0).length === 0 ? <p className="empty-moves">Your inventory is empty. The shop is waiting.</p> : <ul className="wallet-history">{Object.entries(inventory).filter(([, qty]) => qty > 0).map(([id, qty]) => <li key={id}><span><strong>{items.find(item => item.id === id)?.name || id}</strong></span><b>× {qty}</b></li>)}</ul>}<button className="arcade-secondary" onClick={() => window.dispatchEvent(new CustomEvent('chessgay:navigate', { detail: 'casino' }))}>EARN MORE COINS</button></div>
+              <div className="arcade-panel"><span className="dashboard-kicker">YOUR INVENTORY</span><h3>What you own</h3>{Object.entries(inventory).filter(([, qty]) => qty > 0).length === 0 ? <p className="empty-moves">Your inventory is empty. The shop is waiting.</p> : <ul className="wallet-history">{Object.entries(inventory).filter(([, qty]) => qty > 0).map(([id, qty]) => <li key={id}><span><strong>{items.find(item => item.id === id)?.name || id}</strong></span><b>× {qty}</b></li>)}</ul>}<button className="arcade-secondary" onClick={() => onNavigate('casino')}>EARN MORE COINS</button></div>
             </div>
           )}
         </>
