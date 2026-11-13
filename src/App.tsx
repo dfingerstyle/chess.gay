@@ -371,17 +371,19 @@ export default function App() {
       return () => { active = false; };
     }
     setProfileLoading(true);
-    void supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at').eq('id', user.id).maybeSingle()
-      .then(({ data }) => {
+    void (async () => {
+      try {
+        const { data } = await supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at').eq('id', user.id).maybeSingle();
         if (!active) return;
         setMyProfile(data as Profile | null);
         setProfileLoading(false);
-      }).catch(() => {
+      } catch {
         if (active) {
           setMyProfile(null);
           setProfileLoading(false);
         }
-      });
+      }
+    })();
     return () => { active = false; };
   }, [user]);
 
