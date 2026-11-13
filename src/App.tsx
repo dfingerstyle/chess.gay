@@ -16,6 +16,7 @@ type Profile = {
   display_name: string | null;
   bio: string;
   avatar_url: string | null;
+  banner_style: string;
   created_at: string;
 };
 type AvatarPreset = 'knight' | 'king' | 'queen' | 'bishop' | 'rook' | 'pawn';
@@ -29,6 +30,14 @@ const avatarPieces: Record<AvatarPreset, string> = {
   pawn: '♟',
 };
 const avatarOptions = Object.keys(avatarPieces) as AvatarPreset[];
+const bannerOptions = [
+  { id: 'starry', name: 'Starry Void' },
+  { id: 'sakura', name: 'Sakura' },
+  { id: 'sea', name: 'Deep Sea' },
+  { id: 'ember', name: 'Ember' },
+  { id: 'forest', name: 'Forest' },
+  { id: 'void', name: 'Void' },
+];
 
 const pieces = [
   ['♜','♞','♝','♛','♚','♝','♞','♜'],
@@ -242,7 +251,7 @@ function PublicProfile({ profile, onBack }: { profile: Profile; onBack: () => vo
   return (
     <section className="app-page public-profile-page">
       <button className="back-link" onClick={onBack}>← BACK TO PLAYERS</button>
-      <div className="public-profile-banner"><span>CHESS.GAY PLAYER</span><span>♞</span></div>
+      <div className={'public-profile-banner banner-' + (profile.banner_style || 'starry')}><span>CHESS.GAY PLAYER</span><span>♞</span></div>
       <div className="public-profile-identity"><Avatar value={profile.avatar_url} label={profile.username} size="large" /><div><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div></div>
       <p className="public-profile-bio">{profile.bio || 'This player has not added a bio yet.'}</p>
       <div className="dashboard-stat-grid">
@@ -259,6 +268,7 @@ function ProfileEditor({ profile, onClose, onSaved }: { profile: Profile; onClos
   const [displayName, setDisplayName] = useState(profile.display_name || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [avatar, setAvatar] = useState<AvatarPreset>(getAvatarPreset(profile.avatar_url));
+  const [bannerStyle, setBannerStyle] = useState(profile.banner_style || 'starry');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -273,9 +283,9 @@ function ProfileEditor({ profile, onClose, onSaved }: { profile: Profile; onClos
     setError('');
     setMessage('');
     const { data, error: updateError } = await supabase.from('profiles')
-      .update({ display_name: displayName.trim() || null, bio: bio.trim(), avatar_url: 'preset:' + avatar })
+      .update({ display_name: displayName.trim() || null, bio: bio.trim(), avatar_url: 'preset:' + avatar, banner_style: bannerStyle })
       .eq('id', profile.id)
-      .select('id, username, display_name, bio, avatar_url, created_at')
+      .select('id, username, display_name, bio, avatar_url, banner_style, created_at')
       .single();
     setBusy(false);
     if (updateError) {
@@ -298,6 +308,9 @@ function ProfileEditor({ profile, onClose, onSaved }: { profile: Profile; onClos
           <input id="profile-display-name" maxLength={32} value={displayName} onChange={event => setDisplayName(event.target.value)} placeholder={profile.username} />
           <label htmlFor="profile-bio">BIO <span>{bio.length}/160</span></label>
           <textarea id="profile-bio" maxLength={160} rows={3} value={bio} onChange={event => setBio(event.target.value)} placeholder="A little about you…" />
+          <span className="editor-label">PROFILE BANNER</span>
+          <div className={'profile-banner-preview banner-' + bannerStyle}><span>YOUR PROFILE</span><strong>{displayName || profile.username}</strong></div>
+          <div className="banner-picker">{bannerOptions.map(option => <button type="button" key={option.id} className={bannerStyle === option.id ? 'banner-option selected' : 'banner-option'} onClick={() => setBannerStyle(option.id)} aria-pressed={bannerStyle === option.id}>{option.name}</button>)}</div>
           <span className="editor-label">CHOOSE A CURATED AVATAR</span>
           <div className="avatar-picker">
             {avatarOptions.map(option => <button type="button" key={option} className={avatar === option ? 'avatar-option selected' : 'avatar-option'} onClick={() => setAvatar(option)} aria-pressed={avatar === option} aria-label={option + ' avatar'}><Avatar value={'preset:' + option} label={option} /></button>)}
@@ -373,7 +386,7 @@ export default function App() {
     setProfileLoading(true);
     void (async () => {
       try {
-        const { data } = await supabase.from('profiles').select('id, username, display_name, bio, avatar_url, created_at').eq('id', user.id).maybeSingle();
+        const { data } = await supabase.from('profiles').select('id, username, display_name, bio, avatar_url, banner_style, created_at').eq('id', user.id).maybeSingle();
         if (!active) return;
         setMyProfile(data as Profile | null);
         setProfileLoading(false);
