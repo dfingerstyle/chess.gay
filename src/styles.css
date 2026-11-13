@@ -422,3 +422,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible 
 .auth-submit,.header-guest { background:#fff !important; color:#000 !important; }
 .art-glow { background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%) !important; }
 .community-ornament { color:rgba(255,255,255,.035) !important; }
+
+
+/* Hybrid world hub: eight real destinations, laid out as a compact game-world directory. */
+.mode-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.mode-card { min-height: 310px; }
+.mode-card h3 { font-size: clamp(25px, 2.2vw, 34px); }
+.mode-card p { min-height: 78px; }
+@media (max-width: 1100px) {
+  .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 650px) {
+  .mode-grid { grid-template-columns: 1fr; }
+  .mode-card { min-height: 260px; }
+  .mode-card p { min-height: 0; }
+}
