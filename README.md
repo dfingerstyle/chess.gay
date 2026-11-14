@@ -50,7 +50,7 @@ The Phase 1 foundation branch adds:
 
 The existing Supabase client and profiles foundation are preserved. Authentication now waits for session restoration, distinguishes anonymous guests from registered accounts, and avoids showing account-creation prompts to registered users. Guest email linking uses the same Supabase user identity so eligible wallet and inventory rows remain attached. The product specification is the source of truth for guest-first access and the planned playable game systems.
 
-The homepage is now a hybrid world hub with eight destinations. Chess, the virtual arcade, the shop, work, farming, fishing and the board-colour workshop have real interactions; training, social/community, tournaments and the full Player Studio remain partially or wholly in development. Each unfinished destination states its actual status.
+The homepage is now a hybrid world hub with eight destinations. Chess, the casino, the shop, work, farming, fishing and the board-colour workshop have real interactions. The casino now includes animated roulette, coin flip, dice and slots, public/private multiplayer tables, player duels, chat, spectators, history and leaderboards. Training, social/community, tournaments, the admin command centre and the full Player Studio remain partially or wholly in development. Each unfinished destination states its actual status.
 
 The player directory requires the existing public SELECT policy on `profiles`; profile editing uses the existing owner-only UPDATE policy. Realtime presence is ephemeral and does not create persistent visitor records.
 
@@ -87,7 +87,10 @@ These are product requirements, not claims that the systems are already implemen
 The branch now includes a first real playable and economy vertical slice:
 
 - **Local standard chess:** legal move selection, captures, castling, en passant, promotion, check/checkmate, stalemate, insufficient material, repetition and move-count draw handling, clocks, move history, undo, board flip, pass-and-play and a lightweight legal-move CPU opponent.
-- **Virtual arcade:** server-resolved coinflip, high/low dice and red/black roulette. Stakes are limited to 1–5,000 virtual coins per round.
+- **Casino:** dedicated animated casino hub with European roulette (all standard bet classes), coin flip, dice and three-reel slots. Published odds: roulette 2.70% house edge; coin flip/dice fair 50/50; slots 95.83% theoretical RTP. Includes synthesized sound and optional ambient audio.
+- **Multiplayer casino:** public/private roulette, coinflip and dice tables, 16-character hashed invite codes, up to eight players and 50 spectators, 20-second rounds, live chat, shared animated results, recent history and spectator settlement.
+- **Player duels:** coinflip, dice and roulette challenges with accepted stakes, winner-takes-pot settlement and a roulette-zero push/refund.
+- **Casino history and rankings:** personal table-bet and slot-spin history, plus net-profit leaderboard across table bets, slots and player duels. All wagers use virtual coins only.
 - **Persistent wallet:** Supabase wallet balances, immutable transaction history, work-shift earnings (100–250 coins, one-hour cooldown), shop purchases, item sales and inventory.
 - **Security:** balance changes and game outcomes are database RPCs; direct client access to the internal balance-adjustment function is revoked. Economy RPCs validate the authenticated user and lock the wallet row before changing its balance.
 - **Themes:** Starry Void, Sakura and Deep Sea, with Inter body text, Pixelify Sans display typography and animated pixel-art backgrounds.
@@ -104,4 +107,4 @@ To use a persistent guest wallet, anonymous sign-ins must be enabled in Supabase
 
 **Still not implemented:** server-authoritative online chess moves/clocks/results, public matchmaking, starting a playable match from a lobby, the four-player chess rules engine (FFA/2v2), custom starting positions and all-queen variants, Stockfish analysis, account-synced board presets, profile frames/titles, personal banner uploads, and the remaining social/community systems. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
 
-Virtual coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist.
+Casino coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist. See [Casino rules, odds and architecture](docs/casino.md).
