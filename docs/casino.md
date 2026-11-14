@@ -67,6 +67,7 @@ The opponent receives the opposite choice. Neither player is charged until the c
 - Sensitive tables deny direct client writes. Mutations happen through authenticated RPC functions.
 - Row-level security limits private tables, messages, bets, challenges and slot history to the relevant members/owners.
 - Casino RPCs revoke anonymous execution and explicitly require an authenticated user.
+- The internal wallet-adjustment helper is not executable by `anon` or `authenticated`; trusted `SECURITY DEFINER` game/economy RPCs invoke it as their database owner. This prevents players from calling the balance mutation helper directly.
 - Table creation, bets, chat and outgoing challenges have server-side rate limits.
 
 ## Verification
@@ -80,5 +81,6 @@ Database smoke tests run inside transactions and roll back:
 - RLS visibility for private tables, members, chat and public bets.
 - Rate limits for table creation, chat and per-round bets.
 - Anonymous execution is revoked for casino RPCs.
+- Direct execution of the internal wallet-adjustment helper is denied to both `anon` and `authenticated`, while authenticated coinflip and slot RPCs still settle successfully through the trusted server-side call path.
 
 A CI build and dependency audit are run on the draft branch. A true browser-based end-to-end test across two independent logged-in browser sessions remains a release check.
