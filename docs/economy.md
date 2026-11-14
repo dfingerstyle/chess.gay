@@ -74,4 +74,4 @@ The casino retains its separate net-profit leaderboard. Casino profit, economy n
 
 ## Implementation status
 
-The migration `20261114150000_persistent_world_economy.sql` adds the catalogue, ownership table, purchase/upgrade RPC, collect-all RPC and public economy leaderboard RPC. The migration is committed to the development branch but is not applied to the hosted Supabase project. The browser UI and staging database verification remain separate build/test tasks.
+The migration `20261114150000_persistent_world_economy.sql` adds the catalogue, ownership table, purchase/upgrade RPC, collect-all RPC and public economy leaderboard RPC. `WorldEconomyPage.tsx` provides the property/business/mining portfolio, collect-all control and public coins/net-worth/level/XP rankings. The migration and UI are committed to the development branch; the migration is not applied to the hosted Supabase project. Staging database execution and browser verification remain outstanding.
