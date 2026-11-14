@@ -90,7 +90,10 @@ export default function AuthPanel({ user, onClose, onSignedOut, onGuestRegistere
         setMessage('If an account exists for that email, a password reset link is on its way.');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      const detail = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(/anonymous.*disabled|anonymous sign.?ins.*disabled/i.test(detail)
+        ? 'Email-free accounts are disabled in Supabase. Enable Anonymous Sign-Ins under Authentication → Sign-In / Providers, then try again.'
+        : detail);
     } finally {
       setBusy(false);
     }
@@ -105,7 +108,10 @@ export default function AuthPanel({ user, onClose, onSignedOut, onGuestRegistere
       if (authError) throw authError;
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Guest sign-in failed. Please try again.');
+      const detail = err instanceof Error ? err.message : 'Guest sign-in failed. Please try again.';
+      setError(/anonymous.*disabled|anonymous sign.?ins.*disabled/i.test(detail)
+        ? 'Email-free play is disabled in Supabase. Enable Anonymous Sign-Ins under Authentication → Sign-In / Providers, then try again.'
+        : detail);
     } finally { setBusy(false); }
   }
 
