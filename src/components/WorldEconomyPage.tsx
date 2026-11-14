@@ -16,13 +16,13 @@ type Asset = {
 type OwnedAsset = { asset_key: string; level: number; acquired_at: string; last_claim_at: string };
 type LeaderboardRow = { rank: number; user_id: string; username: string; display_name: string | null; score: number; category: string };
 type Wallet = { balance: number; xp: number; level: number };
-type Props = { user: User | null; onBack: () => void; onStartGuest: () => void };
+type Props = { user: User | null; onBack: () => void; onStartGuest: () => void; initialSection?: 'assets' | 'leaderboards' };
 
 const money = (value: number) => Number(value || 0).toLocaleString() + ' coins';
 const iconFor = (type: Asset['asset_type']) => type === 'property' ? '⌂' : type === 'business' ? '▥' : '⌁';
 
-export default function WorldEconomyPage({ user, onBack, onStartGuest }: Props) {
-  const [section, setSection] = useState<'assets' | 'leaderboards'>('assets');
+export default function WorldEconomyPage({ user, onBack, onStartGuest, initialSection = 'assets' }: Props) {
+  const [section, setSection] = useState<'assets' | 'leaderboards'>(initialSection);
   const [category, setCategory] = useState<'net_worth' | 'coins' | 'level' | 'xp'>('net_worth');
   const [catalog, setCatalog] = useState<Asset[]>([]);
   const [owned, setOwned] = useState<OwnedAsset[]>([]);
