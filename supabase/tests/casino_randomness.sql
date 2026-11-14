@@ -42,6 +42,39 @@ begin
   if not has_function_privilege('authenticated', 'public.play_casino_slots(bigint)', 'EXECUTE') then
     raise exception 'authenticated must execute play_casino_slots';
   end if;
+
+  if not exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private'
+      and p.proname in (
+        'guard_casino_table_creation',
+        'guard_casino_bet_rate',
+        'guard_casino_chat_rate',
+        'guard_casino_challenge_rate'
+      )
+    group by n.nspname
+    having count(*) = 4
+  ) then
+    raise exception 'expected all four casino rate-limit trigger functions';
+  end if;
+
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private'
+      and p.proname in (
+        'guard_casino_table_creation',
+        'guard_casino_bet_rate',
+        'guard_casino_chat_rate',
+        'guard_casino_challenge_rate'
+      )
+      and position('pg_advisory_xact_lock' in lower(pg_get_functiondef(p.oid))) = 0
+  ) then
+    raise exception 'casino rate-limit guards must serialize concurrent requests';
+  end if;
 end;
 $$;
 
