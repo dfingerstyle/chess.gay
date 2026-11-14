@@ -45,7 +45,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [soundEnabled,setSoundEnabled] = useState(()=>{try{return localStorage.getItem('chessgay-casino-sound')!=='off'}catch{return true}});
   const [soundVolume,setSoundVolume] = useState(()=>{try{const value=Number(localStorage.getItem('chessgay-casino-volume')||'0.35');return Number.isFinite(value)?Math.max(0,Math.min(1,value)):0.35}catch{return 0.35}});
   const [musicEnabled,setMusicEnabled] = useState(()=>{try{return localStorage.getItem('chessgay-casino-music')==='on'}catch{return false}});
-  const [choice, setChoice] = useState('heads');
+  const [choice, setChoice] = useState('red');
   const [rouletteType, setRouletteType] = useState('colour');
   const [bet, setBet] = useState('25');
   const [result, setResult] = useState<PlayResult | null>(null);
