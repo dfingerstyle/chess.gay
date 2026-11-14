@@ -582,7 +582,7 @@ export default function App() {
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
 
-      {authOpen && <AuthPanel user={user} onClose={() => setAuthOpen(false)} onSignedOut={() => { setUser(null); setMyProfile(null); setPage('home'); }} />}
+      {authOpen && <AuthPanel user={user} onClose={() => setAuthOpen(false)} onGuestRegistered={setGuestName} onSignedOut={() => { setUser(null); setMyProfile(null); setPage('home'); }} />}
       {editorOpen && user && myProfile && <ProfileEditor profile={myProfile} onClose={() => setEditorOpen(false)} onSaved={saveProfile} />}
       </>}
     </main>
