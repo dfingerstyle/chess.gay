@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import CasinoStage from './CasinoStage';
 import CasinoMultiplayer from './CasinoMultiplayer';
+import RouletteBetTable from './RouletteBetTable';
 
 type Page = 'casino' | 'shop';
 type Game = 'coinflip' | 'dice' | 'roulette';
@@ -127,7 +128,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
   const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
   function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0].id); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
-  function changeRouletteType(next: string) { const group = ROULETTE_TYPES.find(option => option.id === next)!; setRouletteType(next); setChoice(group.options[0].id); setResult(null); }
+  function selectRouletteBet(type: string, nextChoice: string) { setRouletteType(type); setChoice(nextChoice); setResult(null); }
 
   return (
     <section className="app-page arcade-page">
@@ -178,13 +179,10 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                   <input className="arcade-bet-input" type="number" min="1" max="5000" step="1" value={bet} onChange={event => setBet(event.target.value)} />
                   {game === 'roulette' ? (
                     <div className="roulette-bet-builder">
-                      <label>BET TYPE <span>EUROPEAN · SINGLE ZERO</span></label>
-                      <div className="roulette-type-tabs">{ROULETTE_TYPES.map(option=><button key={option.id} className={rouletteType===option.id?'active':''} onClick={()=>changeRouletteType(option.id)}>{option.label}</button>)}</div>
-                      <label>YOUR PICK <span>{rouletteBet.chance} CHANCE · {rouletteBet.payout} PROFIT</span></label>
-                      <div className={rouletteType==='number'?'roulette-number-grid':'arcade-choice-row roulette-pick-row'}>
-                        {rouletteGroup.options.map(option=><button key={option.id} className={choice===option.id?'active':''} onClick={()=>{setChoice(option.id);setResult(null);}}>{option.label}</button>)}
-                      </div>
-                      <p className="roulette-odds-note">37 equally likely pockets · 0 is green · standard payouts · 2.70% house edge (97.30% RTP)</p>
+                      <label>BETTING LAYOUT <span>EUROPEAN · SINGLE ZERO</span></label>
+                      <RouletteBetTable selectedType={rouletteType} selectedChoice={choice} onSelect={selectRouletteBet}/>
+                      <div className="roulette-selected-bet"><label>SELECTED WAGER <span>{rouletteBet.chance} CHANCE · {rouletteBet.payout} PROFIT</span></label><strong>{rouletteBet.label}</strong></div>
+                      <p className="roulette-odds-note">37 equally likely pockets · zero loses on standard outside bets · 2.70% house edge (97.30% RTP)</p>
                     </div>
                   ) : (
                     <>
