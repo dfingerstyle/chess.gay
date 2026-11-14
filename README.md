@@ -31,10 +31,11 @@ A free chess and community platform. No subscriptions, premium tiers, paywalled 
 
 ## Access model
 
-- Visitors can play immediately as guests without entering an email or password. The sign-in panel exposes an explicit **Play without email** action backed by Supabase Anonymous Sign-Ins.
-- A random nickname is generated and stored locally in the browser. Anonymous sessions and their server-backed progress persist on the same browser/device; clearing browser data or switching devices loses access unless the player links a recovery identity.
+- Visitors can play immediately without entering an email or password. The sign-in panel offers **Play without email** and **Create username · no email**, backed by Supabase Anonymous Sign-Ins.
+- A player can choose a unique 3–20 character username. The username is saved to the public player profile and locally for the guest display name.
+- Anonymous sessions and their server-backed progress persist on the same browser/device; clearing browser data or switching devices loses access unless the player links a recovery identity.
 - Email linking is optional, not a requirement for playing. It can make an anonymous session recoverable across devices after verification.
-- Username-only, password-based sign-in across devices is a separate feature and is not implemented yet. Supabase Auth does not natively authenticate by username; this requires a carefully secured server-side username-to-auth mapping and recovery/abuse controls. Do not simulate it with a public client-side lookup.
+- Username-only password login across devices is not implemented yet. Supabase Auth does not natively authenticate by username; this requires a carefully secured server-side username-to-auth mapping and recovery/abuse controls. Do not simulate it with a public client-side lookup.
 
 ## Phase 1 status
 
