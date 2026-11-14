@@ -12,12 +12,12 @@ begin
   if (
     select count(*) from (
       select value % 37 as pocket
-      from generate_series(0, 221) as value
+      from generate_series(0, 221) as g(value)
       group by value % 37
       having count(*) <> 6
     ) buckets
   ) <> 0 or (
-    select count(distinct value % 37) from generate_series(0, 221) as value
+    select count(distinct value % 37) from generate_series(0, 221) as g(value)
   ) <> 37 then
     raise exception 'roulette rejection sampling must map six byte values to each of 37 pockets';
   end if;
@@ -25,21 +25,21 @@ begin
   if (
     select count(*) from (
       select value % 6 as face
-      from generate_series(0, 251) as value
+      from generate_series(0, 251) as g(value)
       group by value % 6
       having count(*) <> 42
     ) buckets
   ) <> 0 or (
-    select count(distinct value % 6) from generate_series(0, 251) as value
+    select count(distinct value % 6) from generate_series(0, 251) as g(value)
   ) <> 6 then
     raise exception 'dice and slot rejection sampling must map 42 byte values to each of six outcomes';
   end if;
 
   if (
-    select count(*) from generate_series(0, 127) as value
+    select count(*) from generate_series(0, 127) as g(value)
     where value < 64
   ) <> 64 or (
-    select count(*) from generate_series(0, 127) as value
+    select count(*) from generate_series(0, 127) as g(value)
     where value >= 64
   ) <> 64 then
     raise exception 'coinflip byte split must be exactly 50/50';
