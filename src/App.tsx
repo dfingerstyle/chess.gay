@@ -395,7 +395,8 @@ export default function App() {
       setPlatformConfigLoading(false);
     };
     void loadConfig();
-    return () => { active = false; };
+    const timer = window.setInterval(() => { void loadConfig(); }, 30000);
+    return () => { active = false; window.clearInterval(timer); };
   }, []);
 
   useEffect(() => {
@@ -436,6 +437,10 @@ export default function App() {
     const { data, error } = await supabase.rpc('get_public_platform_config');
     if (!error && data) setPlatformConfig(data as {maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>});
   };
+
+  useEffect(() => {
+    if (page === 'admin' && !isAdmin) setPage('dashboard');
+  }, [page, isAdmin]);
 
   useEffect(() => {
     let active = true;
