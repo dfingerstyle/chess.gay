@@ -8,6 +8,7 @@ import ThemeBackdrop from './components/ThemeBackdrop';
 import BoardWorkshop from './components/BoardWorkshop';
 import { FarmPage, FishingPage, WorkPage } from './components/WorldActivities';
 import MultiplayerLobby from './components/MultiplayerLobby';
+import AdminPage from './components/AdminPage';
 import { supabase } from './lib/supabase';
 
 type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby';
@@ -336,6 +337,12 @@ export default function App() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [page, setPage] = useState<Page>('home');
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
+  const [adminAccess, setAdminAccess] = useState<{is_admin:boolean;roles:Array<{id:string;key:string;name:string}>;permissions:string[]}|null>(null);
+  const [accountStatus, setAccountStatus] = useState<{is_banned:boolean;banned_until:string|null;is_muted:boolean;muted_until:string|null}|null>(null);
+  const [accountStatusLoading, setAccountStatusLoading] = useState(false);
+  const [accountStatusError, setAccountStatusError] = useState('');
+  const [platformConfig, setPlatformConfig] = useState<{maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>}|null>(null);
+  const [platformConfigLoading, setPlatformConfigLoading] = useState(true);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [directoryLoading, setDirectoryLoading] = useState(false);
   const [directoryError, setDirectoryError] = useState('');
