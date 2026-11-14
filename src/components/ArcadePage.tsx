@@ -86,20 +86,25 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   }
 
   async function play() {
-    if (!supabase || !user) return;
+    if (!supabase || !user || busy || revealing) return;
     const stake = Number(bet);
     if (!Number.isInteger(stake) || stake < 1 || stake > 5000) { setMessage('Choose a whole-number bet between 1 and 5,000 coins.'); return; }
     if(soundEnabled)primeCasinoAudio();
     setBusy(true); setMessage(''); setResult(null);
-    const { data, error } = game==='slots'
-      ? await supabase.rpc('play_casino_slots',{p_bet:stake})
-      : await supabase.rpc('play_arcade_game', { p_game: game, p_bet: stake, p_choice: choice });
-    setBusy(false);
-    if (error) { setMessage(error.message); return; }
-    setResult(data as PlayResult);
-    setAnimationKey(key => key + 1);
-    setRevealing(true);
-    await refresh();
+    try {
+      const { data, error } = game==='slots'
+        ? await supabase.rpc('play_casino_slots',{p_bet:stake})
+        : await supabase.rpc('play_arcade_game', { p_game: game, p_bet: stake, p_choice: choice });
+      if (error) { setMessage(error.message); return; }
+      setResult(data as PlayResult);
+      setAnimationKey(key => key + 1);
+      setRevealing(true);
+      await refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'The casino request failed. Please try again.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function work() {
@@ -135,8 +140,8 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const activeGame = GAMES.find(option => option.id === game)!;
   const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
   const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
-  function changeGame(next: Game) { setGame(next); setChoice(next==='roulette'?'red':next==='coinflip'?'heads':next==='dice'?'low':'spin'); if(next==='roulette')setRouletteType('colour'); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
-  function selectRouletteBet(type: string, nextChoice: string) { setRouletteType(type); setChoice(nextChoice); setResult(null); }
+  function changeGame(next: Game) { if(busy||revealing)return; setGame(next); setChoice(next==='roulette'?'red':next==='coinflip'?'heads':next==='dice'?'low':'spin'); if(next==='roulette')setRouletteType('colour'); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
+  function selectRouletteBet(type: string, nextChoice: string) { if(busy||revealing)return; setRouletteType(type); setChoice(nextChoice); setResult(null); }
 
   return (
     <section className="app-page arcade-page">
@@ -179,7 +184,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
               {casinoView==='games' && (
             <div className="arcade-grid">
               <div className="arcade-main-column">
-                <div className="arcade-game-tabs">{GAMES.map(option => <button key={option.id} className={game === option.id ? 'active' : ''} onClick={() => changeGame(option.id)}>{option.name}</button>)}</div>
+                <div className="arcade-game-tabs">{GAMES.map(option => <button key={option.id} className={game === option.id ? 'active' : ''} onClick={() => changeGame(option.id)} disabled={busy||revealing}>{option.name}</button>)}</div>
                 <CasinoStage game={game} result={result} animationKey={animationKey} onAnimationComplete={()=>setRevealing(false)} soundEnabled={soundEnabled} soundVolume={soundVolume} />
                 <div className="arcade-game-card">
                   <div className="arcade-card-top"><div><span className="dashboard-kicker">VIRTUAL TABLE</span><h2>{activeGame.name}</h2></div><span className="arcade-game-symbol">{game === 'coinflip' ? '◐' : game === 'dice' ? '⚄' : game === 'slots' ? '🎰' : '◎'}</span></div>
@@ -202,7 +207,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                   ) : (
                     <>
                       <label>YOUR PICK <span>50% CHANCE · 1:1 PROFIT</span></label>
-                      <div className="arcade-choice-row">{activeGame.choices.map(option => <button key={option.id} className={choice === option.id ? 'active' : ''} onClick={() => setChoice(option.id)}>{option.label}</button>)}</div>
+                      <div className="arcade-choice-row">{activeGame.choices.map(option => <button key={option.id} className={choice === option.id ? 'active' : ''} onClick={() => setChoice(option.id)} disabled={busy||revealing}>{option.label}</button>)}</div>
                       <p className="roulette-odds-note">Fair odds · 50% chance · no built-in house edge on this game.</p>
                     </>
                   )}
