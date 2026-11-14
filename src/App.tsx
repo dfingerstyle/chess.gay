@@ -12,7 +12,7 @@ import AdminPage from './components/AdminPage';
 import WorldEconomyPage from './components/WorldEconomyPage';
 import { supabase } from './lib/supabase';
 
-type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby' | 'economy';
+type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby' | 'economy' | 'leaderboards';
 type Profile = {
   id: string;
   username: string;
@@ -202,7 +202,7 @@ function Dashboard({ profile, profileLoading, guestName, onDiscover, onEditProfi
           <button className="dashboard-action" onClick={() => onFeature('casino')}>THE CASINO <span>VIRTUAL COINS</span></button>
           <button className="dashboard-action" onClick={() => onFeature('learn')}>PUZZLES & LESSONS <span>TRAIN</span></button>
           <button className="dashboard-action dashboard-action-primary" onClick={() => onFeature('economy')}>PROPERTY & BUSINESSES <span>BUILD WEALTH</span></button>
-          <button className="dashboard-action" onClick={() => onFeature('economy')}>LEADERBOARDS <span>RANK UP</span></button>
+          <button className="dashboard-action" onClick={() => onFeature('leaderboards')}>LEADERBOARDS <span>RANK UP</span></button>
         </article>
         <article className="dashboard-card profile-summary-card">
           <div className="dashboard-card-heading"><div><span className="dashboard-kicker">YOUR IDENTITY</span><h3>Player profile</h3></div><span className="dashboard-card-icon">♟</span></div>
@@ -533,7 +533,7 @@ export default function App() {
           <button onClick={() => { setPage('learn'); setMenuOpen(false); }}>LEARN</button>
           <button onClick={() => { setPage('discover'); setMenuOpen(false); }}>PLAYERS</button>
           <button onClick={() => { setPage('economy'); setMenuOpen(false); }}>WORLD</button>
-          <button onClick={() => { setPage('economy'); setMenuOpen(false); }}>RANKINGS</button>
+          <button onClick={() => { setPage('leaderboards'); setMenuOpen(false); }}>RANKINGS</button>
           {featureFlags.community_enabled !== false && <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>}
           {featureFlags.casino_enabled !== false && <button onClick={() => { setPage('casino'); setMenuOpen(false); }}>CASINO</button>}
           <button onClick={() => { setPage('shop'); setMenuOpen(false); }}>SHOP</button>
@@ -581,6 +581,7 @@ export default function App() {
       {page === 'fishing' && <FishingPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'work' && <WorkPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'economy' && <WorldEconomyPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
+      {page === 'leaderboards' && <WorldEconomyPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} initialSection="leaderboards" />}
       {page === 'shop' && <ArcadePage page="shop" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
       {page === 'casino' && (featureFlags.casino_enabled === false ? <section className="app-page"><button className="back-link" onClick={() => setPage('dashboard')}>← BACK</button><PageHeading eyebrow="CASINO" title={<>Temporarily <em>unavailable.</em></>} description="The virtual casino is currently disabled by platform administration." /></section> : <ArcadePage page="casino" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />)}
       {['learn','community','tournaments','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
