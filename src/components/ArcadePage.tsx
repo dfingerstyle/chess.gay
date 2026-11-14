@@ -8,17 +8,18 @@ import RouletteBetTable from './RouletteBetTable';
 import { setCasinoAmbience } from '../lib/casinoAudio';
 
 type Page = 'casino' | 'shop';
-type Game = 'coinflip' | 'dice' | 'roulette';
+type Game = 'coinflip' | 'dice' | 'roulette' | 'slots';
 type CasinoView = 'lobby' | 'games' | 'multiplayer';
 type Theme = 'starry' | 'sakura' | 'sea';
 type Item = { id: string; name: string; kind: string; rarity: string; buy_price: number | null; sell_price: number | null; description: string };
 type Transaction = { id: number; amount: number; reason: string; created_at: string };
-type PlayResult = { game: string; bet: number; choice: string; outcome: string; won: boolean; net: number; balance: number; payout_multiplier?: number; win_probability?: string };
+type PlayResult = { game: string; bet: number; choice: string; outcome: string; won: boolean; net: number; balance: number; payout_multiplier?: number; win_probability?: string; symbols?: string[]; payout?: number; rtp?: string; house_edge?: string };
 
 const GAMES: Array<{ id: Game; name: string; description: string; choices: Array<{ id: string; label: string }> }> = [
   { id: 'coinflip', name: 'Coinflip', description: 'Pick heads or tails. A win returns your stake plus the same amount.', choices: [{ id: 'heads', label: 'Heads' }, { id: 'tails', label: 'Tails' }] },
   { id: 'dice', name: 'High or low', description: 'Roll one six-sided die. Low is 1–3; high is 4–6.', choices: [{ id: 'low', label: 'Low · 1–3' }, { id: 'high', label: 'High · 4–6' }] },
   { id: 'roulette', name: 'Roulette', description: 'European single-zero roulette. Choose a colour, number, parity, range, dozen or column. Payouts and chances are shown before every spin.', choices: [{ id: 'red', label: 'Red' }, { id: 'black', label: 'Black' }] },
+  { id: 'slots', name: 'Slot Machine', description: 'Three reels, six symbols and a fixed published paytable. Match three identical symbols to win.', choices: [] },
 ];
 
 const ROULETTE_TYPES = [
@@ -89,7 +90,9 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
     const stake = Number(bet);
     if (!Number.isInteger(stake) || stake < 1 || stake > 5000) { setMessage('Choose a whole-number bet between 1 and 5,000 coins.'); return; }
     setBusy(true); setMessage(''); setResult(null);
-    const { data, error } = await supabase.rpc('play_arcade_game', { p_game: game, p_bet: stake, p_choice: choice });
+    const { data, error } = game==='slots'
+      ? await supabase.rpc('play_casino_slots',{p_bet:stake})
+      : await supabase.rpc('play_arcade_game', { p_game: game, p_bet: stake, p_choice: choice });
     setBusy(false);
     if (error) { setMessage(error.message); return; }
     setResult(data as PlayResult);
@@ -131,7 +134,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const activeGame = GAMES.find(option => option.id === game)!;
   const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
   const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
-  function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0].id); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
+  function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0]?.id||'spin'); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
   function selectRouletteBet(type: string, nextChoice: string) { setRouletteType(type); setChoice(nextChoice); setResult(null); }
 
   return (
@@ -165,6 +168,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                     <button className="casino-lobby-card roulette-card" onClick={()=>changeGame('roulette')}><span className="casino-lobby-art">◎</span><span className="dashboard-kicker">THE CLASSIC</span><strong>Roulette</strong><small>37 pockets · 0–36 · standard bets</small><b>ENTER TABLE ↗</b></button>
                     <button className="casino-lobby-card coin-card" onClick={()=>changeGame('coinflip')}><span className="casino-lobby-art">◐</span><span className="dashboard-kicker">50 / 50</span><strong>Coin Flip</strong><small>Heads or tails. Double-or-nothing.</small><b>FLIP A COIN ↗</b></button>
                     <button className="casino-lobby-card dice-card" onClick={()=>changeGame('dice')}><span className="casino-lobby-art">⚄</span><span className="dashboard-kicker">TEST YOUR LUCK</span><strong>Dice</strong><small>Call low or high before the roll.</small><b>ROLL THE DICE ↗</b></button>
+                    <button className="casino-lobby-card slots-card" onClick={()=>changeGame('slots')}><span className="casino-lobby-art">🎰</span><span className="dashboard-kicker">THREE REELS</span><strong>Slots</strong><small>Six symbols · fixed paytable · 95.83% RTP.</small><b>SPIN THE REELS ↗</b></button>
                     <button className="casino-lobby-card multiplayer-card" onClick={()=>setCasinoView('multiplayer')}><span className="casino-lobby-art">♟</span><span className="dashboard-kicker">PLAY TOGETHER</span><strong>Live Tables</strong><small>Public rooms, private tables and spectators.</small><b>FIND A TABLE ↗</b></button>
                   </div>
                   <div className="casino-lobby-bottom"><div><span className="dashboard-kicker">PLAYER CHALLENGES</span><strong>Bet against a friend.</strong><small>Send a coinflip challenge with an agreed virtual stake.</small></div><button className="arcade-secondary" onClick={()=>setCasinoView('multiplayer')}>OPEN MULTIPLAYER ↗</button></div>
@@ -177,7 +181,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                 <div className="arcade-game-tabs">{GAMES.map(option => <button key={option.id} className={game === option.id ? 'active' : ''} onClick={() => changeGame(option.id)}>{option.name}</button>)}</div>
                 <CasinoStage game={game} result={result} animationKey={animationKey} onAnimationComplete={()=>setRevealing(false)} soundEnabled={soundEnabled} soundVolume={soundVolume} />
                 <div className="arcade-game-card">
-                  <div className="arcade-card-top"><div><span className="dashboard-kicker">VIRTUAL TABLE</span><h2>{activeGame.name}</h2></div><span className="arcade-game-symbol">{game === 'coinflip' ? '◐' : game === 'dice' ? '⚄' : '◎'}</span></div>
+                  <div className="arcade-card-top"><div><span className="dashboard-kicker">VIRTUAL TABLE</span><h2>{activeGame.name}</h2></div><span className="arcade-game-symbol">{game === 'coinflip' ? '◐' : game === 'dice' ? '⚄' : game === 'slots' ? '🎰' : '◎'}</span></div>
                   <p>{activeGame.description}</p>
                   <label>YOUR BET <span>1–5,000 COINS</span></label>
                   <input className="arcade-bet-input" type="number" min="1" max="5000" step="1" value={bet} onChange={event => setBet(event.target.value)} />
@@ -188,15 +192,21 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
                       <div className="roulette-selected-bet"><label>SELECTED WAGER <span>{rouletteBet.chance} CHANCE · {rouletteBet.payout} PROFIT</span></label><strong>{rouletteBet.label}</strong></div>
                       <p className="roulette-odds-note">37 equally likely pockets · zero loses on standard outside bets · 2.70% house edge (97.30% RTP)</p>
                     </div>
+                  ) : game === 'slots' ? (
+                    <div className="slot-paytable">
+                      <label>FIXED PAYTABLE <span>ANY THREE MATCHING</span></label>
+                      {[['🍒','Cherry','10×'],['🍋','Lemon','12×'],['🔔','Bell','15×'],['💎','Diamond','20×'],['⭐','Star','40×'],['7️⃣','Lucky seven','110×']].map(row=><div className="slot-paytable-row" key={row[1]}><b>{row[0]}</b><span>{row[1]}</span><strong>{row[2]}</strong></div>)}
+                      <p className="roulette-odds-note">Any triple: 2.78% chance · 95.83% RTP · 4.17% house edge. Multipliers are total returns, including your stake.</p>
+                    </div>
                   ) : (
                     <>
-                      <label>YOUR PICK <span>{game==='coinflip'?'50% CHANCE · 1:1 PROFIT':'50% CHANCE · 1:1 PROFIT'}</span></label>
+                      <label>YOUR PICK <span>50% CHANCE · 1:1 PROFIT</span></label>
                       <div className="arcade-choice-row">{activeGame.choices.map(option => <button key={option.id} className={choice === option.id ? 'active' : ''} onClick={() => setChoice(option.id)}>{option.label}</button>)}</div>
                       <p className="roulette-odds-note">Fair odds · 50% chance · no built-in house edge on this game.</p>
                     </>
                   )}
                   <button className="arcade-primary" onClick={play} disabled={busy || revealing || balance === null}>{busy ? 'PLACING BET…' : revealing ? 'REVEALING RESULT…' : 'PLACE BET'}</button>
-                  {result && !revealing && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>{result.payout_multiplier ? `Payout: ${result.payout_multiplier}:1 profit · Win chance: ${result.win_probability || '—'}` : ''}</small><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
+                  {result && !revealing && <div className={result.won ? 'arcade-result win' : 'arcade-result loss'}><strong>{result.won ? 'YOU WON' : 'NOT THIS TIME'}</strong><span>Outcome: {result.outcome}</span><b>{result.net > 0 ? '+' : ''}{result.net.toLocaleString()} coins</b><small>{game==='slots' ? `Total payout: ${result.payout_multiplier||0}× · RTP: ${result.rtp||'95.83%'}` : result.payout_multiplier ? `Payout: ${result.payout_multiplier}:1 profit · Win chance: ${result.win_probability || '—'}` : ''}</small><small>New balance: {result.balance.toLocaleString()} coins</small></div>}
                 </div>
                 <div className="arcade-work-card"><div><span className="dashboard-kicker">EARN COINS</span><h2>Work a shift.</h2><p>Choose a shift and earn 100–250 coins. One shift per hour.</p></div><button className="arcade-secondary" onClick={work} disabled={busy}>START SHIFT · +100–250</button></div>
               </div>
