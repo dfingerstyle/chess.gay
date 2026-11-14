@@ -78,6 +78,14 @@ begin
     pg_catalog.hashtextextended(v_uid::text || ':economy:' || p_asset_key, 0)
   );
 
+  -- Lock the wallet before any asset rows. Income collection uses the same order,
+  -- preventing a purchase/collection deadlock under concurrent requests.
+  select balance into v_balance
+  from public.wallets where user_id = v_uid for update;
+  if v_balance is null then
+    raise exception 'wallet not found' using errcode = 'P0001';
+  end if;
+
   select * into v_asset
   from public.economy_asset_catalog
   where asset_key = p_asset_key and active = true
@@ -102,9 +110,7 @@ begin
 
   v_cost := v_asset.base_price * case when v_action = 'purchase' then 1 else v_owned.level end;
 
-  select balance into v_balance
-  from public.wallets where user_id = v_uid for update;
-  if v_balance is null or v_balance < v_cost then
+  if v_balance < v_cost then
     raise exception 'not enough coins; this costs %', v_cost using errcode = 'P0001';
   end if;
 
