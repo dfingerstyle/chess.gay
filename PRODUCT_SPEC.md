@@ -213,6 +213,7 @@ The current development branch has moved beyond the original static foundation f
 - **Casino social/history:** personal table-bet and slot-spin history, net-profit leaderboard across table bets, slots and player duels, synthesized sound effects and optional ambient audio.
 - **Casino security:** server-generated outcomes, wallet locks and ledger adjustments, RLS, authenticated-only RPCs, no direct client writes to sensitive tables, private invite entropy and server-side rate limits.
 - A work-shift earning action (100–250 coins, one-hour cooldown), server-side shop purchases and sales, and persistent inventory.
+- A persistent world-asset economy on the development branch: property rent, business revenue and fictional mining-rig income; server-side purchase/upgrade RPCs; capped collect-all passive income; and public coins, net-worth, level and XP leaderboards. The migration is committed but not yet applied to hosted Supabase.
 - Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated pixel-art backgrounds.
 - Eight-destination hybrid world hub.
 - Board Workshop MVP with six colour palettes, custom square colours, live preview and local named presets.
