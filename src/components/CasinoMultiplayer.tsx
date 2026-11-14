@@ -125,7 +125,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
   },[selectedTableId]);
 
   useEffect(()=>{void refreshTables();},[refreshTables]);
-  useEffect(()=>{lastAnimatedRound.current=null;setVisualResult(null);setBetsRoundId(null);},[selectedTableId]);
+  useEffect(()=>{lastAnimatedRound.current=null;setVisualResult(null);setBetsRoundId(null);setSelectedTable(null);setRound(null);setRoundHistory([]);setBets([]);setMessages([]);setMembers([]);},[selectedTableId]);
   useEffect(()=>{
     if(!round||round.status!=='settled'||!round.outcome||betsRoundId!==round.id||lastAnimatedRound.current===round.id)return;
     lastAnimatedRound.current=round.id;
@@ -193,7 +193,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     const {error}=await supabase.rpc('join_casino_table',{p_table_id:tableId,p_role:joinRole,p_code:code||null});
     setBusy(false);
     if(error){setMessage(error.message);return;}
-    setRole(joinRole);setSelectedTableId(tableId);setMessage(joinRole==='spectator'?'You are spectating this table.':'You joined the table.');setView('tables');
+    setCreatedCode('');setRole(joinRole);setSelectedTable(null);setSelectedTableId(tableId);setMessage(joinRole==='spectator'?'You are spectating this table.':'You joined the table.');setView('tables');
   }
 
   async function joinByCode(event:FormEvent){
@@ -202,7 +202,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     const {data,error}=await supabase.rpc('join_casino_table_by_code',{p_code:joinCode,p_role:role});
     setBusy(false);
     if(error){setMessage(error.message);return;}
-    setSelectedTableId((data as {table_id:string}).table_id);
+    setCreatedCode('');setSelectedTable(null);setSelectedTableId((data as {table_id:string}).table_id);
     setMessage(role==='spectator'?'You joined as a spectator.':'You joined the private table.');
     setJoinCode('');setView('tables');
   }
@@ -213,7 +213,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     const {error}=await supabase.rpc('leave_casino_table',{p_table_id:selectedTableId});
     setBusy(false);
     if(error){setMessage(error.message);return;}
-    setSelectedTableId(null);setSelectedTable(null);setRound(null);setMessage('You left the table.');
+    setCreatedCode('');setSelectedTableId(null);setSelectedTable(null);setRound(null);setMessage('You left the table.');
     await refreshTables();
   }
 
