@@ -5,6 +5,8 @@ do $$
 declare
   v_def text;
   v_count integer;
+  v_wallet_lock integer;
+  v_asset_lock integer;
 begin
   if not exists (
     select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace
@@ -40,10 +42,22 @@ begin
      or position('internal_adjust' in v_def)=0
   then raise exception 'purchase/upgrade must serialize and use the wallet ledger'; end if;
 
+  v_wallet_lock := position('from public.wallets' in lower(v_def));
+  v_asset_lock := position('from public.player_economy_assets' in lower(v_def));
+  if v_wallet_lock = 0 or v_asset_lock = 0 or v_wallet_lock > v_asset_lock then
+    raise exception 'purchase must lock the wallet before owned assets to avoid deadlocks';
+  end if;
+
   select pg_get_functiondef('public.claim_economy_income()'::regprocedure) into v_def;
   if position('for update' in lower(v_def))=0
      or position('internal_adjust' in v_def)=0
   then raise exception 'income claim must lock owned assets and use the wallet ledger'; end if;
+
+  v_wallet_lock := position('from public.wallets' in lower(v_def));
+  v_asset_lock := position('from public.player_economy_assets' in lower(v_def));
+  if v_wallet_lock = 0 or v_asset_lock = 0 or v_wallet_lock > v_asset_lock then
+    raise exception 'income collection must lock the wallet before owned assets';
+  end if;
 
   select pg_get_functiondef('public.get_economy_leaderboard(text,integer)'::regprocedure) into v_def;
   if position('email' in lower(v_def))>0
