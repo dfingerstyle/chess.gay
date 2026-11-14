@@ -29,7 +29,7 @@ chess.gay is a free chess, learning, community and gaming platform. Chess.com is
 - E2EE for private messaging, implemented using an established and independently reviewed protocol.
 - Full profile customisation, but personal image uploads are disabled. Use curated platform avatars and shop cosmetics.
 - Dedicated full admin dashboard plus contextual moderation controls.
-- Casino, if launched, uses virtual coins only and no real-money deposits, cash-outs or withdrawals; legal and age restrictions still apply.
+- The casino uses virtual coins only and no real-money deposits, cash-outs, withdrawals or cash-equivalent prizes; legal and age restrictions still apply.
 - The platform is free. One shared coin wallet connects all activities. Hybrid progression uses XP/levels for earned unlocks; cosmetics and convenience may be unlocked, but competitive advantages are never sold.
 
 ## Public website
