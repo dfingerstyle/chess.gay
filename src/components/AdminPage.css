@@ -33,3 +33,5 @@
 
 .admin-page input[type="checkbox"]{width:16px;height:16px;padding:0;accent-color:#a77bdd}
 .admin-toggle-row input[type="checkbox"]{width:36px;height:19px}
+
+.admin-unreleased{display:inline-block;margin-left:6px;padding:3px 5px;border:1px solid rgba(215,166,100,.25);border-radius:3px;color:#d4aa75;font-size:7px;font-style:normal;letter-spacing:.08em;vertical-align:middle}
