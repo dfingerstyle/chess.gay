@@ -69,6 +69,7 @@ let ambienceNodes: OscillatorNode[] = [];
 let ambienceStopTimer: number | null = null;
 
 export function setCasinoAmbience(enabled: boolean, volume = 0.35) {
+  if (!enabled && !ambienceGain) return;
   const ctx = context();
   if (!ctx) return;
   const now = ctx.currentTime;
