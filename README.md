@@ -57,13 +57,14 @@ The player directory requires the existing public SELECT policy on `profiles`; p
 
 ## Roadmap
 
-1. Foundation: public site, guest/account identity, dashboard, profiles, discovery, presence and theme system.
-2. Playable chess: local rules engine, clocks and history; then online two-player lobbies and matchmaking.
-3. Four-player chess: FFA, 2v2 and custom starting positions, built on shared multiplayer infrastructure.
-4. World activities: shared wallet, farming, fishing, work, inventory, XP and hybrid progression.
-5. Customization: Board Workshop, Player Studio, cosmetics and account-backed presets.
-6. Chess intelligence and community: Stockfish, puzzles, friends, messages, clubs and events.
-7. Administration and launch: the first protected Admin Command Centre is implemented; finish browser-based multi-account QA, anti-cheat, accessibility and security review.
+The original six-phase delivery plan is authoritative. Existing implementation is preserved and credited; no working feature is rebuilt simply to reorder it.
+
+1. **Phase 1 — Platform foundations:** code/database review, shared UI/navigation, permission design, casino room/bet/transaction schema, testing/migration standards, and the shared world economy (wallet, inventory, XP, work, farming, fishing, properties, businesses, simulated mining and economy leaderboards).
+2. **Phase 2 — Admin Command Centre:** admin authentication, custom roles, dashboard/player management, moderation/audit logs, economy controls, and casino/chess management.
+3. **Phase 3 — Casino experience:** lobby, roulette, coin flip, dice, animations/sound, betting history/statistics and server-side validation/payout tests.
+4. **Phase 4 — Multiplayer casino:** public/private tables, player challenges, shared results, spectating, live chat, leaderboards and multiplayer testing.
+5. **Phase 5 — Chess Hub:** six selectable modes, bot/local/self-play, online matchmaking, private lobbies and training.
+6. **Phase 6 — Polish and release:** responsive layouts, performance, security, two-account/multiple-device testing and regression coverage for farming, fishing, profiles, economy and progression.
 
 ## Security
 
