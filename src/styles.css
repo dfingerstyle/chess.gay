@@ -452,3 +452,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible 
 .banner-picker { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 17px; }
 .banner-option { min-height:38px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:9px;cursor:pointer; }
 .banner-option.selected { border-color:var(--acc);color:var(--acc);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent); }
+
+
+/* Protected admin entry and platform-wide account/maintenance gates */
+.admin-nav-link{color:#c6a5ee!important;text-shadow:0 0 12px rgba(163,112,220,.28)}
+.platform-gate-screen{position:relative;z-index:20;min-height:72vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;color:var(--text,#f3edf9);background:radial-gradient(ellipse at 50% 30%,rgba(120,79,168,.2),transparent 55%)}
+.platform-gate-screen h1{margin:18px 0 10px;font-size:clamp(34px,6vw,66px);line-height:1.02;letter-spacing:-.05em}
+.platform-gate-screen h1 em{color:var(--accent,#b995e6);font-style:normal}
+.platform-gate-screen p{max-width:520px;color:var(--muted,#978ca3);font-size:13px;line-height:1.7;margin:0 0 22px}
+.platform-gate-screen .eyebrow-line{width:42px;height:2px;background:var(--accent,#b995e6);box-shadow:0 0 18px var(--accent,#b995e6)}
+.platform-gate-screen.restricted h1 em{color:#e68b9d}
