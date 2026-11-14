@@ -134,7 +134,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const activeGame = GAMES.find(option => option.id === game)!;
   const rouletteGroup = ROULETTE_TYPES.find(option => option.id === rouletteType)!;
   const rouletteBet = rouletteGroup.options.find(option => option.id === choice) || rouletteGroup.options[0];
-  function changeGame(next: Game) { setGame(next); setChoice(GAMES.find(option => option.id === next)!.choices[0]?.id||'spin'); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
+  function changeGame(next: Game) { setGame(next); setChoice(next==='roulette'?'red':next==='coinflip'?'heads':next==='dice'?'low':'spin'); if(next==='roulette')setRouletteType('colour'); setResult(null); setRevealing(false); setCasinoView('games'); setMessage(''); }
   function selectRouletteBet(type: string, nextChoice: string) { setRouletteType(type); setChoice(nextChoice); setResult(null); }
 
   return (
