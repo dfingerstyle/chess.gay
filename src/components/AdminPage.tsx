@@ -133,16 +133,15 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function loadCasino(){
     if(!supabase)return;
-    const [summary,activity]=await Promise.all([
+    const [summary,activity,tables]=await Promise.all([
       supabase.rpc('admin_get_casino_overview'),
       supabase.rpc('admin_get_recent_casino_activity',{p_limit:40}),
       supabase.rpc('admin_get_casino_tables'),
     ]);
-    if(summary.error||activity.error||arguments.length===0){setNotice(summary.error?.message||activity.error?.message||'Could not load casino analytics.');return;}
+    if(summary.error||activity.error||tables.error){setNotice(summary.error?.message||activity.error?.message||tables.error?.message||'Could not load casino analytics.');return;}
     setCasino((summary.data||{}) as Record<string,number>);
     setCasinoActivity((activity.data||[]) as Array<Record<string,unknown>>);
-    const tables=await supabase.rpc('admin_get_casino_tables');
-    if(tables.error)setNotice(tables.error.message);else setCasinoTables((tables.data||[]) as CasinoTable[]);
+    setCasinoTables((tables.data||[]) as CasinoTable[]);
   }
   async function loadSettings(){
     if(!supabase)return;
