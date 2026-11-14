@@ -1,4 +1,4 @@
-type CasinoCue = 'roulette' | 'coinflip' | 'dice' | 'win' | 'loss';
+type CasinoCue = 'roulette' | 'coinflip' | 'dice' | 'slots' | 'win' | 'loss';
 
 let audioContext: AudioContext | null = null;
 
@@ -50,6 +50,12 @@ export function playCasinoCue(cue: CasinoCue, volume = 0.35) {
   if (cue === 'dice') {
     [880, 620, 1040, 520].forEach((frequency, index) => {
       tone(ctx, frequency, now + index * 0.1, 0.075, v * 0.75, 'square', frequency * 0.55);
+    });
+    return;
+  }
+  if (cue === 'slots') {
+    [620, 780, 540, 880, 660, 990, 740].forEach((frequency, index) => {
+      tone(ctx, frequency, now + index * 0.16, 0.12, v * 0.8, 'triangle', frequency * 0.82);
     });
     return;
   }
