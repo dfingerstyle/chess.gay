@@ -60,7 +60,7 @@ The opponent receives the opposite choice. Neither player is charged until the c
 - Synthesized game sound effects, optional ambient audio and a volume control.
 
 ## Security model
-- Random outcomes are generated on the server using the Supabase cryptographic random-byte function with rejection sampling where modulo reduction would otherwise introduce bias.
+- Random outcomes for single-player games, slots, multiplayer rounds and player challenges are generated on the server using Supabase cryptographic random bytes. Rejection sampling is used where modulo reduction would otherwise introduce bias; coin flips use an even split of accepted byte values.
 - The browser displays results; it never determines outcomes or payouts.
 - Wallet changes use the existing server-side economy ledger function.
 - Wallet rows, table rows and rounds are locked where needed to serialize stakes and settlement.
@@ -83,4 +83,4 @@ Database smoke tests run inside transactions and roll back:
 - Anonymous execution is revoked for casino RPCs.
 - Direct execution of the internal wallet-adjustment helper is denied to both `anon` and `authenticated`, while authenticated coinflip and slot RPCs still settle successfully through the trusted server-side call path.
 
-A CI build and dependency audit are run on the draft branch. A true browser-based end-to-end test across two independent logged-in browser sessions remains a release check.
+A CI build and dependency audit are run on the draft branch. The read-only regression checks in `supabase/tests/casino_randomness.sql` verify that the single-player arcade and slots RPCs use cryptographic randomness, retain unbiased rejection bounds, and remain unavailable to anonymous callers. Run them after migrations against a local or staging database with `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/casino_randomness.sql`. A true browser-based end-to-end test across two independent logged-in browser sessions remains a release check.
