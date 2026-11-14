@@ -120,3 +120,7 @@
 .casino-audio-controls label{display:flex;align-items:center;gap:7px;color:#a99fb6;font-size:7px;font-weight:900;letter-spacing:.12em}
 .casino-audio-controls input{width:75px;accent-color:#c9a75f}
 @media(max-width:700px){.casino-audio-controls{width:100%;margin-left:0;justify-content:flex-end}.game-page-toolbar{flex-wrap:wrap}}
+
+.casino-table-roulette-pick{grid-column:1/-1;min-width:0}
+.casino-bet-odds{margin:8px 0 0;color:#cbb274;font-size:8px;font-weight:800;letter-spacing:.08em}
+.casino-bet-form label small{color:#bba36b;font-size:8px;font-weight:600;letter-spacing:.06em}
