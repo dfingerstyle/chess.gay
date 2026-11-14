@@ -26,6 +26,8 @@ function tone(ctx: AudioContext, frequency: number, start: number, duration: num
   oscillator.stop(start + duration + 0.015);
 }
 
+export function primeCasinoAudio() { void context(); }
+
 export function playCasinoCue(cue: CasinoCue, volume = 0.35) {
   const ctx = context();
   const level = Math.max(0, Math.min(1, volume));
