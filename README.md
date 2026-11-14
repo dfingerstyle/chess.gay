@@ -51,19 +51,20 @@ The Phase 1 foundation branch adds:
 
 The existing Supabase client and profiles foundation are preserved. Authentication now waits for session restoration, distinguishes anonymous guests from registered accounts, and avoids showing account-creation prompts to registered users. Guest email linking uses the same Supabase user identity so eligible wallet and inventory rows remain attached. The product specification is the source of truth for guest-first access and the planned playable game systems.
 
-The homepage is now a hybrid world hub with eight destinations. Chess, the casino, the shop, work, farming, fishing and the board-colour workshop have real interactions. The casino now includes animated roulette, coin flip, dice and slots, public/private multiplayer tables, player duels, chat, spectators, history and leaderboards. Training, social/community, tournaments and the full Player Studio remain partially or wholly in development. The Admin Command Centre now has its first operational implementation: custom roles, permission checks, player records, moderation, economy controls, casino oversight, audit logs and platform settings. Final browser-based multi-account QA is still required before launch.
+The homepage is now a hybrid world hub with nine destinations. Chess, the casino, the shop, work, farming, fishing and the board-colour workshop have real interactions. The casino now includes animated roulette, coin flip, dice and slots, public/private multiplayer tables, player duels, chat, spectators, history and leaderboards. Training, social/community, tournaments and the full Player Studio remain partially or wholly in development. The Admin Command Centre now has its first operational implementation: custom roles, permission checks, player records, moderation, economy controls, casino oversight, audit logs and platform settings. Final browser-based multi-account QA is still required before launch.
 
 The player directory requires the existing public SELECT policy on `profiles`; profile editing uses the existing owner-only UPDATE policy. Realtime presence is ephemeral and does not create persistent visitor records.
 
 ## Roadmap
 
-1. Foundation: public site, guest/account identity, dashboard, profiles, discovery, presence and theme system.
-2. Playable chess: local rules engine, clocks and history; then online two-player lobbies and matchmaking.
-3. Four-player chess: FFA, 2v2 and custom starting positions, built on shared multiplayer infrastructure.
-4. World activities: shared wallet, farming, fishing, work, inventory, XP and hybrid progression.
-5. Customization: Board Workshop, Player Studio, cosmetics and account-backed presets.
-6. Chess intelligence and community: Stockfish, puzzles, friends, messages, clubs and events.
-7. Administration and launch: the first protected Admin Command Centre is implemented; finish browser-based multi-account QA, anti-cheat, accessibility and security review.
+The original six-phase delivery plan is authoritative. Existing implementation is preserved and credited; no working feature is rebuilt simply to reorder it.
+
+1. **Phase 1 — Platform foundations:** code/database review, shared UI/navigation, permission design, casino room/bet/transaction schema, testing/migration standards, and the shared world economy (wallet, inventory, XP, work, farming, fishing, properties, businesses, simulated mining and economy leaderboards).
+2. **Phase 2 — Admin Command Centre:** admin authentication, custom roles, dashboard/player management, moderation/audit logs, economy controls, and casino/chess management.
+3. **Phase 3 — Casino experience:** lobby, roulette, coin flip, dice, animations/sound, betting history/statistics and server-side validation/payout tests.
+4. **Phase 4 — Multiplayer casino:** public/private tables, player challenges, shared results, spectating, live chat, leaderboards and multiplayer testing.
+5. **Phase 5 — Chess Hub:** six selectable modes, bot/local/self-play, online matchmaking, private lobbies and training.
+6. **Phase 6 — Polish and release:** responsive layouts, performance, security, two-account/multiple-device testing and regression coverage for farming, fishing, profiles, economy and progression.
 
 ## Security
 
@@ -94,9 +95,10 @@ The branch now includes a first real playable and economy vertical slice:
 - **Casino history and rankings:** personal table-bet and slot-spin history, plus net-profit leaderboard across table bets, slots and player duels. All wagers use virtual coins only.
 - **Admin Command Centre:** database-backed custom roles and granular permissions; player search and detail records; reasoned wallet adjustments; warnings, chat mutes, suspensions and bans; role assignment; casino analytics and table closure; audit history; maintenance mode and feature flags. Direct writes to admin tables are revoked and admin mutations use permission-checked RPCs.
 - **Persistent wallet:** Supabase wallet balances, immutable transaction history, work-shift earnings (100–250 coins, one-hour cooldown), shop purchases, item sales and inventory.
+- **World economy expansion (development branch):** property ownership, business upgrades and fictional mining rigs with server-calculated passive income; a collect-all action; and public coins, net-worth, level and XP leaderboards. Requires the new migration before the UI can operate against a database.
 - **Security:** balance changes and game outcomes are database RPCs; direct client access to the internal balance-adjustment function is revoked. Economy RPCs validate the authenticated user and lock the wallet row before changing its balance.
 - **Themes:** Starry Void, Sakura and Deep Sea, with Inter body text, Pixelify Sans display typography and animated pixel-art backgrounds.
-- **Hybrid world hub:** eight clickable destinations for Chess, Farming, Fishing, Work, Board Workshop, Player Studio, Arcade and Community.
+- **Hybrid world hub:** nine clickable destinations for Chess, Farming, Fishing, Work, Board Workshop, Player Studio, Arcade and Community.
 - **Board Workshop MVP:** six preset palettes, custom light/dark square colours, live board preview, equip action and up to 12 named local presets. These settings currently sync only within the same browser/device.
 - **Player Studio MVP:** profile editor for display name, bio, six avatar presets and six server-saved banner styles. Personal image uploads, frames, titles and privacy controls are not yet implemented.
 - **Farming:** four persistent plots, carrot seed and shovel requirements, five-minute server-tracked growth, harvest into inventory, and +10 XP per harvest. Harvested carrots can be sold in the Shop.

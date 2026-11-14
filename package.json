@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "verify:preservation": "node scripts/check-platform-preservation.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

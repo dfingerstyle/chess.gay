@@ -2,12 +2,14 @@ name: Build
 
 on:
   push:
-    branches: [main, phase-1-foundation]
+    branches: [main, phase-1-foundation, phase-2-casino-completion, phase-1-world-economy-expansion]
   pull_request:
     branches: [main, phase-1-foundation]
 
 permissions:
   contents: read
+
+# Keep build verification active while the world-economy feature branch is under review.
 
 jobs:
   build:
@@ -23,5 +25,7 @@ jobs:
         run: npm install
       - name: Audit dependencies
         run: npm audit --audit-level=high
+      - name: Verify core platform preservation
+        run: npm run verify:preservation
       - name: Type-check and build
         run: npm run build
