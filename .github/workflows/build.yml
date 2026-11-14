@@ -9,6 +9,8 @@ on:
 permissions:
   contents: read
 
+# Keep build verification active while the world-economy feature branch is under review.
+
 jobs:
   build:
     runs-on: ubuntu-latest
