@@ -9,9 +9,10 @@ import BoardWorkshop from './components/BoardWorkshop';
 import { FarmPage, FishingPage, WorkPage } from './components/WorldActivities';
 import MultiplayerLobby from './components/MultiplayerLobby';
 import AdminPage from './components/AdminPage';
+import WorldEconomyPage from './components/WorldEconomyPage';
 import { supabase } from './lib/supabase';
 
-type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby';
+type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby' | 'economy';
 type Profile = {
   id: string;
   username: string;
@@ -61,6 +62,7 @@ const modes: Array<{number:string;title:string;detail:string;tag:string;icon:str
   { number: '06', title: 'Player Studio', detail: 'Make your profile feel like yours.', tag: 'CUSTOMIZATION', icon: '✦', page: 'studio' },
   { number: '07', title: 'The Arcade', detail: 'Play arcade games using free virtual coins.', tag: 'VIRTUAL COINS', icon: '✳', page: 'casino' },
   { number: '08', title: 'The Club', detail: 'Find players and explore the community.', tag: 'YOUR PEOPLE', icon: '♧', page: 'community' },
+  { number: '09', title: 'World Economy', detail: 'Own property, build businesses, mine simulated coins and climb the wealth rankings.', tag: 'BUILD YOUR EMPIRE', icon: '⌂', page: 'economy' },
 ];
 
 function getAvatarPreset(value: string | null | undefined): AvatarPreset {
@@ -199,6 +201,8 @@ function Dashboard({ profile, profileLoading, guestName, onDiscover, onEditProfi
           <button className="dashboard-action" onClick={onEditProfile}>EDIT YOUR PROFILE <span>↗</span></button>
           <button className="dashboard-action" onClick={() => onFeature('casino')}>THE CASINO <span>VIRTUAL COINS</span></button>
           <button className="dashboard-action" onClick={() => onFeature('learn')}>PUZZLES & LESSONS <span>TRAIN</span></button>
+          <button className="dashboard-action dashboard-action-primary" onClick={() => onFeature('economy')}>PROPERTY & BUSINESSES <span>BUILD WEALTH</span></button>
+          <button className="dashboard-action" onClick={() => onFeature('economy')}>LEADERBOARDS <span>RANK UP</span></button>
         </article>
         <article className="dashboard-card profile-summary-card">
           <div className="dashboard-card-heading"><div><span className="dashboard-kicker">YOUR IDENTITY</span><h3>Player profile</h3></div><span className="dashboard-card-icon">♟</span></div>
@@ -528,6 +532,8 @@ export default function App() {
           <button onClick={() => { setPage('chess'); setMenuOpen(false); }}>CHESS</button>
           <button onClick={() => { setPage('learn'); setMenuOpen(false); }}>LEARN</button>
           <button onClick={() => { setPage('discover'); setMenuOpen(false); }}>PLAYERS</button>
+          <button onClick={() => { setPage('economy'); setMenuOpen(false); }}>WORLD</button>
+          <button onClick={() => { setPage('economy'); setMenuOpen(false); }}>RANKINGS</button>
           {featureFlags.community_enabled !== false && <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>}
           {featureFlags.casino_enabled !== false && <button onClick={() => { setPage('casino'); setMenuOpen(false); }}>CASINO</button>}
           <button onClick={() => { setPage('shop'); setMenuOpen(false); }}>SHOP</button>
@@ -556,7 +562,7 @@ export default function App() {
         <section className="ticker" aria-label="Platform values"><div>PLAY WITH PURPOSE <b>✳</b> STAY FOR THE PEOPLE <b>✳</b> MAKE YOUR NEXT MOVE <b>✳</b> THE WHOLE GAME IS FREE <b>✳</b></div></section>
         <section className="games-section section-pad" id="games">
           <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LINEUP</div><h2>Choose your<br /><em>kind of trouble.</em></h2></div><p>One home for thoughtful games, useful training, ridiculous comebacks, and the people you'll want to play again.</p></div>
-          <div className="mode-grid">{modes.filter(mode => (mode.page !== 'casino' || featureFlags.casino_enabled !== false) && (mode.page !== 'community' || featureFlags.community_enabled !== false)).map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 08</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
+          <div className="mode-grid">{modes.filter(mode => (mode.page !== 'casino' || featureFlags.casino_enabled !== false) && (mode.page !== 'community' || featureFlags.community_enabled !== false)).map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 09</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
         </section>
         <section className="community-section section-pad" id="community">
           <div className="community-ornament">♘</div>
@@ -574,6 +580,7 @@ export default function App() {
       {page === 'farm' && <FarmPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} onShop={() => setPage('shop')} />}
       {page === 'fishing' && <FishingPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'work' && <WorkPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
+      {page === 'economy' && <WorldEconomyPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'shop' && <ArcadePage page="shop" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
       {page === 'casino' && (featureFlags.casino_enabled === false ? <section className="app-page"><button className="back-link" onClick={() => setPage('dashboard')}>← BACK</button><PageHeading eyebrow="CASINO" title={<>Temporarily <em>unavailable.</em></>} description="The virtual casino is currently disabled by platform administration." /></section> : <ArcadePage page="casino" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />)}
       {['learn','community','tournaments','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
