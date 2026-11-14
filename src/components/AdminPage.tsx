@@ -81,8 +81,8 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
 
   async function loadOverview(){
-    if(!supabase)return;
-    const {data,error}=await supabase.rpc('admin_get_overview');
+    if(!client)return;
+    const {data,error}=await client.rpc('admin_get_overview');
     if(error)setNotice(error.message);else setOverview((data||{}) as Record<string,number>);
   }
   async function loadPlayers(){
@@ -101,7 +101,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     if(!supabase)return;
     const [roleResult,permissionResult,linkResult,userRoleResult]=await Promise.all([
       client.from('admin_roles').select('id,role_key,name,description,is_system').order('name'),
-      supabase.from('admin_permissions').select('permission_key,category,label,description').order('category').order('label'),
+      client.from('admin_permissions').select('permission_key,category,label,description').order('category').order('label'),
       supabase.from('admin_role_permissions').select('role_id,permission_key'),
       supabase.from('admin_user_roles').select('role_id'),
     ]);
