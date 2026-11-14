@@ -12,7 +12,7 @@ The admin interface is a protected operations console at the Admin navigation en
 | Moderator | Player warnings, chat mutes, suspensions and moderation review |
 | Support | Player lookup, moderation history and internal support notes |
 
-The Owner role is immutable and cannot be assigned to another account or removed through the panel. Custom roles can be created and given any combination of the seeded permissions. Only an account with roles.manage can create roles or edit permission sets; only roles.assign can grant or remove roles. In the initial project database, the project owner account receives the Owner role during the migration.
+The Owner role is immutable and cannot be assigned through the panel or removed. The trusted initial migration bootstraps the project owner separately. The role-assignment RPC rejects Owner assignments even when the target is the acting administrator; this prevents a staff member with roles.assign from escalating itself. Custom roles can be created and given any combination of the seeded permissions. Only an account with roles.manage can create roles or edit permission sets; only roles.assign can grant or remove roles. In the initial project database, the project owner account receives the Owner role during the migration.
 
 ## Permission catalogue
 
@@ -91,4 +91,4 @@ Database tests run inside transactions and roll back:
 - Unreleased feature flags cannot be enabled.
 - Casino table listing and audited closure work; closure is rejected while a betting round is open.
 
-The browser UI has passed the TypeScript/build pipeline on the draft branch. Real browser-based testing with two separate signed-in accounts and a full admin workflow is still a final release check.
+The browser UI has passed the TypeScript/build pipeline on the draft branch. Real browser-based testing with two separate signed-in accounts and a full admin workflow is still a final release check. Ordinary players do not receive the Admin navigation entry: it is shown only when the server returns a staff role with dashboard.view, and each tab and RPC still checks its own permission. Support and other limited staff roles may see a restricted subset of the console; that is intentional and is not public access.
