@@ -65,6 +65,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
 
   const outcomeLabel = result?.outcome || 'Waiting for the next round';
   const coinSide = outcomeLabel.toLowerCase().includes('tails') ? 'TAILS' : 'HEADS';
+  const coinStyle = { '--coin-final-rotation': coinSide === 'TAILS' ? '1980deg' : '1800deg' } as CSSProperties;
   const dieNumber = Math.min(6, Math.max(1, Number.parseInt(outcomeLabel, 10) || 1));
   const wheelColour = number === 0 ? 'green' : RED_NUMBERS.has(number) ? 'red' : 'black';
 
@@ -96,7 +97,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
 
       {game === 'coinflip' && (
         <div className="coin-scene">
-          <div className={revealing ? 'casino-coin is-flipping' : 'casino-coin'}>
+          <div className={revealing ? 'casino-coin is-flipping' : 'casino-coin'} style={coinStyle}>
             <div className="coin-face coin-front"><span>♛</span><b>HEADS</b></div>
             <div className="coin-face coin-back"><span>♞</span><b>TAILS</b></div>
           </div>
