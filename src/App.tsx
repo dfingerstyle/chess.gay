@@ -431,7 +431,7 @@ export default function App() {
     return () => { active = false; window.clearInterval(timer); };
   }, [user?.id]);
 
-  const isAdmin = Boolean(adminAccess?.is_admin && !accountStatus?.is_banned);
+  const isAdmin = Boolean(adminAccess?.is_admin && adminAccess.permissions.includes('dashboard.view') && !accountStatus?.is_banned);
   const featureFlags = platformConfig?.feature_flags || {};
   const maintenanceMode = Boolean(platformConfig?.maintenance_mode && !isAdmin);
   const refreshPlatformConfig = async () => {
