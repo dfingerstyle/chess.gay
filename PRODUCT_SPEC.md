@@ -215,7 +215,7 @@ The current development branch has moved beyond the original static foundation f
 - A work-shift earning action (100–250 coins, one-hour cooldown), server-side shop purchases and sales, and persistent inventory.
 - A persistent world-asset economy on the development branch: property rent, business revenue and fictional mining-rig income; server-side purchase/upgrade RPCs; capped collect-all passive income; and public coins, net-worth, level and XP leaderboards. The migration is committed but not yet applied to hosted Supabase.
 - Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated pixel-art backgrounds.
-- Eight-destination hybrid world hub.
+- Nine-destination hybrid world hub.
 - Board Workshop MVP with six colour palettes, custom square colours, live preview and local named presets.
 - Player Studio MVP with display name, bio, six curated avatars and six database-backed banner presets.
 - Farming with four persistent plots, carrot seeds, shovel requirement, five-minute growth, harvest-to-inventory and +10 XP.
