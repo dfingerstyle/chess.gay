@@ -12,6 +12,7 @@ type Role = { id:string; role_key:string; name:string; description:string; is_sy
 type Moderation = { id:string; target_user_id:string; actor_id:string|null; action_type:string; reason:string; status:string; created_at:string; expires_at:string|null; revoked_at:string|null };
 type Audit = { id:number; actor_id:string|null; action:string; target_type:string; target_id:string|null; reason:string; metadata:Record<string,unknown>; created_at:string };
 type Note = { id:string; author_id:string|null; note:string; created_at:string };
+type CasinoTable = { table_id:string;table_name:string;game_type:string;visibility:string;status:string;host_id:string;host_name:string|null;player_count:number;spectator_count:number;max_players:number;min_bet:number;max_bet:number;created_at:string };
 type Detail = { profile:Record<string,unknown>; email:string|null; last_sign_in_at:string|null; banned_until:string|null; wallet:{balance:number;xp:number;level:number}|null; roles:Array<{id:string;key:string;name:string}>; transactions:Array<{id:number;amount:number;reason:string;created_at:string}>; moderation:Moderation[]; notes:Note[]; casino_bets:Array<Record<string,unknown>>; slot_spins:Array<Record<string,unknown>> };
 type Metric = { label:string; value:string|number; hint?:string };
 const fmt=(value:number)=>Number(value||0).toLocaleString();
@@ -44,6 +45,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   const [economy,setEconomy]=useState<Record<string,number>>({});
   const [casino,setCasino]=useState<Record<string,number>>({});
   const [casinoActivity,setCasinoActivity]=useState<Array<Record<string,unknown>>>([]);
+  const [casinoTables,setCasinoTables]=useState<CasinoTable[]>([]);
   const [settings,setSettings]=useState<Array<{setting_key:string;value:unknown;description:string}>>([]);
   const [flags,setFlags]=useState<Array<{flag_key:string;enabled:boolean;description:string}>>([]);
   const [walletDelta,setWalletDelta]=useState('100');
@@ -134,10 +136,13 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     const [summary,activity]=await Promise.all([
       supabase.rpc('admin_get_casino_overview'),
       supabase.rpc('admin_get_recent_casino_activity',{p_limit:40}),
+      supabase.rpc('admin_get_casino_tables'),
     ]);
-    if(summary.error||activity.error){setNotice(summary.error?.message||activity.error?.message||'Could not load casino analytics.');return;}
+    if(summary.error||activity.error||arguments.length===0){setNotice(summary.error?.message||activity.error?.message||'Could not load casino analytics.');return;}
     setCasino((summary.data||{}) as Record<string,number>);
     setCasinoActivity((activity.data||[]) as Array<Record<string,unknown>>);
+    const tables=await supabase.rpc('admin_get_casino_tables');
+    if(tables.error)setNotice(tables.error.message);else setCasinoTables((tables.data||[]) as CasinoTable[]);
   }
   async function loadSettings(){
     if(!supabase)return;
@@ -253,6 +258,16 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
       if(error)throw error;await loadSettings();onConfigChanged();setNotice('Platform setting updated.');
     });
   }
+  async function closeCasinoTable(table:CasinoTable){
+    if(!supabase)return;
+    const reason=window.prompt('Reason for closing '+table.table_name+' (at least 8 characters):');
+    if(!reason||reason.trim().length<8)return;
+    if(!window.confirm('Close this casino table? An open betting round must settle first.'))return;
+    await runAction(async()=>{
+      const {error}=await supabase.rpc('admin_close_casino_table',{p_table_id:table.table_id,p_reason:reason.trim()});
+      if(error)throw error;await loadCasino();setNotice('Casino table closed.');
+    });
+  }
   async function toggleFlag(key:string,enabled:boolean){
     if(!supabase)return;
     await runAction(async()=>{
@@ -341,7 +356,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
 
         {tab==='economy'&&<div className="admin-content"><SectionHead eyebrow="SHARED WALLET" title="Economy" detail="Virtual coin circulation, XP and transaction flow. Player balance changes are ledger-backed."/><div className="admin-stat-grid"><Stat label="COINS IN CIRCULATION" value={fmt(economy.total_balance||0)}/><Stat label="TOTAL XP" value={fmt(economy.total_xp||0)}/><Stat label="WALLETS" value={fmt(economy.wallets||0)}/><Stat label="TRANSACTIONS · 24H" value={fmt(economy.transactions_24h||0)}/><Stat label="COINS IN · 24H" value={fmt(economy.coin_in_24h||0)}/><Stat label="COINS OUT · 24H" value={fmt(economy.coin_out_24h||0)}/></div><div className="admin-panel"><SectionHead eyebrow="ECONOMY SAFEGUARD" title="Balance adjustment" detail="Find a player in the Players tab. Adjustments require a reason and are recorded in both the wallet ledger and admin audit trail."/></div></div>}
 
-        {tab==='casino'&&<div className="admin-content"><SectionHead eyebrow="VIRTUAL CASINO" title="Casino operations" detail="Review house-game activity and player-versus-player results. Outcomes and odds are not editable here."/><div className="admin-stat-grid"><Stat label="ACTIVE TABLES" value={fmt(casino.active_tables||0)}/><Stat label="ACTIVE ROUNDS" value={fmt(casino.active_rounds||0)}/><Stat label="TABLE BETS" value={fmt(casino.table_bets||0)}/><Stat label="TABLE WAGERED" value={fmt(casino.table_wagered||0)}/><Stat label="TABLE PAYOUTS" value={fmt(casino.table_payouts||0)}/><Stat label="TABLE NET" value={fmt(casino.table_net||0)}/><Stat label="SLOT SPINS" value={fmt(casino.slot_spins||0)}/><Stat label="SLOT NET" value={fmt(casino.slot_net||0)}/><Stat label="PLAYER DUELS" value={fmt(casino.player_challenges||0)}/></div><div className="admin-panel"><div className="admin-panel-heading">RECENT CASINO ACTIVITY <span>{casinoActivity.length}</span></div>{casinoActivity.map((item,index)=><div className="admin-list-row" key={String(item.kind)+'-'+index}><span><b>{String(item.kind).replace('_',' ').toUpperCase()} · {String(item.game_type||'')}</b><small>Player {String(item.user_id||'').slice(0,8)}… · {String(item.detail||'')} · {date(String(item.created_at||''))}</small></span><strong>{fmt(Number(item.stake||0))} wagered</strong><b className={Number(item.net||0)>=0?'positive':'negative'}>{Number(item.net)>0?'+':''}{fmt(Number(item.net||0))}</b></div>)}</div></div>}
+        {tab==='casino'&&<div className="admin-content"><SectionHead eyebrow="VIRTUAL CASINO" title="Casino operations" detail="Review house-game activity and player-versus-player results. Outcomes and odds are not editable here."/><div className="admin-stat-grid"><Stat label="ACTIVE TABLES" value={fmt(casino.active_tables||0)}/><Stat label="ACTIVE ROUNDS" value={fmt(casino.active_rounds||0)}/><Stat label="TABLE BETS" value={fmt(casino.table_bets||0)}/><Stat label="TABLE WAGERED" value={fmt(casino.table_wagered||0)}/><Stat label="TABLE PAYOUTS" value={fmt(casino.table_payouts||0)}/><Stat label="TABLE NET" value={fmt(casino.table_net||0)}/><Stat label="SLOT SPINS" value={fmt(casino.slot_spins||0)}/><Stat label="SLOT NET" value={fmt(casino.slot_net||0)}/><Stat label="PLAYER DUELS" value={fmt(casino.player_challenges||0)}/></div><div className="admin-panel"><div className="admin-panel-heading">TABLE MANAGEMENT <span>{casinoTables.length} TABLES</span></div>{casinoTables.map(table=><div className="admin-list-row" key={table.table_id}><span><b>{table.table_name} · {table.game_type.toUpperCase()}</b><small>{table.visibility} · host @{table.host_name||table.host_id.slice(0,8)} · {table.player_count}/{table.max_players} players · {table.spectator_count} spectators · bets {fmt(table.min_bet)}–{fmt(table.max_bet)} · {date(table.created_at)}</small></span><span className={'admin-status '+(table.status==='closed'?'revoked':'active')}>{table.status.toUpperCase()}</span>{table.status!=='closed'&&can('casino.manage')&&<button className="admin-mini-button" onClick={()=>void closeCasinoTable(table)} disabled={busy}>CLOSE TABLE</button>}</div>)}</div><div className="admin-panel"><div className="admin-panel-heading">RECENT CASINO ACTIVITY <span>{casinoActivity.length}</span></div>{casinoActivity.map((item,index)=><div className="admin-list-row" key={String(item.kind)+'-'+index}><span><b>{String(item.kind).replace('_',' ').toUpperCase()} · {String(item.game_type||'')}</b><small>Player {String(item.user_id||'').slice(0,8)}… · {String(item.detail||'')} · {date(String(item.created_at||''))}</small></span><strong>{fmt(Number(item.stake||0))} wagered</strong><b className={Number(item.net||0)>=0?'positive':'negative'}>{Number(item.net)>0?'+':''}{fmt(Number(item.net||0))}</b></div>)}</div></div>}
 
         {tab==='audit'&&<div className="admin-content"><SectionHead eyebrow="IMMUTABLE HISTORY" title="Audit trail" detail="Sensitive admin actions are appended with actor, target, reason and metadata. Logs cannot be edited from the client."/><div className="admin-panel"><div className="admin-panel-heading">RECENT ADMIN ACTIONS <span>{audit.length}</span></div>{audit.map(item=><div className="admin-list-row audit-row" key={item.id}><span><b>{item.action}</b><small>{item.target_type} · {item.target_id||'—'} · {item.reason}</small><small>{date(item.created_at)} · actor {item.actor_id?.slice(0,8)||'system'}…</small></span><code>#{item.id}</code></div>)}</div></div>}
 
