@@ -525,10 +525,10 @@ export default function App() {
           <button onClick={() => { setPage('chess'); setMenuOpen(false); }}>CHESS</button>
           <button onClick={() => { setPage('learn'); setMenuOpen(false); }}>LEARN</button>
           <button onClick={() => { setPage('discover'); setMenuOpen(false); }}>PLAYERS</button>
-          <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>
+          {featureFlags.community_enabled !== false && <button onClick={() => { setPage('community'); setMenuOpen(false); }}>COMMUNITY</button>}
           {featureFlags.casino_enabled !== false && <button onClick={() => { setPage('casino'); setMenuOpen(false); }}>CASINO</button>}
           <button onClick={() => { setPage('shop'); setMenuOpen(false); }}>SHOP</button>
-          <button onClick={() => { setPage('tournaments'); setMenuOpen(false); }}>EVENTS</button>
+          {featureFlags.tournaments_enabled === true && <button onClick={() => { setPage('tournaments'); setMenuOpen(false); }}>EVENTS</button>}
           {user && <button onClick={() => { setPage('dashboard'); setMenuOpen(false); }}>DASHBOARD</button>}{isAdmin && <button className="admin-nav-link" onClick={() => { setPage('admin'); setMenuOpen(false); }}>ADMIN</button>}
         </nav>
         <OnlineCounter userId={user?.id ?? null} />
@@ -553,7 +553,7 @@ export default function App() {
         <section className="ticker" aria-label="Platform values"><div>PLAY WITH PURPOSE <b>✳</b> STAY FOR THE PEOPLE <b>✳</b> MAKE YOUR NEXT MOVE <b>✳</b> THE WHOLE GAME IS FREE <b>✳</b></div></section>
         <section className="games-section section-pad" id="games">
           <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LINEUP</div><h2>Choose your<br /><em>kind of trouble.</em></h2></div><p>One home for thoughtful games, useful training, ridiculous comebacks, and the people you'll want to play again.</p></div>
-          <div className="mode-grid">{modes.filter(mode => mode.page !== 'casino' || featureFlags.casino_enabled !== false).map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 08</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
+          <div className="mode-grid">{modes.filter(mode => (mode.page !== 'casino' || featureFlags.casino_enabled !== false) && (mode.page !== 'community' || featureFlags.community_enabled !== false)).map(mode => <article className="mode-card" key={mode.number}><div className="mode-card-top"><span>{mode.number} / 08</span><span className="mode-icon">{mode.icon}</span></div><div className="mode-card-bottom"><div className="mode-tag">{mode.tag}</div><h3>{mode.title}</h3><p>{mode.detail}</p><button className="card-link" onClick={() => setPage(mode.page)}>EXPLORE <span>↗</span></button></div></article>)}</div>
         </section>
         <section className="community-section section-pad" id="community">
           <div className="community-ornament">♘</div>
