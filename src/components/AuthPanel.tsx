@@ -182,7 +182,7 @@ export default function AuthPanel({ user, onClose, onSignedOut, onGuestRegistere
             </form>}
             {mode === 'login' && <button className="auth-submit" type="button" onClick={() => { void handleGuestPlay(); }} disabled={busy}>{busy ? 'STARTING GUEST SESSION…' : 'PLAY WITHOUT EMAIL'} <span>↗</span></button>}
             <div className="auth-switches">
-              {mode === 'login' && <><button onClick={() => { setMode('username'); setError(''); setMessage(''); }}>CREATE USERNAME · NO EMAIL</button><button onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>CREATE AN ACCOUNT<button onClick={() => { setMode('reset'); setError(''); setMessage(''); }}>FORGOT PASSWORD?</button></>}
+              {mode === 'login' && <><button onClick={() => { setMode('username'); setError(''); setMessage(''); }}>CREATE USERNAME · NO EMAIL</button><button onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>CREATE AN ACCOUNT</button><button onClick={() => { setMode('reset'); setError(''); setMessage(''); }}>FORGOT PASSWORD?</button></>}
               {mode !== 'login' && <button onClick={() => { setMode('login'); setError(''); setMessage(''); }}>← BACK TO SIGN IN</button>}
             </div>
           </>
