@@ -131,7 +131,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     lastAnimatedRound.current=round.id;
     const ownBets=bets.filter(bet=>bet.user_id===user.id);
     const net=ownBets.reduce((sum,bet)=>sum+Number(bet.net||0),0);
-    setVisualResult({outcome:round.outcome.label||String(round.outcome.number??round.outcome.side??'Result'),won:ownBets.length?ownBets.some(bet=>bet.status==='won'):undefined,net:ownBets.length?net:undefined});
+    setVisualResult({outcome:round.outcome.label||String(round.outcome.number??round.outcome.side??'Result'),won:ownBets.length&&net!==0?net>0:undefined,net:ownBets.length?net:undefined});
     setAnimationKey(key=>key+1);
   },[round?.id,round?.status,round?.outcome,betsRoundId,bets,user.id]);
   useEffect(()=>{if(!selectedTable)return;setBetType('colour');setBetChoice(selectedTable.game_type==='roulette'?'red':selectedTable.game_type==='coinflip'?'heads':'low');},[selectedTable?.id,selectedTable?.game_type]);
@@ -151,9 +151,9 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
   const settleRound=useCallback(async()=>{
     if(!supabase||!round||round.status!=='betting'||settling.current)return;
     settling.current=true;
-    const {error}=await supabase.rpc('settle_casino_round',{p_round_id:round.id});
+    const {data,error}=await supabase.rpc('settle_casino_round',{p_round_id:round.id});
     if(error)setMessage(error.message);
-    else{setMessage('Round settled. Check the result and your balance.');onBalanceChange();}
+    else{setMessage((data as {status?:string})?.status==='cancelled'?'No wagers were placed. The round was cancelled.':'Round settled. Check the result and your balance.');onBalanceChange();}
     await refreshSelected();
     settling.current=false;
   },[round,refreshSelected,onBalanceChange]);
