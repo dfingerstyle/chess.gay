@@ -10,6 +10,7 @@ import { FarmPage, FishingPage, WorkPage } from './components/WorldActivities';
 import MultiplayerLobby from './components/MultiplayerLobby';
 import AdminPage from './components/AdminPage';
 import WorldEconomyPage from './components/WorldEconomyPage';
+import TrainingPage from './components/TrainingPage';
 import { supabase } from './lib/supabase';
 
 type Page = 'home' | 'dashboard' | 'discover' | 'profile' | 'chess' | 'learn' | 'community' | 'casino' | 'shop' | 'tournaments' | 'admin' | 'farm' | 'fishing' | 'work' | 'workshop' | 'studio' | 'lobby' | 'economy' | 'leaderboards';
@@ -575,6 +576,7 @@ export default function App() {
 
       {page === 'dashboard' && (authLoading ? <section className="app-page"><PageHeading eyebrow="LOADING SESSION" title={<>Checking <em>your session.</em></>} description="Restoring your account and player data…" /></section> : (!user || user.is_anonymous) ? <GuestDashboard nickname={guestName} onRegister={() => setAuthOpen(true)} onFeature={setPage} /> : <Dashboard profile={myProfile} profileLoading={profileLoading} guestName={guestName} onDiscover={() => setPage('discover')} onEditProfile={() => setEditorOpen(true)} onFeature={setPage} />)}
       {page === 'chess' && <GamePage onBack={() => setPage('dashboard')} onOnline={() => setPage('lobby')} />}
+      {page === 'learn' && <TrainingPage onBack={() => setPage('dashboard')} onPlayChess={() => setPage('chess')} />}
       {page === 'lobby' && <MultiplayerLobby user={user} onBack={() => setPage('chess')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'workshop' && <BoardWorkshop onBack={() => setPage('dashboard')} />}
       {page === 'farm' && <FarmPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} onShop={() => setPage('shop')} />}
@@ -584,7 +586,7 @@ export default function App() {
       {page === 'leaderboards' && <WorldEconomyPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} initialSection="leaderboards" />}
       {page === 'shop' && <ArcadePage page="shop" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
       {page === 'casino' && (featureFlags.casino_enabled === false ? <section className="app-page"><button className="back-link" onClick={() => setPage('dashboard')}>← BACK</button><PageHeading eyebrow="CASINO" title={<>Temporarily <em>unavailable.</em></>} description="The virtual casino is currently disabled by platform administration." /></section> : <ArcadePage page="casino" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />)}
-      {['learn','community','tournaments','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
+      {['community','tournaments','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
       {page === 'admin' && <AdminPage user={user} onBack={() => setPage('dashboard')} onConfigChanged={() => { void refreshPlatformConfig(); }} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
