@@ -266,6 +266,17 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     setChallenges((data||[]) as Challenge[]);
   }
 
+  useEffect(()=>{
+    if(!supabase)return;
+    const channel=supabase.channel('casino-public-lobby:'+user.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'casino_tables'},()=>void refreshTables())
+      .on('postgres_changes',{event:'*',schema:'public',table:'casino_table_members'},()=>void refreshTables())
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'casino_challenges',filter:'opponent_id=eq.'+user.id},()=>{if(view==='challenges')void loadChallenges();})
+      .on('postgres_changes',{event:'*',schema:'public',table:'casino_challenges',filter:'challenger_id=eq.'+user.id},()=>{if(view==='challenges')void loadChallenges();})
+      .subscribe();
+    return ()=>{if(supabase)void supabase.removeChannel(channel);};
+  },[user.id,view,refreshTables]);
+
   async function searchPlayers(event:FormEvent){
     event.preventDefault();if(!supabase||search.trim().length<2)return;
     const {data,error}=await supabase.from('profiles').select('id,username,display_name').ilike('username','%'+search.trim()+'%').neq('id',user.id).limit(8);
