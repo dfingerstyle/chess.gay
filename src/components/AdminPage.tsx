@@ -84,6 +84,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function loadPlayers(){
     if(!supabase)return;
+    if(can('roles.view')&&roles.length===0)await loadRoles();
     const {data,error}=await supabase.rpc('admin_get_players',{p_search:search.trim()||null,p_limit:50,p_offset:0});
     if(error)setNotice(error.message);else setPlayers((data||[]) as Player[]);
   }
@@ -222,7 +223,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   async function moderate(event:FormEvent){
     event.preventDefault();if(!supabase||!selectedPlayer)return;
     await runAction(async()=>{
-      const duration=moderationAction==='warning'?null:Number(moderationDuration);
+      const duration=moderationAction==='warning'||(moderationAction==='ban'&&!moderationDuration.trim())?null:Number(moderationDuration);
       const {error}=await supabase.rpc('admin_moderate_player',{p_user_id:selectedPlayer.user_id,p_action:moderationAction,p_reason:moderationReason,p_duration_minutes:duration});
       if(error)throw error;setModerationReason('');await loadModeration();await loadPlayerDetail(selectedPlayer);setNotice('Moderation action recorded.');
     });
@@ -268,7 +269,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     <header className="admin-topbar">
       <button className="admin-back" onClick={onBack}>← GAME ROOM</button>
       <div className="admin-brand"><span>♜</span><div><strong>COMMAND CENTRE</strong><small>CHESS.GAY · ADMINISTRATION</small></div></div>
-      <div className="admin-session"><i/> OWNER CONTROL · {user?.email||'AUTHENTICATED'}</div>
+      <div className="admin-session"><i/> {access.roles.map(role=>role.name.toUpperCase()).join(' · ')} · {user?.email||'AUTHENTICATED'}</div>
     </header>
     <div className="admin-shell">
       <aside className="admin-sidebar">
@@ -290,7 +291,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
             <Stat label="CASINO BETS · 24H" value={fmt(overview.casino_bets_24h||0)} hint="Settled and pending table bets"/>
             <Stat label="CASINO NET · 24H" value={fmt(overview.casino_net_24h||0)} hint="Net player result"/>
             <Stat label="OPEN RESTRICTIONS" value={fmt(overview.open_moderation_actions||0)}/>
-            <Stat label="ADMIN ACTIONS · 24H" value={fmt(overview.admin_actions_24h||0)}/>
+            <Stat label="ADMIN ACTIONS · 24H" value={fmt(overview.admin_actions_24h||0)}/><Stat label="ACTIVE CHESS LOBBIES" value={fmt(overview.active_chess_lobbies||0)}/>
           </div>
           <div className="admin-panel"><SectionHead eyebrow="ACCESS CONTROL" title="Your permissions" detail="The database checks each action independently."/><div className="admin-role-pills">{access.roles.map(role=><span key={role.id}>{role.name}</span>)}</div><div className="admin-permission-cloud">{access.permissions.map(permission=><code key={permission}>{permission}</code>)}</div></div>
         </div>}
