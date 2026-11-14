@@ -23,9 +23,9 @@ const checks = [
 ];
 
 const failures = [];
-for (const [label, path, pattern] of checks) {
+for (const [label, path, pattern, shouldExist = true] of checks) {
   const source = read(path);
-  if (!pattern.test(source)) failures.push(label);
+  if (pattern.test(source) !== shouldExist) failures.push(label);
 }
 
 if (failures.length) {
