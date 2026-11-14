@@ -101,11 +101,6 @@ export default function WorldEconomyPage({ user, onBack, onStartGuest, initialSe
   }
 
   const ownedByKey = new Map(owned.map(item => [item.asset_key, item]));
-  const incomeReady = owned.some(item => {
-    const asset = catalog.find(entry => entry.asset_key === item.asset_key);
-    return asset && Date.now() - new Date(item.last_claim_at).getTime() >= asset.cycle_hours * 3600000;
-  });
-
   return <section className="app-page world-economy-page">
     <div className="activity-toolbar">
       <button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button>
