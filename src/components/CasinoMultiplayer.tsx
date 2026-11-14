@@ -54,6 +54,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
   const [history,setHistory]=useState<Bet[]>([]);
   const [slotHistory,setSlotHistory]=useState<SlotSpin[]>([]);
   const [challenges,setChallenges]=useState<Challenge[]>([]);
+  const [challengeVisual,setChallengeVisual]=useState<{game:Game;result:CasinoVisualResult;key:number}|null>(null);
   const [profiles,setProfiles]=useState<Profile[]>([]);
   const [search,setSearch]=useState('');
   const [tableName,setTableName]=useState('The Midnight Table');
@@ -77,6 +78,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
   const [message,setMessage]=useState('');
   const settling=useRef(false);
   const lastAnimatedRound=useRef<string|null>(null);
+  const lastAnimatedChallenge=useRef<string|null>(null);
   const chatFeedRef=useRef<HTMLDivElement>(null);
 
   const myMembership=members.find(member=>member.user_id===user.id);
@@ -274,6 +276,17 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     setSlotHistory((slotResult.data||[]) as SlotSpin[]);
   }
 
+  function showChallengeResult(challenge:Challenge){
+    if(!challenge.outcome||challenge.status!=='settled'||lastAnimatedChallenge.current===challenge.id)return;
+    lastAnimatedChallenge.current=challenge.id;
+    const push=challenge.winner_id===null;
+    setChallengeVisual(current=>({game:challenge.game_type,result:{
+      outcome:challenge.outcome||'Result',
+      won:push?undefined:challenge.winner_id===user.id,
+      net:push?0:challenge.winner_id===user.id?challenge.stake:-challenge.stake,
+    },key:(current?.key||0)+1}));
+  }
+
   async function loadChallenges(){
     if(!supabase)return;
     const {data,error}=await supabase.from('casino_challenges').select('*').or('challenger_id.eq.'+user.id+',opponent_id.eq.'+user.id).order('created_at',{ascending:false}).limit(30);
@@ -283,6 +296,8 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     const profileRows=ids.length?await supabase.from('profiles').select('id,username,display_name').in('id',ids):{data:[]};
     const profileMap=new Map(((profileRows.data||[]) as Profile[]).map(profile=>[profile.id,profile] as [string,Profile]));
     setChallenges(rows.map(row=>({...row,challenger_profile:profileMap.get(row.challenger_id),opponent_profile:profileMap.get(row.opponent_id)})));
+    const latestSettled=rows.find(row=>row.status==='settled'&&row.outcome);
+    if(latestSettled)showChallengeResult(latestSettled);
   }
 
   useEffect(()=>{
@@ -398,9 +413,12 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
             </div>
           )}
           {view==='challenges'&&(
+            <>
+            {challengeVisual&&<CasinoStage game={challengeVisual.game} result={challengeVisual.result} animationKey={challengeVisual.key} soundEnabled={soundEnabled} soundVolume={soundVolume}/>}
             <div className="casino-challenges-layout"><div className="casino-create-panel"><span className="casino-multi-kicker">HEAD TO HEAD</span><h3>Challenge a player</h3><p>Send a coinflip, dice or roulette duel for virtual coins. Neither player is charged unless the opponent accepts. A roulette zero returns both stakes.</p><form onSubmit={searchPlayers}><label>FIND PLAYER BY USERNAME<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="username"/></label><button className="casino-outline-button">SEARCH PLAYERS</button></form><label>GAME<select value={challengeGame} onChange={e=>{const game=e.target.value as Game;setChallengeGame(game);setChallengeChoice(game==='coinflip'?'heads':game==='dice'?'low':'red')}}><option value="coinflip">Coin flip</option><option value="dice">Dice · low / high</option><option value="roulette">Roulette · red / black</option></select></label><label>STAKE<input type="number" min="1" max="5000" value={challengeStake} onChange={e=>setChallengeStake(e.target.value)}/></label><label>YOUR PICK<select value={challengeChoice} onChange={e=>setChallengeChoice(e.target.value)}>{(challengeGame==='coinflip'?['heads','tails']:challengeGame==='dice'?['low','high']:['red','black']).map(choice=><option key={choice} value={choice}>{labelChoice(choice)}</option>)}</select></label>
               {profiles.map(profile=><div className="casino-player-result" key={profile.id}><span><b>@{profile.username}</b><small>{profile.display_name||'Player'}</small></span><button onClick={()=>void challengePlayer(profile)} disabled={busy}>CHALLENGE</button></div>)}
             </div><div className="casino-challenge-list"><div className="casino-section-title"><h3>YOUR CHALLENGES</h3><button onClick={()=>void loadChallenges()}>REFRESH ↻</button></div>{challenges.length===0?<p className="casino-empty">No challenges yet.</p>:challenges.map(challenge=><article className="casino-challenge-card" key={challenge.id}><div><b>{challenge.challenger_id===user.id?'You challenged @'+(challenge.opponent_profile?.username||'player'):'@'+(challenge.challenger_profile?.username||'player')+' challenged you'}</b><small>{GAME_LABEL[challenge.game_type]} · {challenge.stake.toLocaleString()} coins · your pick {challenge.challenger_id===user.id?challenge.challenger_choice:challenge.game_type==='coinflip'?(challenge.challenger_choice==='heads'?'tails':'heads'):challenge.game_type==='dice'?(challenge.challenger_choice==='low'?'high':'low'):(challenge.challenger_choice==='red'?'black':'red')}</small><span>{challenge.status.toUpperCase()} {challenge.outcome?'· RESULT '+challenge.outcome:''} {challenge.status==='settled'?'· '+(challenge.winner_id===user.id?'YOU WON':challenge.winner_id?'OPPONENT WON':'PUSH / REFUNDED'):''}</span></div>{challenge.status==='pending'&&challenge.opponent_id===user.id&&<><button onClick={()=>void respondChallenge(challenge,'accept')} disabled={busy}>ACCEPT</button><button onClick={()=>void respondChallenge(challenge,'decline')} disabled={busy}>DECLINE</button></>}{challenge.status==='pending'&&challenge.challenger_id===user.id&&<button onClick={()=>void respondChallenge(challenge,'cancel')} disabled={busy}>CANCEL</button>}</article>)}</div></div>
+            </>
           )}
           {view==='leaderboard'&&<div className="casino-leaderboard"><div className="casino-section-title"><h3>CASINO LEADERBOARD</h3><button onClick={()=>void loadLeaderboard()}>REFRESH ↻</button></div>{leaderboard.length===0?<p className="casino-empty">No settled casino games yet.</p>:leaderboard.map((row,index)=><div className="casino-leader-row" key={row.user_id}><strong>#{index+1}</strong><span><b>{row.display_name||row.username}</b><small>@{row.username} · {row.wins}/{row.games} wins</small></span><em className={row.net_profit>=0?'positive':'negative'}>{row.net_profit>0?'+':''}{row.net_profit.toLocaleString()} coins</em></div>)}</div>}
           {view==='history'&&<div className="casino-history"><div className="casino-section-title"><h3>YOUR BETTING HISTORY</h3><button onClick={()=>void loadHistory()}>REFRESH ↻</button></div>{history.length===0&&slotHistory.length===0?<p className="casino-empty">Your casino bets and slot spins will appear here.</p>:<>{history.map(row=><div className="casino-bet-row" key={row.id}><span><b>{labelChoice(row.choice)}</b><small>{row.bet_type} · {new Date(row.created_at||Date.now()).toLocaleString()}</small></span><strong>{row.stake.toLocaleString()} coins</strong><em className={row.net>=0?'positive':'negative'}>{row.net>0?'+':''}{row.net.toLocaleString()}</em></div>)}{slotHistory.map(row=><div className="casino-bet-row" key={row.id}><span><b>🎰 {row.symbols.join(' ')}</b><small>Slot machine · {new Date(row.created_at).toLocaleString()} · payout {row.payout.toLocaleString()}</small></span><strong>{row.stake.toLocaleString()} coins</strong><em className={row.net>=0?'positive':'negative'}>{row.net>0?'+':''}{row.net.toLocaleString()}</em></div>)}</>}</div>}
