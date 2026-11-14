@@ -56,3 +56,12 @@
 .roulette-selected-bet label{display:flex;flex-direction:column;gap:4px;margin:0;color:#b9a775;font-size:8px;font-weight:900;letter-spacing:.13em}
 .roulette-selected-bet label span{color:#8f879d;font-size:7px}
 .roulette-selected-bet strong{color:#f1d58d;font:700 16px 'Pixelify Sans',monospace;text-align:right}
+
+.slots-card{background:radial-gradient(ellipse at 75% 20%,rgba(193,142,60,.25),transparent 52%),linear-gradient(150deg,#302117,#0c0b13)}
+.slot-paytable{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid rgba(199,167,94,.25);border-radius:9px;background:linear-gradient(145deg,rgba(30,23,39,.9),rgba(12,10,19,.95))}
+.slot-paytable>label{display:flex;justify-content:space-between;gap:10px;margin:0 0 4px;color:#d8bd7d;font-size:8px;font-weight:900;letter-spacing:.15em}
+.slot-paytable>label span{color:#9c91aa;font-size:7px}
+.slot-paytable-row{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;padding:7px 9px;border:1px solid rgba(186,166,221,.1);border-radius:6px;background:rgba(255,255,255,.025)}
+.slot-paytable-row b{font-size:19px;text-align:center}
+.slot-paytable-row span{color:#dcd2e8;font-size:10px}
+.slot-paytable-row strong{color:#e7c77a;font:700 13px 'Pixelify Sans',monospace}
