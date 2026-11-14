@@ -23,7 +23,7 @@
 .casino-lobby-banner p{position:relative;z-index:1;max-width:520px;margin:0;color:#b5aabd;font-size:12px;line-height:1.7}
 .casino-lobby-stats{position:relative;z-index:1;display:flex;gap:16px;flex-wrap:wrap;margin-top:25px}
 .casino-lobby-stats span{color:#bba36b;font-size:8px;font-weight:900;letter-spacing:.14em}
-.casino-lobby-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.casino-lobby-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .casino-lobby-card{position:relative;overflow:hidden;display:flex;min-height:220px;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:7px;padding:17px;border:1px solid rgba(199,167,94,.2);border-radius:12px;background:linear-gradient(150deg,rgba(35,26,43,.95),rgba(11,10,18,.98));text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
 .casino-lobby-card:hover{transform:translateY(-4px);border-color:rgba(221,188,112,.65);box-shadow:0 14px 35px rgba(0,0,0,.25),0 0 25px rgba(196,159,84,.08)}
 .casino-lobby-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 75% 20%,rgba(210,172,99,.16),transparent 55%)}
