@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import CasinoStage from './CasinoStage';
 import CasinoMultiplayer from './CasinoMultiplayer';
 import RouletteBetTable from './RouletteBetTable';
+import { setCasinoAmbience } from '../lib/casinoAudio';
 
 type Page = 'casino' | 'shop';
 type Game = 'coinflip' | 'dice' | 'roulette';
@@ -42,6 +43,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [revealing, setRevealing] = useState(false);
   const [soundEnabled,setSoundEnabled] = useState(()=>{try{return localStorage.getItem('chessgay-casino-sound')!=='off'}catch{return true}});
   const [soundVolume,setSoundVolume] = useState(()=>{try{const value=Number(localStorage.getItem('chessgay-casino-volume')||'0.35');return Number.isFinite(value)?Math.max(0,Math.min(1,value)):0.35}catch{return 0.35}});
+  const [musicEnabled,setMusicEnabled] = useState(()=>{try{return localStorage.getItem('chessgay-casino-music')==='on'}catch{return false}});
   const [choice, setChoice] = useState('heads');
   const [rouletteType, setRouletteType] = useState('colour');
   const [bet, setBet] = useState('25');
@@ -52,7 +54,9 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
   const [theme, setTheme] = useState<Theme>(() => { try { const saved = localStorage.getItem('chessgay:theme'); return saved === 'sakura' || saved === 'sea' ? saved : 'starry'; } catch { return 'starry'; } });
 
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('chessgay:theme', theme); } catch { /* storage can be unavailable */ } }, [theme]);
-  useEffect(() => { try { localStorage.setItem('chessgay-casino-sound',soundEnabled?'on':'off'); localStorage.setItem('chessgay-casino-volume',String(soundVolume)); } catch { /* storage can be unavailable */ } },[soundEnabled,soundVolume]);
+  useEffect(() => { try { localStorage.setItem('chessgay-casino-sound',soundEnabled?'on':'off'); localStorage.setItem('chessgay-casino-volume',String(soundVolume)); localStorage.setItem('chessgay-casino-music',musicEnabled?'on':'off'); } catch { /* storage can be unavailable */ } },[soundEnabled,soundVolume,musicEnabled]);
+  useEffect(() => { setCasinoAmbience(musicEnabled,soundVolume); },[musicEnabled,soundVolume]);
+  useEffect(() => () => setCasinoAmbience(false,0),[]);
 
   const refresh = useCallback(async () => {
     if (!supabase || !user) return;
@@ -132,7 +136,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
 
   return (
     <section className="app-page arcade-page">
-      <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div>{page==='casino'&&<div className="casino-audio-controls"><button onClick={()=>setSoundEnabled(value=>!value)}>{soundEnabled?'♫ SOUND ON':'♪ SOUND OFF'}</button><label>VOLUME<input type="range" min="0" max="1" step="0.05" value={soundVolume} onChange={event=>setSoundVolume(Number(event.target.value))}/></label></div>}</div>
+      <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div>{page==='casino'&&<div className="casino-audio-controls"><button onClick={()=>setSoundEnabled(value=>!value)}>{soundEnabled?'♫ SOUND ON':'♪ SOUND OFF'}</button><button onClick={()=>setMusicEnabled(value=>!value)}>{musicEnabled?'♫ AMBIENCE ON':'♪ AMBIENCE OFF'}</button><label>VOLUME<input type="range" min="0" max="1" step="0.05" value={soundVolume} onChange={event=>setSoundVolume(Number(event.target.value))}/></label></div>}</div>
       <div className="game-page-heading arcade-heading">
         <div><div className="eyebrow"><span className="eyebrow-line" /> {page === 'casino' ? 'THE MIDNIGHT CLUB' : 'MAKE IT YOURS'}</div><h1>{page === 'casino' ? <>Enter the <em>casino.</em></> : <>The <em>shop.</em></>}</h1><p>Virtual coins only. No real-money deposits, withdrawals or cash prizes.</p></div>
         <div className="wallet-display"><span>YOUR BALANCE</span><strong>{balance === null ? '—' : balance.toLocaleString()} <small>coins</small></strong></div>
