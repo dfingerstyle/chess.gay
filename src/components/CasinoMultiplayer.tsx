@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import './CasinoMultiplayer.css';
 import CasinoStage, { type CasinoVisualResult } from './CasinoStage';
 import RouletteBetTable from './RouletteBetTable';
+import { primeCasinoAudio } from '../lib/casinoAudio';
 
 type Game = 'roulette' | 'coinflip' | 'dice';
 type CasinoTable = {
@@ -194,6 +195,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   async function joinTable(tableId:string,joinRole:'player'|'spectator'='player',code?:string){
     if(!supabase)return;
+    if(soundEnabled)primeCasinoAudio();
     setBusy(true);setMessage('');
     const {error}=await supabase.rpc('join_casino_table',{p_table_id:tableId,p_role:joinRole,p_code:code||null});
     setBusy(false);
@@ -203,6 +205,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   async function joinByCode(event:FormEvent){
     event.preventDefault();if(!supabase)return;
+    if(soundEnabled)primeCasinoAudio();
     setBusy(true);setMessage('');
     const {data,error}=await supabase.rpc('join_casino_table_by_code',{p_code:joinCode,p_role:role});
     setBusy(false);
@@ -224,6 +227,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   async function startRound(){
     if(!supabase||!selectedTable)return;
+    if(soundEnabled)primeCasinoAudio();
     setBusy(true);setMessage('');
     const {error}=await supabase.rpc('start_casino_round',{p_table_id:selectedTable.id});
     setBusy(false);
@@ -233,6 +237,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   async function placeBet(event:FormEvent){
     event.preventDefault();if(!supabase||!round)return;
+    if(soundEnabled)primeCasinoAudio();
     const amount=Number(stake);
     if(!Number.isInteger(amount)||amount<1){setMessage('Enter a whole-number stake.');return;}
     setBusy(true);setMessage('');
@@ -310,6 +315,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   async function respondChallenge(challenge:Challenge,action:'accept'|'decline'|'cancel'){
     if(!supabase)return;
+    if(soundEnabled)primeCasinoAudio();
     setBusy(true);setMessage('');
     const rpc=action==='accept'?'accept_casino_challenge':action==='decline'?'decline_casino_challenge':'cancel_casino_challenge';
     const {data,error}=await supabase.rpc(rpc,{p_challenge_id:challenge.id});
