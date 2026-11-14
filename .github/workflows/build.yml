@@ -2,14 +2,14 @@ name: Build
 
 on:
   push:
-    branches: [main, phase-1-foundation, phase-2-casino-completion, phase-1-world-economy-expansion]
+    branches: [main, phase-1-foundation, phase-2-casino-completion, phase-1-world-economy-expansion, phase-5-chess-training]
   pull_request:
     branches: [main, phase-1-foundation]
 
 permissions:
   contents: read
 
-# Keep build verification active while the world-economy feature branch is under review.
+# Keep build and preservation checks active on the world-economy and chess-training branches.
 
 jobs:
   build:
