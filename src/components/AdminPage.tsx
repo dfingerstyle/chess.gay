@@ -253,6 +253,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function saveSetting(key:string,value:unknown){
     if(!client)return;
+    if(key==='maintenance_mode'&&value===true&&!window.confirm('Enable maintenance mode for all non-admin players?'))return;
     await runAction(async()=>{
       const {error}=await client.rpc('admin_update_system_setting',{p_key:key,p_value:value});
       if(error)throw error;await loadSettings();onConfigChanged();setNotice('Platform setting updated.');
@@ -270,6 +271,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function toggleFlag(key:string,enabled:boolean){
     if(!client)return;
+    if(key==='casino_enabled'&&enabled===false&&!window.confirm('Disable the casino for all players?'))return;
     await runAction(async()=>{
       const {error}=await client.rpc('admin_update_feature_flag',{p_key:key,p_enabled:enabled});
       if(error)throw error;await loadSettings();onConfigChanged();setNotice('Feature flag updated.');
