@@ -16,7 +16,7 @@ type Member = { table_id: string; user_id: string; seat: number|null; role: 'pla
 type Round = { id: string; table_id: string; round_number: number; game_type: Game; status: 'betting'|'settled'|'cancelled'; betting_ends_at: string; outcome: {label?:string;number?:number;colour?:string;side?:string}|null };
 type Bet = { id: string; user_id: string; bet_type: string; choice: string; stake: number; payout: number; net: number; status: string; profile?: Profile };
 type ChatMessage = { id: number; user_id: string; message: string; created_at: string; profile?: Profile };
-type Challenge = { id: string; challenger_id: string; opponent_id: string; stake: number; challenger_choice: string; status: string; outcome: string|null; winner_id: string|null; expires_at: string };
+type Challenge = { id: string; challenger_id: string; opponent_id: string; stake: number; challenger_choice: string; status: string; outcome: string|null; winner_id: string|null; expires_at: string; challenger_profile?: Profile; opponent_profile?: Profile };
 type LeaderboardRow = { user_id: string; username: string; display_name: string|null; games: number; wins: number; net_profit: number };
 type View = 'tables'|'challenges'|'leaderboard'|'history';
 
@@ -263,7 +263,11 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     if(!supabase)return;
     const {data,error}=await supabase.from('casino_challenges').select('*').or('challenger_id.eq.'+user.id+',opponent_id.eq.'+user.id).order('created_at',{ascending:false}).limit(30);
     if(error){setMessage(error.message);return;}
-    setChallenges((data||[]) as Challenge[]);
+    const rows=(data||[]) as Challenge[];
+    const ids=[...new Set(rows.flatMap(row=>[row.challenger_id,row.opponent_id]))];
+    const profileRows=ids.length?await supabase.from('profiles').select('id,username,display_name').in('id',ids):{data:[]};
+    const profileMap=new Map(((profileRows.data||[]) as Profile[]).map(profile=>[profile.id,profile] as [string,Profile]));
+    setChallenges(rows.map(row=>({...row,challenger_profile:profileMap.get(row.challenger_id),opponent_profile:profileMap.get(row.opponent_id)})));
   }
 
   useEffect(()=>{
@@ -302,7 +306,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
     setBusy(false);
     if(error){setMessage(error.message);return;}
     if(action==='accept'&&(data as {status?:string})?.status==='settled')setMessage('Challenge settled: '+(data as {outcome:string}).outcome+'. Winner: '+((data as {winner_id:string}).winner_id===user.id?'you':'your opponent')+'.');
-    else setMessage('Challenge '+action+'ed.');
+    else setMessage(action==='decline'?'Challenge declined.':action==='cancel'?'Challenge cancelled.':'Challenge accepted.');
     onBalanceChange();await loadChallenges();
   }
 
@@ -378,7 +382,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
           {view==='challenges'&&(
             <div className="casino-challenges-layout"><div className="casino-create-panel"><span className="casino-multi-kicker">HEAD TO HEAD</span><h3>Challenge a player</h3><p>Send a virtual-coin coinflip challenge. Neither player is charged unless the opponent accepts.</p><form onSubmit={searchPlayers}><label>FIND PLAYER BY USERNAME<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="username"/></label><button className="casino-outline-button">SEARCH PLAYERS</button></form><label>STAKE<input type="number" min="1" max="5000" value={challengeStake} onChange={e=>setChallengeStake(e.target.value)}/></label><label>YOUR PICK<select value={challengeChoice} onChange={e=>setChallengeChoice(e.target.value)}><option value="heads">Heads</option><option value="tails">Tails</option></select></label>
               {profiles.map(profile=><div className="casino-player-result" key={profile.id}><span><b>@{profile.username}</b><small>{profile.display_name||'Player'}</small></span><button onClick={()=>void challengePlayer(profile)} disabled={busy}>CHALLENGE</button></div>)}
-            </div><div className="casino-challenge-list"><div className="casino-section-title"><h3>YOUR CHALLENGES</h3><button onClick={()=>void loadChallenges()}>REFRESH ↻</button></div>{challenges.length===0?<p className="casino-empty">No challenges yet.</p>:challenges.map(challenge=><article className="casino-challenge-card" key={challenge.id}><div><b>{challenge.challenger_id===user.id?'You challenged a player':'Incoming challenge'}</b><small>{challenge.stake.toLocaleString()} coins · you pick {challenge.challenger_id===user.id?challenge.challenger_choice:challenge.challenger_choice==='heads'?'tails':'heads'}</small><span>{challenge.status.toUpperCase()} {challenge.outcome?'· RESULT '+challenge.outcome:''}</span></div>{challenge.status==='pending'&&challenge.opponent_id===user.id&&<><button onClick={()=>void respondChallenge(challenge,'accept')} disabled={busy}>ACCEPT</button><button onClick={()=>void respondChallenge(challenge,'decline')} disabled={busy}>DECLINE</button></>}{challenge.status==='pending'&&challenge.challenger_id===user.id&&<button onClick={()=>void respondChallenge(challenge,'cancel')} disabled={busy}>CANCEL</button>}</article>)}</div></div>
+            </div><div className="casino-challenge-list"><div className="casino-section-title"><h3>YOUR CHALLENGES</h3><button onClick={()=>void loadChallenges()}>REFRESH ↻</button></div>{challenges.length===0?<p className="casino-empty">No challenges yet.</p>:challenges.map(challenge=><article className="casino-challenge-card" key={challenge.id}><div><b>{challenge.challenger_id===user.id?'You challenged @'+(challenge.opponent_profile?.username||'player'):'@'+(challenge.challenger_profile?.username||'player')+' challenged you'}</b><small>{challenge.stake.toLocaleString()} coins · your pick {challenge.challenger_id===user.id?challenge.challenger_choice:challenge.challenger_choice==='heads'?'tails':'heads'}</small><span>{challenge.status.toUpperCase()} {challenge.outcome?'· RESULT '+challenge.outcome:''}</span></div>{challenge.status==='pending'&&challenge.opponent_id===user.id&&<><button onClick={()=>void respondChallenge(challenge,'accept')} disabled={busy}>ACCEPT</button><button onClick={()=>void respondChallenge(challenge,'decline')} disabled={busy}>DECLINE</button></>}{challenge.status==='pending'&&challenge.challenger_id===user.id&&<button onClick={()=>void respondChallenge(challenge,'cancel')} disabled={busy}>CANCEL</button>}</article>)}</div></div>
           )}
           {view==='leaderboard'&&<div className="casino-leaderboard"><div className="casino-section-title"><h3>CASINO LEADERBOARD</h3><button onClick={()=>void loadLeaderboard()}>REFRESH ↻</button></div>{leaderboard.length===0?<p className="casino-empty">No settled casino games yet.</p>:leaderboard.map((row,index)=><div className="casino-leader-row" key={row.user_id}><strong>#{index+1}</strong><span><b>{row.display_name||row.username}</b><small>@{row.username} · {row.wins}/{row.games} wins</small></span><em className={row.net_profit>=0?'positive':'negative'}>{row.net_profit>0?'+':''}{row.net_profit.toLocaleString()} coins</em></div>)}</div>}
           {view==='history'&&<div className="casino-history"><div className="casino-section-title"><h3>YOUR BETTING HISTORY</h3><button onClick={()=>void loadHistory()}>REFRESH ↻</button></div>{history.length===0?<p className="casino-empty">Your table bets will appear here.</p>:history.map(row=><div className="casino-bet-row" key={row.id}><span><b>{labelChoice(row.choice)}</b><small>{row.bet_type} · {new Date((row as Bet & {created_at?:string}).created_at||Date.now()).toLocaleString()}</small></span><strong>{row.stake.toLocaleString()} coins</strong><em className={row.net>=0?'positive':'negative'}>{row.net>0?'+':''}{row.net.toLocaleString()}</em></div>)}</div>}
