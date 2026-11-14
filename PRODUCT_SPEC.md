@@ -68,7 +68,7 @@ One shared virtual coin wallet and inventory across Work, Farming, Fishing, Shop
 Farming uses persistent plots, seed consumption, growth timers, harvesting into inventory and selling crops through the shared Shop. Fishing uses owned equipment, server-side rarity rolls, cooldowns, a catch log and sellable inventory rewards.
 
 ### Casino
-Virtual coin games only, subject to legal review and age/regional restrictions. Server-authoritative outcomes, limits, cooldowns and transaction history.
+Virtual coins only; no deposits, withdrawals, cash prizes or cash-equivalent rewards. The current casino scope includes animated European roulette, coin flip, dice and three-reel slots; public/private multiplayer tables; coinflip/dice/roulette player duels; table chat; spectators; round history; personal betting history; sound and ambient audio controls; and a net-profit leaderboard. Outcomes, odds, stakes, wallet changes and payouts are server-authoritative. Published roulette and slot odds are visible before play. Table creation, betting, chat and challenges have server-side rate limits. See docs/casino.md for the exact paytable, probabilities, payout rules and security model.
 
 ### Administration
 Protected dashboard, user management, moderation, reports, appeals, economy review, shop, marketplace, game configuration, AI usage, security events, audit logs and granular staff permissions. Staff cannot silently edit balances or access E2EE plaintext.
@@ -185,6 +185,8 @@ The current development branch has moved beyond the original static foundation f
 Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymous Sign-Ins** in the Supabase Auth provider settings. This allows a guest to get a server-backed identity without entering an email or password. If the provider is disabled, the arcade will explain that guest-wallet creation is unavailable; local chess remains playable.
 
 ### Not yet implemented
+- Admin Command Centre: custom roles, granular permission editor, player management, moderation, economy/casino controls, audit logs and security settings.
+- Full casino browser E2E testing across two independent logged-in browser sessions; database-level two-user smoke tests have passed.
 - Online multiplayer move submission, clocks and server-authoritative results.
 - Public matchmaking and public queue management.
 - Starting a game from a private lobby, shareable deep links and reconnecting players.
@@ -195,4 +197,4 @@ Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymo
 - Stockfish analysis and the wider training system.
 - Friends, messaging, clubs, tournaments and the remaining community features.
 
-Do not describe these unfinished systems as live. The CPU opponent is a lightweight legal-move bot, not Stockfish. The casino uses virtual coins only; there are no real-money deposits, withdrawals or cash-equivalent prizes.
+Do not describe these unfinished systems as live. The CPU opponent is a lightweight legal-move bot, not Stockfish. The casino uses virtual coins only; there are no real-money deposits, withdrawals or cash-equivalent prizes. Casino implementation details and verification are documented in docs/casino.md.
