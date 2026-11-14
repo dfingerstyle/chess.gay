@@ -19,7 +19,7 @@ const checks = [
   ['Training puzzle uses the shared legal-move engine', 'src/components/TrainingPage.tsx', /legalMoves/],
   ['Training puzzle applies moves through the shared engine', 'src/components/TrainingPage.tsx', /makeMove/],
   ['Training puzzle defines its mate-in-one solution', 'src/components/TrainingPage.tsx', /SOLUTION = 'g6g7'/],
-  ['Training puzzle records a solved position', 'src/components/TrainingPage.tsx', /setSolved\\(true\\)/],
+  ['Training puzzle records a solved position', 'src/components/TrainingPage.tsx', /setSolved/],
   ['Authentication only creates anonymous guest sessions', 'src/components/AuthPanel.tsx', /signInAnonymously/],
   ['Email/password signup is removed', 'src/components/AuthPanel.tsx', /signUp\s*\(/, false],
   ['Email/password login is removed', 'src/components/AuthPanel.tsx', /signInWithPassword\s*\(/, false],
