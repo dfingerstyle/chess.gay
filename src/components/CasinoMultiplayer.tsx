@@ -76,6 +76,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
   const [message,setMessage]=useState('');
   const settling=useRef(false);
   const lastAnimatedRound=useRef<string|null>(null);
+  const chatFeedRef=useRef<HTMLDivElement>(null);
 
   const myMembership=members.find(member=>member.user_id===user.id);
   const isHost=selectedTable?.host_id===user.id;
@@ -321,6 +322,8 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   useEffect(()=>{if(view==='leaderboard')void loadLeaderboard();if(view==='history')void loadHistory();if(view==='challenges')void loadChallenges();},[view]);
 
+  useEffect(()=>{chatFeedRef.current?.scrollTo({top:chatFeedRef.current.scrollHeight,behavior:'smooth'});},[messages]);
+
   const tableView=selectedTableId&&selectedTable;
   const isSpectator=myMembership?.role==='spectator';
   const completedRounds=roundHistory.filter(item=>item.status==='settled');
@@ -361,7 +364,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
             <div className="casino-room-bets"><div className="casino-section-title"><h4>TABLE BETS</h4><span>{bets.length} wagers</span></div>{bets.length===0?<p className="casino-empty">No bets yet. The table is waiting.</p>:bets.map(bet=><div className="casino-bet-row" key={bet.id}><span><b>{bet.profile?.display_name||bet.profile?.username||'Player'}</b><small>{labelChoice(bet.choice)} · {bet.bet_type}</small></span><strong>{bet.stake.toLocaleString()} coins</strong><em className={bet.status==='won'?'positive':bet.status==='lost'?'negative':''}>{bet.status==='pending'?'PENDING':bet.status==='won'?'WON':'LOST'}</em></div>)}</div>
           </div>
           <aside className="casino-room-side">
-            <div className="casino-chat-panel"><div className="casino-section-title"><h4>TABLE CHAT</h4><span>LIVE</span></div><div className="casino-chat-feed">{messages.map(msg=><div className="casino-chat-message" key={msg.id}><b>{msg.profile?.display_name||msg.profile?.username||'Player'}</b><p>{msg.message}</p></div>)}</div><form onSubmit={sendMessage}><input value={chatDraft} maxLength={500} onChange={e=>setChatDraft(e.target.value)} placeholder="Message the table…"/><button disabled={!chatDraft.trim()}>SEND</button></form></div>
+            <div className="casino-chat-panel"><div className="casino-section-title"><h4>TABLE CHAT</h4><span>LIVE</span></div><div className="casino-chat-feed" ref={chatFeedRef}>{messages.map(msg=><div className="casino-chat-message" key={msg.id}><b>{msg.profile?.display_name||msg.profile?.username||'Player'}</b><p>{msg.message}</p></div>)}</div><form onSubmit={sendMessage}><input value={chatDraft} maxLength={500} onChange={e=>setChatDraft(e.target.value)} placeholder="Message the table…"/><button disabled={!chatDraft.trim()}>SEND</button></form></div>
             <div className="casino-room-rules"><span className="casino-multi-kicker">TABLE RULES</span><p>Min. {selectedTable.min_bet} · Max. {selectedTable.max_bet} coins</p><p>{selectedTable.max_players} player seats · spectators welcome</p><p>Results are generated and settled by the server.</p></div>
           </aside>
         </div>
