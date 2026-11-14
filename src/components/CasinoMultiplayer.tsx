@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import './CasinoMultiplayer.css';
+import CasinoStage, { type CasinoVisualResult } from './CasinoStage';
 
 type Game = 'roulette' | 'coinflip' | 'dice';
 type CasinoTable = {
@@ -31,8 +32,8 @@ const labelChoice = (choice:string) => choice.startsWith('number_') ? choice.sli
   column1:'Column 1',column2:'Column 2',column3:'Column 3',heads:'Heads',tails:'Tails',
 }[choice] || choice);
 
-export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
-  user: User; balance: number|null; onBalanceChange: () => void;
+export default function CasinoMultiplayer({ user, balance, onBalanceChange, soundEnabled, soundVolume }: {
+  user: User; balance: number|null; onBalanceChange: () => void; soundEnabled: boolean; soundVolume: number;
 }) {
   const [view,setView]=useState<View>('tables');
   const [tables,setTables]=useState<CasinoTable[]>([]);
@@ -40,6 +41,10 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   const [selectedTable,setSelectedTable]=useState<CasinoTable|null>(null);
   const [members,setMembers]=useState<Member[]>([]);
   const [round,setRound]=useState<Round|null>(null);
+  const [roundHistory,setRoundHistory]=useState<Round[]>([]);
+  const [betsRoundId,setBetsRoundId]=useState<string|null>(null);
+  const [animationKey,setAnimationKey]=useState(0);
+  const [visualResult,setVisualResult]=useState<CasinoVisualResult|null>(null);
   const [bets,setBets]=useState<Bet[]>([]);
   const [messages,setMessages]=useState<ChatMessage[]>([]);
   const [leaderboard,setLeaderboard]=useState<LeaderboardRow[]>([]);
@@ -66,6 +71,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState('');
   const settling=useRef(false);
+  const lastAnimatedRound=useRef<string|null>(null);
 
   const myMembership=members.find(member=>member.user_id===user.id);
   const isHost=selectedTable?.host_id===user.id;
@@ -87,10 +93,11 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
 
   const refreshSelected=useCallback(async()=>{
     if(!supabase||!selectedTableId)return;
-    const [tableResult,memberResult,roundResult,messageResult]=await Promise.all([
+    const [tableResult,memberResult,roundResult,roundHistoryResult,messageResult]=await Promise.all([
       supabase.from('casino_tables').select('*').eq('id',selectedTableId).maybeSingle(),
       supabase.from('casino_table_members').select('table_id,user_id,seat,role,joined_at').eq('table_id',selectedTableId).order('joined_at'),
       supabase.from('casino_rounds').select('*').eq('table_id',selectedTableId).order('round_number',{ascending:false}).limit(1).maybeSingle(),
+      supabase.from('casino_rounds').select('*').eq('table_id',selectedTableId).order('round_number',{ascending:false}).limit(8),
       supabase.from('casino_chat_messages').select('id,user_id,message,created_at').eq('table_id',selectedTableId).order('id',{ascending:false}).limit(40),
     ]);
     if(tableResult.error||!tableResult.data){setMessage(tableResult.error?.message||'This table is no longer available.');setSelectedTableId(null);return;}
@@ -102,6 +109,8 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
     setMembers(memberRows.map(row=>({...row,profile:profileMap.get(row.user_id)})));
     const nextRound=(roundResult.data||null) as Round|null;
     setRound(nextRound);
+    setRoundHistory((roundHistoryResult.data||[]) as Round[]);
+    setBetsRoundId(null);
     const messageRows=(messageResult.data||[]) as ChatMessage[];
     setMessages(messageRows.reverse().map(row=>({...row,profile:profileMap.get(row.user_id)})));
     if(nextRound){
@@ -111,10 +120,20 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
       const extra=betUserIds.length?await supabase.from('profiles').select('id,username,display_name').in('id',betUserIds):{data:[]};
       const allProfiles=new Map([...profileMap,...((extra.data||[]) as Profile[]).map(profile=>[profile.id,profile] as [string,Profile])]);
       setBets(rows.map(row=>({...row,profile:allProfiles.get(row.user_id)})));
-    }else setBets([]);
+      setBetsRoundId(nextRound.id);
+    }else {setBets([]);setBetsRoundId(null);}
   },[selectedTableId]);
 
   useEffect(()=>{void refreshTables();},[refreshTables]);
+  useEffect(()=>{lastAnimatedRound.current=null;setVisualResult(null);setBetsRoundId(null);},[selectedTableId]);
+  useEffect(()=>{
+    if(!round||round.status!=='settled'||!round.outcome||betsRoundId!==round.id||lastAnimatedRound.current===round.id)return;
+    lastAnimatedRound.current=round.id;
+    const ownBets=bets.filter(bet=>bet.user_id===user.id);
+    const net=ownBets.reduce((sum,bet)=>sum+Number(bet.net||0),0);
+    setVisualResult({outcome:round.outcome.label||String(round.outcome.number??round.outcome.side??'Result'),won:ownBets.length?ownBets.some(bet=>bet.status==='won'):undefined,net:ownBets.length?net:undefined});
+    setAnimationKey(key=>key+1);
+  },[round?.id,round?.status,round?.outcome,betsRoundId,bets,user.id]);
   useEffect(()=>{if(!selectedTable)return;setBetType('colour');setBetChoice(selectedTable.game_type==='roulette'?'red':selectedTable.game_type==='coinflip'?'heads':'low');},[selectedTable?.id,selectedTable?.game_type]);
   useEffect(()=>{
     if(!selectedTableId||!supabase)return;
@@ -298,6 +317,8 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange }: {
             <div className="casino-room-members">
               {members.map(member=><div className="casino-seat" key={member.user_id}><span className="casino-seat-avatar">{member.role==='spectator'?'◉':'♟'}</span><span><b>{member.profile?.display_name||member.profile?.username||'Player'}</b><small>{member.role==='spectator'?'SPECTATOR':member.user_id===selectedTable.host_id?'HOST':'PLAYER '+member.seat}</small></span>{member.user_id===user.id&&<i>YOU</i>}</div>)}
             </div>
+            {round?.status==='settled'&&visualResult&&<CasinoStage game={selectedTable.game_type} result={visualResult} animationKey={animationKey} soundEnabled={soundEnabled} soundVolume={soundVolume} />}
+            {roundHistory.length>0&&<div className="casino-round-history"><div className="casino-section-title"><h4>RECENT RESULTS</h4><span>LAST {roundHistory.length} ROUNDS</span></div><div className="casino-round-history-list">{roundHistory.map(item=><span key={item.id} className={item.game_type==='roulette'?(item.outcome?.colour||'black'):item.game_type==='coinflip'?'coin':'dice'} title={'Round '+item.round_number+' · '+(item.outcome?.label||item.status)}>{item.game_type==='roulette'?item.outcome?.number??'—':item.game_type==='coinflip'?(item.outcome?.side||'—').slice(0,1).toUpperCase():item.outcome?.number??'—'}</span>)}</div></div>}
             <div className="casino-round-panel">
               <div className="casino-round-status"><span>{round?.status==='betting'?'BETTING OPEN':round?.status==='settled'?'RESULT REVEALED':'WAITING FOR HOST'}</span>{round?.status==='betting'&&<strong>{secondsLeft}s</strong>}</div>
               {round?.status==='settled'&&<div className="casino-round-result"><span>LAST RESULT</span><b>{round.outcome?.label||'Settled'}</b></div>}
