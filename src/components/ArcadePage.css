@@ -51,3 +51,8 @@
 .casino-audio-controls label{display:flex;align-items:center;gap:7px;color:#a99fb6;font-size:7px;font-weight:900;letter-spacing:.12em}
 .casino-audio-controls input{width:75px;accent-color:#c9a75f}
 @media(max-width:700px){.casino-audio-controls{width:100%;margin-left:0;justify-content:flex-end}.game-page-toolbar{flex-wrap:wrap}}
+
+.roulette-selected-bet{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid rgba(199,167,94,.24);border-radius:7px;background:rgba(199,167,94,.06)}
+.roulette-selected-bet label{display:flex;flex-direction:column;gap:4px;margin:0;color:#b9a775;font-size:8px;font-weight:900;letter-spacing:.13em}
+.roulette-selected-bet label span{color:#8f879d;font-size:7px}
+.roulette-selected-bet strong{color:#f1d58d;font:700 16px 'Pixelify Sans',monospace;text-align:right}
