@@ -387,6 +387,58 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
+    if (!supabase) { setPlatformConfigLoading(false); return; }
+    const loadConfig = async () => {
+      const { data, error } = await supabase.rpc('get_public_platform_config');
+      if (!active) return;
+      if (!error && data) setPlatformConfig(data as {maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>});
+      setPlatformConfigLoading(false);
+    };
+    void loadConfig();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!user || user.is_anonymous || !supabase) {
+      setAdminAccess(null);
+      setAccountStatus(null);
+      setAccountStatusError('');
+      setAccountStatusLoading(false);
+      return;
+    }
+    let active = true;
+    setAccountStatusLoading(true);
+    const refreshAccess = async () => {
+      const [accessResult,statusResult] = await Promise.all([
+        supabase.rpc('admin_get_my_access'),
+        supabase.rpc('admin_get_my_account_status'),
+      ]);
+      if (!active) return;
+      if (accessResult.error) setAdminAccess(null);
+      else setAdminAccess(accessResult.data as {is_admin:boolean;roles:Array<{id:string;key:string;name:string}>;permissions:string[]});
+      if (statusResult.error) setAccountStatusError(statusResult.error.message);
+      else {
+        setAccountStatus(statusResult.data as {is_banned:boolean;banned_until:string|null;is_muted:boolean;muted_until:string|null});
+        setAccountStatusError('');
+      }
+      setAccountStatusLoading(false);
+    };
+    void refreshAccess();
+    const timer = window.setInterval(() => { void refreshAccess(); }, 30000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [user?.id]);
+
+  const isAdmin = Boolean(adminAccess?.is_admin && !accountStatus?.is_banned);
+  const featureFlags = platformConfig?.feature_flags || {};
+  const maintenanceMode = Boolean(platformConfig?.maintenance_mode && !isAdmin);
+  const refreshPlatformConfig = async () => {
+    if (!supabase) return;
+    const { data, error } = await supabase.rpc('get_public_platform_config');
+    if (!error && data) setPlatformConfig(data as {maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>});
+  };
+
+  useEffect(() => {
+    let active = true;
     if (!user || user.is_anonymous || !supabase) {
       setMyProfile(null);
       setProfileLoading(false);
