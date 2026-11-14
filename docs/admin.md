@@ -57,6 +57,9 @@ Displays total coin circulation, XP, wallets and 24-hour transaction flow. Playe
 ### Casino
 Displays table/round counts, table wagers and payouts, slot activity, net results and player duels. Administrators with casino.manage can close a table only when it has no unsettled betting round. Odds and game outcomes are not editable from the admin panel.
 
+### Security overview
+Shows currently banned accounts, active chat mutes, staff account count, custom role count, recent admin actions and recent account restrictions. It is a summary of platform security state, not a replacement for the detailed audit trail.
+
 ### Audit trail
 Displays append-only records of sensitive admin operations, including actor, action, target, reason, timestamp and structured metadata. The client has no direct insert, update or delete permission on audit records.
 
