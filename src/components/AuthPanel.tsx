@@ -77,6 +77,19 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
     }
   }
 
+  async function handleGuestPlay() {
+    if (!supabase) { setError('The game service is not configured. Please try again later.'); return; }
+    setBusy(true);
+    setError('');
+    try {
+      const { error: authError } = await supabase.auth.signInAnonymously();
+      if (authError) throw authError;
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Guest sign-in failed. Please try again.');
+    } finally { setBusy(false); }
+  }
+
   async function handleSignOut() {
     if (!supabase) return;
     const { error: signOutError } = await supabase.auth.signOut();
@@ -97,7 +110,7 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
         {user ? (
           <>
             <h2 id="auth-title">{user.is_anonymous ? <>Keep your <em>progress.</em></> : <>Welcome <em>back.</em></>}</h2>
-            <p className="auth-intro">{user.is_anonymous ? "You are playing as a guest. Link an email to this same guest account to keep its wallet and progress." : "You are signed in. Your place at the board is waiting."}</p>
+            <p className="auth-intro">{user.is_anonymous ? "You are playing without an email. Your session stays on this device. Adding an email is optional and only needed for account recovery across devices." : "You are signed in. Your place at the board is waiting."}</p>
             <div className="account-card">
               <span className="account-piece">♟</span>
               <div><strong>{profile?.display_name || profile?.username || (user.is_anonymous ? 'Guest player' : 'Player')}</strong><small>{user.is_anonymous ? 'GUEST SESSION · PROGRESS ON THIS DEVICE' : '@' + (profile?.username || 'player')}</small></div>
@@ -123,7 +136,7 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
         ) : (
           <>
             <h2 id="auth-title">{mode === 'signup' ? <>Join the <em>club.</em></> : mode === 'reset' ? <>Find your <em>way back.</em></> : <>Good to see <em>you.</em></>}</h2>
-            <p className="auth-intro">{mode === 'signup' ? 'Create your player account and claim your seat.' : mode === 'reset' ? 'We will send a secure password reset link to your email.' : 'Sign in and get back to your next move.'}</p>
+            <p className="auth-intro">{mode === 'signup' ? 'Create your player account and claim your seat.' : mode === 'reset' ? 'We will send a secure password reset link to your email.' : 'Sign in and get back to your next move, or play immediately without an email.'}</p>
             <form onSubmit={handleSubmit}>
               <label htmlFor="auth-email">EMAIL ADDRESS</label>
               <input id="auth-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
@@ -135,6 +148,7 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
               {message && <p className="auth-message" role="status">{message}</p>}
               <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'PLEASE WAIT…' : mode === 'signup' ? 'CREATE ACCOUNT' : mode === 'reset' ? 'SEND RESET LINK' : 'SIGN IN'} <span>↗</span></button>
             </form>
+            {mode === 'login' && <button className="auth-submit" type="button" onClick={() => { void handleGuestPlay(); }} disabled={busy}>{busy ? 'STARTING GUEST SESSION…' : 'PLAY WITHOUT EMAIL'} <span>↗</span></button>}
             <div className="auth-switches">
               {mode === 'login' && <><button onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>CREATE AN ACCOUNT</button><button onClick={() => { setMode('reset'); setError(''); setMessage(''); }}>FORGOT PASSWORD?</button></>}
               {mode !== 'login' && <button onClick={() => { setMode('login'); setError(''); setMessage(''); }}>← BACK TO SIGN IN</button>}
