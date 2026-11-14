@@ -28,7 +28,7 @@ chess.gay is a free chess, learning, community and gaming platform. Chess.com is
 - Message requests: private conversations require acceptance.
 - E2EE for private messaging, implemented using an established and independently reviewed protocol.
 - Full profile customisation, but personal image uploads are disabled. Use curated platform avatars and shop cosmetics.
-- Dedicated full admin dashboard plus contextual moderation controls.
+- Dedicated protected Admin Command Centre with custom roles, granular permissions, player management, moderation, economy and casino controls, audit history, maintenance mode and feature flags. The first operational implementation is in place; reports, appeals, content management and full release QA remain follow-up work.
 - The casino uses virtual coins only and no real-money deposits, cash-outs, withdrawals or cash-equivalent prizes; legal and age restrictions still apply.
 - The platform is free. One shared coin wallet connects all activities. Hybrid progression uses XP/levels for earned unlocks; cosmetics and convenience may be unlocked, but competitive advantages are never sold.
 
@@ -71,7 +71,7 @@ Farming uses persistent plots, seed consumption, growth timers, harvesting into 
 Virtual coins only; no deposits, withdrawals, cash prizes or cash-equivalent rewards. The current casino scope includes animated European roulette, coin flip, dice and three-reel slots; public/private multiplayer tables; coinflip/dice/roulette player duels; table chat; spectators; round history; personal betting history; sound and ambient audio controls; and a net-profit leaderboard. Outcomes, odds, stakes, wallet changes and payouts are server-authoritative. Published roulette and slot odds are visible before play. Table creation, betting, chat and challenges have server-side rate limits. See docs/casino.md for the exact paytable, probabilities, payout rules and security model.
 
 ### Administration
-Protected dashboard, user management, moderation, reports, appeals, economy review, shop, marketplace, game configuration, AI usage, security events, audit logs and granular staff permissions. Staff cannot silently edit balances or access E2EE plaintext.
+Protected dashboard, user management, custom staff roles, granular permissions, moderation, reasoned wallet adjustments, casino oversight, audit logs, maintenance mode and feature flags. Staff cannot silently edit balances or access E2EE plaintext. The first operational dashboard is implemented; reports, appeals, content management, marketplace controls and deeper security-event integration remain future work.
 
 ## Visual system
 
@@ -96,13 +96,13 @@ Protected dashboard, user management, moderation, reports, appeals, economy revi
 
 ## Delivery phases
 
-1. **Foundation:** visual identity, hybrid world hub, guest/account identity, dashboard, profiles, directory and presence.
-2. **Local and online chess:** legal local chess first, then server-authoritative two-player games, matchmaking, lobbies and reconnect.
-3. **Four-player chess:** FFA and 2v2 using the shared lobby/matchmaking foundation.
-4. **World economy:** one wallet, XP/levels, Work, Farming, Fishing, inventory and shop.
-5. **Customization:** Board Workshop, Player Studio, cosmetics and account-backed presets.
-6. **Chess intelligence and social:** Stockfish, puzzles, friends, messaging, clubs and events.
-7. **Administration and launch:** staff permissions, moderation, anti-cheat, auditability, accessibility, performance and security review.
+1. **Foundation and shared economy:** visual identity, hybrid world hub, guest/account identity, profiles, presence, wallet, XP, inventory and existing world activities.
+2. **Finish the casino:** complete roulette, coin flip, dice and slots presentation; animations, sound, history, leaderboards, public/private tables, player challenges, chat and spectating; verify fairness, wallet settlement, rate limits and two-account multiplayer behaviour.
+3. **Finish the Admin Command Centre:** custom roles, permission management, player tools, moderation, economy and casino controls, audit trail, maintenance and feature flags.
+4. **Integrated casino/admin release QA:** test both systems together with separate admin and player accounts, simultaneous sessions, abuse cases, database rollback tests, browser tests, accessibility and responsive layouts. Do not merge or advertise as finished until this passes.
+5. **Chess Hub and online chess:** selectable chess lobby with all six modes, then server-authoritative two-player games, matchmaking, lobbies, clocks and reconnect.
+6. **Four-player chess and custom games:** FFA, 2v2 and validated custom starting positions using a separately tested rules engine.
+7. **Chess intelligence and community:** Stockfish, puzzles, friends, messaging, clubs, events, deeper profile customization and remaining platform polish.
 
 ## Phase 1 implementation notes
 
@@ -188,9 +188,17 @@ The current development branch has moved beyond the original static foundation f
 ### Setup requirement
 Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymous Sign-Ins** in the Supabase Auth provider settings. This allows a guest to get a server-backed identity without entering an email or password. If the provider is disabled, the arcade will explain that guest-wallet creation is unavailable; local chess remains playable.
 
+### Implemented in the first Admin Command Centre release
+- Database-backed custom roles and permission keys, including Owner, Administrator, Casino Manager, Moderator and Support defaults.
+- Permission-checked player search and detail records, including wallet, XP, roles, transactions, moderation, internal notes and casino history.
+- Reasoned wallet adjustments with transaction-ledger entries and audit records.
+- Warnings, casino-chat mutes, account suspensions and long-term bans; restrictions can be revoked, and the app checks account status.
+- Casino analytics, recent table/slot/duel activity, table listing and audited table closure (only when no betting round is open).
+- Append-only admin audit trail, maintenance mode and public-safe feature flags.
+- RLS on admin tables, direct client writes revoked, and privileged mutations routed through server-side permission-checked RPCs.
+
 ### Not yet implemented
-- Admin Command Centre: custom roles, granular permission editor, player management, moderation, economy/casino controls, audit logs and security settings.
-- Full casino browser E2E testing across two independent logged-in browser sessions; database-level two-user smoke tests have passed.
+- Full casino/admin browser E2E testing across two independent logged-in browser sessions; database-level permission, wallet, moderation, mute, suspension, maintenance, feature-flag and casino-table smoke tests have passed.
 - Online multiplayer move submission, clocks and server-authoritative results.
 - Public matchmaking and public queue management.
 - Starting a game from a private lobby, shareable deep links and reconnecting players.
@@ -201,4 +209,4 @@ Persistent guest wallets use Supabase anonymous authentication. Enable **Anonymo
 - Stockfish analysis and the wider training system.
 - Friends, messaging, clubs, tournaments and the remaining community features.
 
-Do not describe these unfinished systems as live. The CPU opponent is a lightweight legal-move bot, not Stockfish. The casino uses virtual coins only; there are no real-money deposits, withdrawals or cash-equivalent prizes. Casino implementation details and verification are documented in docs/casino.md.
+Do not describe these unfinished systems as live. The CPU opponent is a lightweight legal-move bot, not Stockfish. The casino uses virtual coins only; there are no real-money deposits, withdrawals or cash-equivalent prizes. Casino implementation details and verification are documented in docs/casino.md; admin roles, permissions, safeguards and verification are documented in docs/admin.md.
