@@ -1,0 +1,36 @@
+@import './GamePage.css';
+.multiplayer-lobby-page{max-width:1240px;margin:0 auto;padding:28px clamp(16px,4vw,56px) 72px}
+.lobby-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.lobby-entry-card,.lobby-room{padding:20px;border:1px solid var(--line);border-radius:11px;background:var(--panel);backdrop-filter:blur(10px)}
+.lobby-entry-card h2,.lobby-room-header h2{font:700 25px 'Pixelify Sans',monospace;margin:6px 0 10px}
+.lobby-entry-card p,.lobby-room-header p{font-size:12px;line-height:1.6;color:var(--muted)}
+.lobby-entry-card label{display:block;margin:18px 0 8px;color:var(--muted);font-size:9px;letter-spacing:.12em}
+.lobby-entry-card select,.lobby-entry-card input{width:100%;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text)}
+.lobby-choice-row{display:flex;gap:8px}
+.lobby-choice-row button{flex:1;min-height:40px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:9px;font-weight:700;cursor:pointer}
+.lobby-choice-row button.active{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--panel-2))}
+.lobby-primary,.lobby-secondary,.lobby-danger{min-height:42px;padding:0 14px;border:0;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.06em;cursor:pointer}
+.lobby-primary{width:100%;margin-top:18px;background:var(--acc);color:var(--on)}
+.lobby-primary:disabled,.lobby-secondary:disabled,.lobby-danger:disabled{opacity:.4;cursor:not-allowed}
+.lobby-room{margin-top:22px}
+.lobby-room-header{display:flex;justify-content:space-between;align-items:center}
+.lobby-room-mark{font-size:40px;color:var(--acc)}
+.lobby-invite-code{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;margin:16px 0;border:1px solid var(--line);border-radius:8px;background:var(--panel-2)}
+.lobby-invite-code small{display:block;font-size:8px;letter-spacing:.12em;color:var(--muted)}
+.lobby-invite-code strong{display:block;margin-top:5px;font:700 22px 'Pixelify Sans',monospace;letter-spacing:.1em}
+.lobby-invite-code button{min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--acc);font-size:9px;font-weight:800;cursor:pointer}
+.lobby-seats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}
+.lobby-seat{display:grid;justify-items:center;gap:8px;min-height:160px;padding:14px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);text-align:center}
+.lobby-seat.vacant{border-style:dashed;opacity:.72}
+.lobby-seat-number{font-size:8px;letter-spacing:.12em;color:var(--muted)}
+.lobby-seat-piece{font-size:29px;color:var(--acc)}
+.lobby-seat strong{font-size:11px;overflow-wrap:anywhere}
+.lobby-seat small{font-size:8px;letter-spacing:.08em;color:var(--muted)}
+.lobby-room-footer{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.lobby-room-footer>div{flex:1;min-width:220px}.lobby-room-footer strong{font-size:11px}.lobby-room-footer p{font-size:10px;color:var(--muted);line-height:1.5;margin:5px 0 0}
+.lobby-secondary{background:var(--panel-2);border:1px solid var(--line);color:var(--text)}
+.lobby-danger{background:#6d283b;color:#fff}
+.lobby-message,.lobby-disclaimer{margin-top:14px;padding:11px 13px;border:1px solid var(--line);border-radius:7px;background:var(--panel);font-size:11px;line-height:1.6;color:var(--muted)}
+.lobby-gate{display:flex;align-items:center;gap:20px;padding:22px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+.lobby-gate>span{font-size:44px;color:var(--acc)}.lobby-gate h2{font:700 25px 'Pixelify Sans',monospace;margin:0 0 7px}.lobby-gate p{font-size:12px;color:var(--muted);line-height:1.6}
+@media(max-width:760px){.lobby-entry-grid{grid-template-columns:1fr}.lobby-seats{grid-template-columns:repeat(2,minmax(0,1fr))}.lobby-invite-code{align-items:flex-start;flex-direction:column}}

@@ -1,0 +1,57 @@
+@import './GamePage.css';
+.world-activity-page{max-width:1320px;margin:0 auto;padding:28px clamp(16px,4vw,56px) 72px}
+.activity-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+.activity-kicker{font:600 9px Inter;letter-spacing:.13em;color:var(--acc)}
+.activity-wallet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.activity-wallet>div{padding:14px 16px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.activity-wallet small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em}
+.activity-wallet strong{display:block;margin-top:4px;font:700 24px 'Pixelify Sans',monospace;color:var(--acc)}
+.activity-primary{min-height:42px;padding:0 14px;border:0;border-radius:7px;background:var(--acc);color:var(--on);font:700 11px Inter;letter-spacing:.05em;cursor:pointer}
+.activity-primary:disabled{opacity:.45;cursor:not-allowed}
+.activity-gate,.fishing-rod-card,.fishing-cast-card,.work-shift-card{display:flex;align-items:center;gap:20px;padding:22px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+.activity-gate>span,.fishing-rod-card>span,.work-shift-card>span{font-size:44px;color:var(--acc)}
+.activity-gate h2,.fishing-rod-card h2,.fishing-cast-card h2,.work-shift-card h2{font:700 25px 'Pixelify Sans',monospace;margin:0 0 6px}
+.activity-gate p,.fishing-rod-card p,.fishing-cast-card p,.work-shift-card p{font-size:12px;line-height:1.6;color:var(--muted);margin:0 0 12px}
+.farm-tool-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.farm-tool{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.farm-tool>span{font-size:27px}.farm-tool>div{display:grid;gap:4px;flex:1}.farm-tool strong{font-size:13px}.farm-tool small{font-size:9px;color:var(--muted);letter-spacing:.08em}.farm-tool>b{font-size:10px;color:#80dfa4}
+.farm-tool button{min-height:36px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:9px;font-weight:700;cursor:pointer}
+.farm-tool button:disabled{opacity:.4}
+.farm-plot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.farm-plot-card{padding:15px;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-width:0}
+.farm-plot-top{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:8px;letter-spacing:.09em}
+.farm-plot-top span:last-child{color:var(--acc);text-align:right}
+.farm-plot-art{display:grid;place-items:center;height:110px;margin:12px 0;background:linear-gradient(180deg,#26324a,#352a2a);border:1px solid var(--line);border-radius:7px;font-size:48px}
+.farm-plot-card.empty .farm-plot-art{color:var(--muted);font-size:30px;background:linear-gradient(180deg,#28233b,#191522)}
+.farm-plot-card h3{font:700 17px 'Pixelify Sans',monospace;margin:0 0 5px}
+.farm-plot-card p{min-height:55px;font-size:11px;line-height:1.55;color:var(--muted)}
+.farm-plot-card .activity-primary{width:100%}
+.activity-footnote{display:flex;align-items:center;gap:15px;flex-wrap:wrap;padding:14px 0;margin-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}
+.activity-footnote strong{color:var(--acc);letter-spacing:.1em}.activity-footnote button{margin-left:auto;border:1px solid var(--line);border-radius:6px;padding:8px 11px;background:var(--panel);color:var(--text);cursor:pointer}
+.activity-message{padding:11px 13px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px}
+.activity-disclaimer{font-size:10px;line-height:1.6;color:var(--muted);margin-top:18px}
+.fishing-rod-card>div,.work-shift-card>div{flex:1}
+.fishing-cast-card{align-items:stretch}
+.fishing-scene{position:relative;display:grid;place-items:center;min-width:180px;min-height:150px;overflow:hidden;border-radius:8px;background:linear-gradient(180deg,#11172e 0%,#173e59 62%,#0c293b 100%)}
+.fishing-moon{position:absolute;top:12px;right:20px;color:#e8e2c9;font-size:30px}
+.fishing-water{position:absolute;bottom:24px;color:#72c8d5;font-size:20px;letter-spacing:4px}
+.fishing-rod-art{position:relative;z-index:1;font-size:54px;transform:rotate(-15deg)}
+.fishing-cast-card>div:last-child{flex:1;align-self:center}
+.fishing-inventory-panel,.fishing-log-panel{margin-top:16px;padding:17px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.fishing-inventory-panel h2{font:700 22px 'Pixelify Sans',monospace;margin:4px 0 12px}
+.fishing-catch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fishing-catch-grid article{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2)}
+.fishing-catch-grid article>span{font-size:27px}.fishing-catch-grid strong{font-size:12px}.fishing-catch-grid small{font-size:9px;color:var(--muted)}
+.fishing-catch-grid button{min-height:32px;border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--acc);font-size:9px;font-weight:700;cursor:pointer}
+.fishing-catch-grid button:disabled{opacity:.35;cursor:not-allowed}
+.fishing-log-panel>div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:11px}
+.fishing-log-panel>div small,.fishing-log-panel>p{color:var(--muted)}
+.fishing-log-panel>span{display:block;margin-bottom:10px}
+.last-catch-card{display:flex;align-items:center;gap:12px;padding:14px;margin-top:12px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--acc) 10%,var(--panel))}
+.last-catch-card>span{font-size:32px}.last-catch-card div{display:grid;gap:3px}.last-catch-card small{font-size:8px;color:var(--acc);letter-spacing:.1em}.last-catch-card strong{font:700 18px 'Pixelify Sans',monospace}.last-catch-card p{font-size:10px;color:var(--muted);margin:0}
+@media(max-width:1000px){.farm-plot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.activity-wallet{gap:6px}.activity-wallet>div{padding:10px}.activity-wallet strong{font-size:19px}.farm-tool-row,.farm-plot-grid,.fishing-catch-grid{grid-template-columns:1fr}.fishing-cast-card,.work-shift-card,.fishing-rod-card,.activity-gate{align-items:stretch;flex-direction:column}.fishing-scene{min-height:130px}.farm-plot-card p{min-height:0}.farm-tool{flex-wrap:wrap}.farm-tool>div{min-width:100px}}
+
+.fishing-inventory-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fishing-inventory-heading>button{border:1px solid var(--line);border-radius:6px;padding:8px 11px;background:var(--panel-2);color:var(--text);font-size:9px;font-weight:700;cursor:pointer}
+.fishing-inventory-heading>button:disabled{opacity:.4;cursor:wait}

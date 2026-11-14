@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    branches: [main, phase-1-foundation, phase-2-casino-completion, phase-1-world-economy-expansion]
+  pull_request:
+    branches: [main, phase-1-foundation]
+
+permissions:
+  contents: read
+
+# Keep build verification active while the world-economy feature branch is under review.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Verify core platform preservation
+        run: npm run verify:preservation
+      - name: Type-check and build
+        run: npm run build

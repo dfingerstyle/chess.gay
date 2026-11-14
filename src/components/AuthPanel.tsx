@@ -14,13 +14,12 @@ type Props = {
   user: User | null;
   onClose: () => void;
   onSignedOut: () => void;
+  onGuestRegistered: (username: string) => void;
 };
 
-export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
-  const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+export default function AuthPanel({ user, onClose, onSignedOut, onGuestRegistered }: Props) {
+  const [choosingUsername, setChoosingUsername] = useState(false);
+  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -34,35 +33,68 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
     return () => { active = false; };
   }, [user]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleChooseUsername(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!supabase) {
-      setError('Supabase is not configured yet. Add the two VITE_SUPABASE variables to your environment.');
+      setError('The game service is not configured yet. Please try again later.');
+      return;
+    }
+    const cleanUsername = username.trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(cleanUsername)) {
+      setError('Username must be 3–20 characters using letters, numbers or underscores.');
+      return;
+    }
+
+    setBusy(true);
+    setError('');
+    try {
+      let account = user;
+      if (!account) {
+        const { data, error: guestError } = await supabase.auth.signInAnonymously();
+        if (guestError) throw guestError;
+        account = data.user;
+      }
+      if (!account || !account.is_anonymous) {
+        throw new Error('Username-only registration is available for guest sessions.');
+      }
+
+      const { error: profileError } = await supabase.from('profiles')
+        .update({ username: cleanUsername, display_name: cleanUsername })
+        .eq('id', account.id);
+      if (profileError?.code === '23505') {
+        throw new Error('That username is already taken. Choose another one.');
+      }
+      if (profileError) throw profileError;
+
+      try { localStorage.setItem('chessgay:guest-name', cleanUsername); } catch { /* The Supabase profile remains the saved username. */ }
+      onGuestRegistered(cleanUsername);
+      onClose();
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(/anonymous.*disabled|anonymous sign.?ins.*disabled/i.test(detail)
+        ? 'Guest accounts are not enabled in Supabase yet. Enable Anonymous Sign-Ins under Authentication → Sign-In / Providers.'
+        : detail);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleGuestPlay() {
+    if (!supabase) {
+      setError('The game service is not configured. Please try again later.');
       return;
     }
     setBusy(true);
     setError('');
-    setMessage('');
     try {
-      if (mode === 'signup') {
-        const { data, error: authError } = await supabase.auth.signUp({ email: email.trim(), password });
-        if (authError) throw authError;
-        setMessage(data.session
-          ? 'Your account is ready. Welcome to the club.'
-          : 'Check your email to confirm your account, then come back and sign in.');
-      } else if (mode === 'login') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (authError) throw authError;
-        setMessage('Signed in successfully.');
-      } else {
-        const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: window.location.origin,
-        });
-        if (authError) throw authError;
-        setMessage('If an account exists for that email, a password reset link is on its way.');
-      }
+      const { error: authError } = await supabase.auth.signInAnonymously();
+      if (authError) throw authError;
+      onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      const detail = err instanceof Error ? err.message : 'Guest sign-in failed. Please try again.';
+      setError(/anonymous.*disabled|anonymous sign.?ins.*disabled/i.test(detail)
+        ? 'Guest play is not enabled in Supabase yet. Enable Anonymous Sign-Ins under Authentication → Sign-In / Providers.'
+        : detail);
     } finally {
       setBusy(false);
     }
@@ -70,7 +102,9 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
 
   async function handleSignOut() {
     if (!supabase) return;
+    setBusy(true);
     const { error: signOutError } = await supabase.auth.signOut();
+    setBusy(false);
     if (signOutError) setError(signOutError.message);
     else {
       onSignedOut();
@@ -87,33 +121,52 @@ export default function AuthPanel({ user, onClose, onSignedOut }: Props) {
         <div className="auth-kicker">♞ &nbsp; THE CLUB DOOR</div>
         {user ? (
           <>
-            <h2 id="auth-title">Welcome <em>back.</em></h2>
-            <p className="auth-intro">You're signed in. Your place at the board is waiting.</p>
+            <h2 id="auth-title">{user.is_anonymous ? <>Welcome to the <em>club.</em></> : <>Your player <em>account.</em></>}</h2>
+            <p className="auth-intro">{user.is_anonymous
+              ? 'You are playing without an email or password. Your guest session is kept on this device.'
+              : 'This is an older account created before email sign-in was removed. Email-based sign-in and recovery are being retired.'}</p>
             <div className="account-card">
               <span className="account-piece">♟</span>
-              <div><strong>{profile?.display_name || profile?.username || 'Player'}</strong><small>@{profile?.username || 'loading profile'}</small></div>
+              <div><strong>{profile?.display_name || profile?.username || (user.is_anonymous ? 'Guest player' : 'Player')}</strong><small>{user.is_anonymous ? 'GUEST SESSION · NO EMAIL' : '@' + (profile?.username || 'player')}</small></div>
             </div>
-            <button className="auth-submit" onClick={handleSignOut}>SIGN OUT <span>↗</span></button>
+            {user.is_anonymous && (
+              <button className="auth-submit" onClick={() => { setChoosingUsername(true); setError(''); }}>
+                {profile?.username ? 'CHANGE USERNAME' : 'CHOOSE A USERNAME'} <span>↗</span>
+              </button>
+            )}
+            {!user.is_anonymous && <p className="auth-footnote">Sign out only if you understand that this legacy account may not be able to sign in again after email authentication is disabled.</p>}
+            <button className="auth-submit" onClick={handleSignOut} disabled={busy}>
+              {busy ? 'SIGNING OUT…' : 'SIGN OUT'} <span>↗</span>
+            </button>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            {user.is_anonymous && <button className="auth-switches" onClick={onClose}>CONTINUE PLAYING</button>}
           </>
         ) : (
           <>
-            <h2 id="auth-title">{mode === 'signup' ? <>Join the <em>club.</em></> : mode === 'reset' ? <>Find your <em>way back.</em></> : <>Good to see <em>you.</em></>}</h2>
-            <p className="auth-intro">{mode === 'signup' ? 'Create your player account and claim your seat.' : mode === 'reset' ? 'We will send a secure password reset link to your email.' : 'Sign in and get back to your next move.'}</p>
-            <form onSubmit={handleSubmit}>
-              <label htmlFor="auth-email">EMAIL ADDRESS</label>
-              <input id="auth-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
-              {mode !== 'reset' && <>
-                <label htmlFor="auth-password">PASSWORD</label>
-                <input id="auth-password" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" />
-              </>}
-              {error && <p className="auth-error" role="alert">{error}</p>}
-              {message && <p className="auth-message" role="status">{message}</p>}
-              <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'PLEASE WAIT…' : mode === 'signup' ? 'CREATE ACCOUNT' : mode === 'reset' ? 'SEND RESET LINK' : 'SIGN IN'} <span>↗</span></button>
-            </form>
-            <div className="auth-switches">
-              {mode === 'login' && <><button onClick={() => { setMode('signup'); setError(''); setMessage(''); }}>CREATE AN ACCOUNT</button><button onClick={() => { setMode('reset'); setError(''); setMessage(''); }}>FORGOT PASSWORD?</button></>}
-              {mode !== 'login' && <button onClick={() => { setMode('login'); setError(''); setMessage(''); }}>← BACK TO SIGN IN</button>}
-            </div>
+            <h2 id="auth-title">{choosingUsername ? <>Choose your <em>name.</em></> : <>Enter the <em>club.</em></>}</h2>
+            <p className="auth-intro">{choosingUsername
+              ? 'Choose a unique public username. No email, password or personal details required.'
+              : 'Play chess and explore the world without an email address or password.'}</p>
+            {choosingUsername ? (
+              <form onSubmit={handleChooseUsername}>
+                <label htmlFor="auth-username">CHOOSE YOUR USERNAME</label>
+                <input id="auth-username" type="text" autoComplete="nickname" minLength={3} maxLength={20} pattern="[A-Za-z0-9_]{3,20}" required value={username} onChange={(event) => setUsername(event.target.value)} placeholder="YourPlayerName" />
+                <p className="auth-footnote">3–20 characters. Letters, numbers and underscores only. Your guest session stays on this device.</p>
+                {error && <p className="auth-error" role="alert">{error}</p>}
+                <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'CREATING…' : 'CREATE USERNAME & PLAY'} <span>↗</span></button>
+              </form>
+            ) : (
+              <>
+                {error && <p className="auth-error" role="alert">{error}</p>}
+                <button className="auth-submit" onClick={() => { void handleGuestPlay(); }} disabled={busy}>
+                  {busy ? 'STARTING GUEST SESSION…' : 'PLAY WITHOUT EMAIL'} <span>↗</span>
+                </button>
+                <button className="auth-submit" onClick={() => { setChoosingUsername(true); setError(''); }}>
+                  CREATE USERNAME & PLAY <span>↗</span>
+                </button>
+              </>
+            )}
+            {choosingUsername && <div className="auth-switches"><button onClick={() => { setChoosingUsername(false); setError(''); }}>← BACK</button></div>}
           </>
         )}
         <div className="auth-footnote">YOUR ACCOUNT. YOUR MOVES. YOURS TO KEEP.</div>

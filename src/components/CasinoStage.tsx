@@ -1,0 +1,145 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import './CasinoStage.css';
+import { playCasinoCue } from '../lib/casinoAudio';
+
+export type CasinoGame = 'roulette' | 'coinflip' | 'dice' | 'slots';
+export type CasinoVisualResult = {
+  outcome: string;
+  won?: boolean;
+  net?: number;
+  payout_multiplier?: number;
+  win_probability?: string;
+  symbols?: string[];
+};
+
+const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const RED_NUMBERS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const SEGMENT = 360 / WHEEL_ORDER.length;
+const WHEEL_GRADIENT = `conic-gradient(${WHEEL_ORDER.map((number,index) => {
+  const colour = number === 0 ? '#168653' : RED_NUMBERS.has(number) ? '#a72e45' : '#171923';
+  return `${colour} ${index * SEGMENT}deg ${(index + 1) * SEGMENT}deg`;
+}).join(',')})`;
+const DICE_GLYPHS = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+
+function resultNumber(outcome: string) {
+  const parsed = Number.parseInt(outcome, 10);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 36 ? parsed : 0;
+}
+
+export default function CasinoStage({ game, result, animationKey, onAnimationComplete, soundEnabled = false, soundVolume = 0.35 }: {
+  game: CasinoGame;
+  result: CasinoVisualResult | null;
+  animationKey: number;
+  onAnimationComplete?: () => void;
+  soundEnabled?: boolean;
+  soundVolume?: number;
+}) {
+  const completionRef = useRef(onAnimationComplete);
+  const soundRef = useRef({ enabled: soundEnabled, volume: soundVolume });
+  useEffect(() => { completionRef.current = onAnimationComplete; }, [onAnimationComplete]);
+  useEffect(() => { soundRef.current = { enabled: soundEnabled, volume: soundVolume }; }, [soundEnabled, soundVolume]);
+  const [revealing, setRevealing] = useState(false);
+  const [revealed, setRevealed] = useState<CasinoVisualResult | null>(null);
+  const number = result ? resultNumber(result.outcome) : 0;
+  const wheelIndex = WHEEL_ORDER.indexOf(number);
+  const targetRotation = 360 * 8 - Math.max(0, wheelIndex) * SEGMENT;
+  const wheelStyle = useMemo(() => ({
+    '--wheel-gradient': WHEEL_GRADIENT,
+    '--target-rotation': `${targetRotation}deg`,
+  }) as CSSProperties, [targetRotation]);
+
+  useEffect(() => {
+    if (!result || animationKey === 0) { setRevealing(false); setRevealed(null); return; }
+    setRevealed(null);
+    setRevealing(true);
+    if (soundRef.current.enabled) playCasinoCue(game, soundRef.current.volume);
+    const duration = game === 'roulette' ? 4700 : game === 'slots' ? 3200 : 1900;
+    const timer = window.setTimeout(() => {
+      setRevealed(result);
+      setRevealing(false);
+      if (soundRef.current.enabled && result.won !== undefined) playCasinoCue(result.won ? 'win' : 'loss', soundRef.current.volume);
+      completionRef.current?.();
+    }, duration);
+    return () => window.clearTimeout(timer);
+  }, [animationKey, game, result]);
+
+  const outcomeLabel = result?.outcome || 'Waiting for the next round';
+  const coinSide = outcomeLabel.toLowerCase().includes('tails') ? 'TAILS' : 'HEADS';
+  const coinStyle = { '--coin-final-rotation': coinSide === 'TAILS' ? '1980deg' : '1800deg' } as CSSProperties;
+  const dieNumber = Math.min(6, Math.max(1, Number.parseInt(outcomeLabel, 10) || 1));
+  const wheelColour = number === 0 ? 'green' : RED_NUMBERS.has(number) ? 'red' : 'black';
+
+  return (
+    <section className="casino-stage" aria-label={game + ' game animation'}>
+      <div className="casino-stage-topline">
+        <span className="casino-live-dot" />
+        <span>{revealing ? 'RESULT IN MOTION' : revealed ? 'ROUND COMPLETE' : 'TABLE READY'}</span>
+        <span className="casino-stage-rule" />
+        <small>{game === 'roulette' ? 'EUROPEAN · SINGLE ZERO' : game === 'coinflip' ? 'FAIR COIN · 50/50' : game === 'dice' ? 'SIX-SIDED DIE' : 'THREE REELS · FIXED PAYTABLE'}</small>
+      </div>
+
+      {game === 'roulette' && (
+        <div className="roulette-scene">
+          <div className="roulette-pointer" />
+          <div className={revealing ? 'roulette-wheel is-spinning' : 'roulette-wheel'} style={wheelStyle}>
+            <div className="roulette-wheel-numbers" aria-hidden="true">
+              {WHEEL_ORDER.map((value,index) => <span key={value} style={{ transform: `rotate(${index * SEGMENT + SEGMENT / 2}deg) translateY(-126px) rotate(-${index * SEGMENT + SEGMENT / 2}deg)` }}>{value}</span>)}
+            </div>
+            <div className="roulette-wheel-ring" />
+            <div className="roulette-wheel-hub"><span>CHESS.GAY</span><strong>♛</strong></div>
+          </div>
+          <div className={revealing ? 'roulette-ball-track is-orbiting' : 'roulette-ball-track'}>
+            <i className="roulette-ball" />
+          </div>
+          <div className="roulette-table-glow" />
+        </div>
+      )}
+
+      {game === 'coinflip' && (
+        <div className="coin-scene">
+          <div className={revealing ? 'casino-coin is-flipping' : 'casino-coin'} style={coinStyle}>
+            <div className="coin-face coin-front"><span>♛</span><b>HEADS</b></div>
+            <div className="coin-face coin-back"><span>♞</span><b>TAILS</b></div>
+          </div>
+          <div className="coin-shadow" />
+        </div>
+      )}
+
+      {game === 'dice' && (
+        <div className="dice-scene">
+          <div className={revealing ? 'casino-die is-rolling' : 'casino-die'}>{revealing ? '⚄' : DICE_GLYPHS[revealed ? dieNumber : 5]}</div>
+          <div className="dice-shadow" />
+        </div>
+      )}
+
+      {game === 'slots' && (
+        <div className="slot-scene">
+          <div className="slot-machine">
+            <div className="slot-machine-header"><span>THE MIDNIGHT</span><b>777</b><span>CLUB</span></div>
+            <div className="slot-reels">
+              {[0,1,2].map(index=><div className={revealing?'slot-reel is-spinning':'slot-reel'} style={{'--reel-delay':(index*0.16)+'s'} as CSSProperties} key={index}><span>{revealing?['🍒','🔔','💎'][index]:revealed?.symbols?.[index]||'?'}</span></div>)}
+            </div>
+            <div className="slot-machine-payline"><i/> WIN LINE <i/></div>
+            <div className="slot-machine-footer">MATCH THREE · HIT THE JACKPOT</div>
+          </div>
+        </div>
+      )}
+
+      <div className="casino-stage-result" aria-live="polite">
+        {revealing ? (
+          <><span className="stage-result-kicker">THE HOUSE IS WAITING</span><strong className="stage-result-wait">...</strong><small>Revealing the server-generated result</small></>
+        ) : revealed ? (
+          <>
+            <span className="stage-result-kicker">{revealed.won === undefined ? 'ROUND RESULT' : revealed.won ? 'LUCK FAVOURED YOU' : 'BETTER LUCK NEXT ROUND'}</span>
+            <strong className={game === 'roulette' ? `stage-result-number ${wheelColour}` : game === 'slots' ? 'stage-result-number slot-result-symbols' : 'stage-result-number'}>{game === 'roulette' ? number : game === 'coinflip' ? coinSide : game === 'slots' ? (revealed.symbols||[]).join(' ') : dieNumber}</strong>
+            <small>{game === 'roulette' ? wheelColour.toUpperCase() : game === 'coinflip' ? 'COIN FLIP' : game === 'slots' ? (revealed.payout_multiplier ? 'TOTAL PAYOUT · '+revealed.payout_multiplier+'×' : 'NO MATCH') : dieNumber <= 3 ? 'LOW' : 'HIGH'}</small>
+            {typeof revealed.net === 'number' && <b className={revealed.net >= 0 ? 'stage-result-profit' : 'stage-result-loss'}>{revealed.net > 0 ? '+' : ''}{revealed.net.toLocaleString()} COINS</b>}
+          </>
+        ) : (
+          <><span className="stage-result-kicker">PLACE YOUR BET</span><strong className="stage-result-wait">READY?</strong><small>The result is generated securely by the server.</small></>
+        )}
+      </div>
+    </section>
+  );
+}
