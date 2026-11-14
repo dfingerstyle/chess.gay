@@ -323,6 +323,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
 
   const tableView=selectedTableId&&selectedTable;
   const isSpectator=myMembership?.role==='spectator';
+  const completedRounds=roundHistory.filter(item=>item.status==='settled');
 
   return (
     <section className="casino-multiplayer">
@@ -342,7 +343,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
               {members.map(member=><div className="casino-seat" key={member.user_id}><span className="casino-seat-avatar">{member.role==='spectator'?'◉':'♟'}</span><span><b>{member.profile?.display_name||member.profile?.username||'Player'}</b><small>{member.role==='spectator'?'SPECTATOR':member.user_id===selectedTable.host_id?'HOST':'PLAYER '+member.seat}</small></span>{member.user_id===user.id&&<i>YOU</i>}</div>)}
             </div>
             {round?.status==='settled'&&visualResult&&<CasinoStage game={selectedTable.game_type} result={visualResult} animationKey={animationKey} soundEnabled={soundEnabled} soundVolume={soundVolume} />}
-            {roundHistory.length>0&&<div className="casino-round-history"><div className="casino-section-title"><h4>RECENT RESULTS</h4><span>LAST {roundHistory.length} ROUNDS</span></div><div className="casino-round-history-list">{roundHistory.map(item=><span key={item.id} className={item.game_type==='roulette'?(item.outcome?.colour||'black'):item.game_type==='coinflip'?'coin':'dice'} title={'Round '+item.round_number+' · '+(item.outcome?.label||item.status)}>{item.game_type==='roulette'?item.outcome?.number??'—':item.game_type==='coinflip'?(item.outcome?.side||'—').slice(0,1).toUpperCase():item.outcome?.number??'—'}</span>)}</div></div>}
+            {completedRounds.length>0&&<div className="casino-round-history"><div className="casino-section-title"><h4>RECENT RESULTS</h4><span>LAST {completedRounds.length} ROUNDS</span></div><div className="casino-round-history-list">{completedRounds.map(item=><span key={item.id} className={item.game_type==='roulette'?(item.outcome?.colour||'black'):item.game_type==='coinflip'?'coin':'dice'} title={'Round '+item.round_number+' · '+(item.outcome?.label||item.status)}>{item.game_type==='roulette'?item.outcome?.number??'—':item.game_type==='coinflip'?(item.outcome?.side||'—').slice(0,1).toUpperCase():item.outcome?.number??'—'}</span>)}</div></div>}
             <div className="casino-round-panel">
               <div className="casino-round-status"><span>{round?.status==='betting'?'BETTING OPEN':round?.status==='settled'?'RESULT REVEALED':'WAITING FOR HOST'}</span>{round?.status==='betting'&&<strong>{secondsLeft}s</strong>}</div>
               {round?.status==='settled'&&<div className="casino-round-result"><span>LAST RESULT</span><b>{round.outcome?.label||'Settled'}</b></div>}
