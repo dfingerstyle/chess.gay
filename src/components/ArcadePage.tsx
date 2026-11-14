@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import CasinoStage from './CasinoStage';
 import CasinoMultiplayer from './CasinoMultiplayer';
 import RouletteBetTable from './RouletteBetTable';
-import { setCasinoAmbience } from '../lib/casinoAudio';
+import { primeCasinoAudio, setCasinoAmbience } from '../lib/casinoAudio';
 
 type Page = 'casino' | 'shop';
 type Game = 'coinflip' | 'dice' | 'roulette' | 'slots';
@@ -89,6 +89,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
     if (!supabase || !user) return;
     const stake = Number(bet);
     if (!Number.isInteger(stake) || stake < 1 || stake > 5000) { setMessage('Choose a whole-number bet between 1 and 5,000 coins.'); return; }
+    if(soundEnabled)primeCasinoAudio();
     setBusy(true); setMessage(''); setResult(null);
     const { data, error } = game==='slots'
       ? await supabase.rpc('play_casino_slots',{p_bet:stake})
@@ -139,7 +140,7 @@ export default function ArcadePage({ page, user, onBack, onSignIn, onNavigate }:
 
   return (
     <section className="app-page arcade-page">
-      <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div>{page==='casino'&&<div className="casino-audio-controls"><button onClick={()=>setSoundEnabled(value=>!value)}>{soundEnabled?'♫ SOUND ON':'♪ SOUND OFF'}</button><button onClick={()=>{const next=!musicEnabled;setMusicEnabled(next);setCasinoAmbience(next,soundVolume)}}>{musicEnabled?'♫ AMBIENCE ON':'♪ AMBIENCE OFF'}</button><label>VOLUME<input type="range" min="0" max="1" step="0.05" value={soundVolume} onChange={event=>setSoundVolume(Number(event.target.value))}/></label></div>}</div>
+      <div className="game-page-toolbar"><button className="back-link" onClick={onBack}>← BACK TO THE GAME ROOM</button><div className="theme-switcher"><span>THEME</span>{(['starry','sakura','sea'] as Theme[]).map(option => <button key={option} className={theme === option ? 'theme-chip active' : 'theme-chip'} onClick={() => setTheme(option)}>{option === 'starry' ? '✦ Starry' : option === 'sakura' ? '✿ Sakura' : '≈ Deep sea'}</button>)}</div>{page==='casino'&&<div className="casino-audio-controls"><button onClick={()=>{const next=!soundEnabled;setSoundEnabled(next);if(next)primeCasinoAudio()}}>{soundEnabled?'♫ SOUND ON':'♪ SOUND OFF'}</button><button onClick={()=>{const next=!musicEnabled;setMusicEnabled(next);setCasinoAmbience(next,soundVolume)}}>{musicEnabled?'♫ AMBIENCE ON':'♪ AMBIENCE OFF'}</button><label>VOLUME<input type="range" min="0" max="1" step="0.05" value={soundVolume} onChange={event=>setSoundVolume(Number(event.target.value))}/></label></div>}</div>
       <div className="game-page-heading arcade-heading">
         <div><div className="eyebrow"><span className="eyebrow-line" /> {page === 'casino' ? 'THE MIDNIGHT CLUB' : 'MAKE IT YOURS'}</div><h1>{page === 'casino' ? <>Enter the <em>casino.</em></> : <>The <em>shop.</em></>}</h1><p>Virtual coins only. No real-money deposits, withdrawals or cash prizes.</p></div>
         <div className="wallet-display"><span>YOUR BALANCE</span><strong>{balance === null ? '—' : balance.toLocaleString()} <small>coins</small></strong></div>
