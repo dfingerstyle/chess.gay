@@ -63,3 +63,53 @@ export function playCasinoCue(cue: CasinoCue, volume = 0.35) {
     tone(ctx, frequency, now + index * 0.14, 0.24, v * 0.75, 'triangle', frequency * 0.82);
   });
 }
+
+let ambienceGain: GainNode | null = null;
+let ambienceNodes: OscillatorNode[] = [];
+let ambienceStopTimer: number | null = null;
+
+export function setCasinoAmbience(enabled: boolean, volume = 0.35) {
+  const ctx = context();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const target = Math.max(0, Math.min(1, volume));
+  if (ambienceStopTimer !== null) {
+    window.clearTimeout(ambienceStopTimer);
+    ambienceStopTimer = null;
+  }
+  if (enabled) {
+    if (!ambienceGain) {
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 420;
+      ambienceGain = ctx.createGain();
+      ambienceGain.gain.value = 0.0001;
+      filter.connect(ambienceGain);
+      ambienceGain.connect(ctx.destination);
+      [55,82.41,110,164.81].forEach((frequency,index) => {
+        const oscillator = ctx.createOscillator();
+        const voiceGain = ctx.createGain();
+        oscillator.type = index===3 ? 'triangle' : 'sine';
+        oscillator.frequency.value = frequency;
+        voiceGain.gain.value = index===0 ? 0.42 : index===1 ? 0.22 : index===2 ? 0.16 : 0.08;
+        oscillator.connect(voiceGain);
+        voiceGain.connect(filter);
+        oscillator.start();
+        ambienceNodes.push(oscillator);
+      });
+    }
+    ambienceGain.gain.cancelScheduledValues(now);
+    ambienceGain.gain.setTargetAtTime(target * 0.035, now, 0.9);
+  } else if (ambienceGain) {
+    const oldGain = ambienceGain;
+    oldGain.gain.cancelScheduledValues(now);
+    oldGain.gain.setTargetAtTime(0.0001, now, 0.35);
+    ambienceStopTimer = window.setTimeout(() => {
+      if (ambienceGain !== oldGain) return;
+      ambienceNodes.forEach(node => { try { node.stop(); } catch { /* already stopped */ } });
+      ambienceNodes = [];
+      ambienceGain = null;
+      ambienceStopTimer = null;
+    }, 1400);
+  }
+}
