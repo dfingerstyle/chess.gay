@@ -506,6 +506,11 @@ export default function App() {
   return (
     <main>
       <ThemeBackdrop />
+      {accountStatusLoading || platformConfigLoading ? <section className="platform-gate-screen"><span className="eyebrow-line" /><h1>Checking <em>platform access.</em></h1><p>Verifying account status and platform settings…</p></section>
+      : accountStatusError ? <section className="platform-gate-screen"><h1>Unable to verify <em>account status.</em></h1><p>{accountStatusError}</p><button className="button button-primary" onClick={() => window.location.reload()}>RETRY</button></section>
+      : accountStatus?.is_banned ? <section className="platform-gate-screen restricted"><span className="eyebrow-line" /><h1>Account <em>restricted.</em></h1><p>This account cannot access the game room until {accountStatus.banned_until ? new Date(accountStatus.banned_until).toLocaleString() : 'the restriction is lifted'}.</p><button className="button button-primary" onClick={() => { void supabase?.auth.signOut(); setUser(null); setPage('home'); }}>SIGN OUT</button></section>
+      : maintenanceMode ? <section className="platform-gate-screen"><span className="eyebrow-line" /><h1>Under <em>maintenance.</em></h1><p>{platformConfig?.maintenance_message || 'The game room is undergoing maintenance. Please check back soon.'}</p><button className="button button-primary" onClick={() => window.location.reload()}>CHECK AGAIN</button></section>
+      : <>
       <div className="announcement"><span className="announcement-dot" /> CHESS.GAY IS FREE TO PLAY <span className="announcement-divider">/</span> NO PREMIUM TIERS. JUST THE GAME.</div>
       <header className="site-header">
         <a className="brand" href="#top" onClick={event => { event.preventDefault(); setPage('home'); }} aria-label="chess.gay home"><span className="brand-mark">♞</span><span>chess<span className="brand-dot">.</span>gay</span></a>
@@ -571,6 +576,7 @@ export default function App() {
 
       {authOpen && <AuthPanel user={user} onClose={() => setAuthOpen(false)} onSignedOut={() => { setUser(null); setMyProfile(null); setPage('home'); }} />}
       {editorOpen && user && myProfile && <ProfileEditor profile={myProfile} onClose={() => setEditorOpen(false)} onSaved={saveProfile} />}
+      </>}
     </main>
   );
 }
