@@ -62,10 +62,10 @@ Friends, requests, group conversations, E2EE private messages, clubs, tournament
 Username, display name, bio, curated avatar, curated banner, themes, layout, competitive statistics, achievements and equipped cosmetics. Competitive credentials must be distinguishable from decorative titles.
 
 ### Economy and progression
-One shared virtual coin wallet and inventory across Work, Farming, Fishing, Shop, Marketplace and Arcade. XP and levels are separate from spendable coins. Hybrid progression unlocks activities, cosmetics, equipment and areas through play; no competitive advantage is sold. Wallet changes, item ownership, crop growth, catches, cooldowns and XP are server-authoritative and auditable.
+One shared virtual coin wallet and inventory across Work, Farming, Fishing, Shop, properties, businesses, simulated mining, Marketplace and Arcade. XP and levels are separate from spendable coins. Hybrid progression unlocks activities, cosmetics, equipment and areas through play; no competitive advantage is sold. Wallet changes, item ownership, property/business/mining assets, passive income, crop growth, catches, cooldowns and XP are server-authoritative and auditable. Separate leaderboards cover coins, net worth, XP and levels; chess rankings require verified chess results.
 
 ### Farming and fishing
-Farming uses persistent plots, seed consumption, growth timers, harvesting into inventory and selling crops through the shared Shop. Fishing uses owned equipment, server-side rarity rolls, cooldowns, a catch log and sellable inventory rewards.
+Farming uses persistent plots, seed consumption, growth timers, harvesting into inventory and selling crops through the shared Shop. Fishing uses owned equipment, server-side rarity rolls, cooldowns, a catch log and sellable inventory rewards. Work shifts provide timed wages. Properties generate rent, businesses generate revenue, and simulated mining rigs generate virtual coins on capped collection cycles. All asset purchases, upgrades and income claims use the shared wallet ledger.
 
 ### Casino
 Virtual coins only; no deposits, withdrawals, cash prizes or cash-equivalent rewards. The current casino scope includes animated European roulette, coin flip, dice and three-reel slots; public/private multiplayer tables; coinflip/dice/roulette player duels; table chat; spectators; round history; personal betting history; sound and ambient audio controls; and a net-profit leaderboard. Outcomes, odds, stakes, wallet changes and payouts are server-authoritative. Published roulette and slot odds are visible before play. Table creation, betting, chat and challenges have server-side rate limits. See docs/casino.md for the exact paytable, probabilities, payout rules and security model.
@@ -94,15 +94,54 @@ Protected dashboard, user management, custom staff roles, granular permissions, 
 - Stockfish for chess rules/evaluation.
 - E2EE using an established reviewed protocol with device verification, key rotation and recovery design.
 
-## Delivery phases
+## Delivery phases — authoritative six-phase roadmap
 
-1. **Foundation and shared economy:** visual identity, hybrid world hub, guest/account identity, profiles, presence, wallet, XP, inventory and existing world activities.
-2. **Finish the casino:** complete roulette, coin flip, dice and slots presentation; animations, sound, history, leaderboards, public/private tables, player challenges, chat and spectating; verify fairness, wallet settlement, rate limits and two-account multiplayer behaviour.
-3. **Finish the Admin Command Centre:** custom roles, permission management, player tools, moderation, economy and casino controls, audit trail, maintenance and feature flags.
-4. **Integrated casino/admin release QA:** test both systems together with separate admin and player accounts, simultaneous sessions, abuse cases, database rollback tests, browser tests, accessibility and responsive layouts. Do not merge or advertise as finished until this passes.
-5. **Chess Hub and online chess:** selectable chess lobby with all six modes, then server-authoritative two-player games, matchmaking, lobbies, clocks and reconnect.
-6. **Four-player chess and custom games:** FFA, 2v2 and validated custom starting positions using a separately tested rules engine.
-7. **Chess intelligence and community:** Stockfish, puzzles, friends, messaging, clubs, events, deeper profile customization and remaining platform polish.
+The original six-phase plan is the delivery order. Existing completed work is credited where it belongs; nothing is rebuilt just to match the sequence. Work that was started out of order is preserved, hardened and integrated at the appropriate phase.
+
+1. **Phase 1 — Platform foundations**
+   - Review existing code and database.
+   - Establish shared UI components and navigation.
+   - Design the permission system.
+   - Design casino room, bet and transaction data structures.
+   - Establish testing and migration requirements.
+   - Preserve and complete the shared economy: one wallet, inventory, XP/levels, work, farming, fishing, Shop, properties, businesses and simulated mining.
+   - Provide separate leaderboards for wealth/progression and, once authoritative chess results exist, chess performance.
+2. **Phase 2 — Admin Command Centre**
+   - Admin authentication and custom roles.
+   - Dashboard and player management.
+   - Moderation and audit logs.
+   - Economy controls.
+   - Casino and chess management.
+   - The admin system must be secure and operational before the casino is treated as release-ready.
+3. **Phase 3 — Casino experience**
+   - New casino lobby.
+   - Roulette, coin flip and dice interfaces.
+   - Animation and sound systems.
+   - Betting history and statistics.
+   - Server-side game validation and payout tests.
+4. **Phase 4 — Multiplayer casino**
+   - Public and private tables.
+   - Player challenges and agreed stakes.
+   - Shared game results.
+   - Spectating.
+   - Live chat.
+   - Leaderboards and multiplayer testing.
+5. **Phase 5 — Chess Hub**
+   - New chess landing page.
+   - Six selectable game modes.
+   - Bot, local and self-play experiences.
+   - Online matchmaking.
+   - Private lobbies and training.
+6. **Phase 6 — Polish and release**
+   - Animations and responsive layouts.
+   - Performance optimization.
+   - Security review.
+   - Two-account and multiple-device testing.
+   - Regression tests for existing farming, fishing, profiles, economy and progression.
+
+### Economy design requirement
+
+Farming, fishing, work, properties, businesses and simulated mining are connected progression loops inspired by social economy games such as Dank Memer, but must use original chess.gay mechanics and presentation. They share the same virtual-coin wallet and inventory. Assets can generate capped passive income; upgrades and claims are server-authoritative and ledger-backed. Simulated mining never creates, transfers or represents real cryptocurrency. Wealth, coins, XP and levels have separate rankings. Chess rating and win leaderboards must wait for verified server-authoritative chess results.
 
 ## Phase 1 implementation notes
 
