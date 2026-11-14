@@ -172,6 +172,10 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   useEffect(()=>{void loadAccess();},[user?.id]);
   useEffect(()=>{if(access?.is_admin)void loadTab(tab);},[access?.is_admin,tab]);
   useEffect(()=>{const role=roles.find(item=>item.id===selectedRoleId);if(role)setSelectedPermissions(role.permissions);},[selectedRoleId,roles]);
+  useEffect(()=>{
+    const available=['warning','mute','suspend','ban'].find(action=>can('moderation.'+action));
+    if(available)setModerationAction(available);
+  },[access]);
 
   async function runAction(action:()=>Promise<void>){
     setBusy(true);setNotice('');
