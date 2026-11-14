@@ -11,6 +11,9 @@ begin
   if position('extensions.gen_random_bytes' in v_arcade) = 0 then
     raise exception 'play_arcade_game must use cryptographic random bytes';
   end if;
+  if position('p_choice is null' in v_arcade) = 0 then
+    raise exception 'play_arcade_game must reject null choices';
+  end if;
   if v_arcade ~ '\mrandom\s*\(' then
     raise exception 'play_arcade_game must not use PostgreSQL pseudo-random functions';
   end if;
