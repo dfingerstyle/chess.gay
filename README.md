@@ -50,7 +50,7 @@ The Phase 1 foundation branch adds:
 
 The existing Supabase client and profiles foundation are preserved. Authentication now waits for session restoration, distinguishes anonymous guests from registered accounts, and avoids showing account-creation prompts to registered users. Guest email linking uses the same Supabase user identity so eligible wallet and inventory rows remain attached. The product specification is the source of truth for guest-first access and the planned playable game systems.
 
-The homepage is now a hybrid world hub with eight destinations. Chess, the casino, the shop, work, farming, fishing and the board-colour workshop have real interactions. The casino now includes animated roulette, coin flip, dice and slots, public/private multiplayer tables, player duels, chat, spectators, history and leaderboards. Training, social/community, tournaments, the admin command centre and the full Player Studio remain partially or wholly in development. Each unfinished destination states its actual status.
+The homepage is now a hybrid world hub with eight destinations. Chess, the casino, the shop, work, farming, fishing and the board-colour workshop have real interactions. The casino now includes animated roulette, coin flip, dice and slots, public/private multiplayer tables, player duels, chat, spectators, history and leaderboards. Training, social/community, tournaments and the full Player Studio remain partially or wholly in development. The Admin Command Centre now has its first operational implementation: custom roles, permission checks, player records, moderation, economy controls, casino oversight, audit logs and platform settings. Final browser-based multi-account QA is still required before launch.
 
 The player directory requires the existing public SELECT policy on `profiles`; profile editing uses the existing owner-only UPDATE policy. Realtime presence is ephemeral and does not create persistent visitor records.
 
@@ -62,7 +62,7 @@ The player directory requires the existing public SELECT policy on `profiles`; p
 4. World activities: shared wallet, farming, fishing, work, inventory, XP and hybrid progression.
 5. Customization: Board Workshop, Player Studio, cosmetics and account-backed presets.
 6. Chess intelligence and community: Stockfish, puzzles, friends, messages, clubs and events.
-7. Administration and launch: permissions, moderation, audit logs, anti-cheat, accessibility and security review.
+7. Administration and launch: the first protected Admin Command Centre is implemented; finish browser-based multi-account QA, anti-cheat, accessibility and security review.
 
 ## Security
 
@@ -91,6 +91,7 @@ The branch now includes a first real playable and economy vertical slice:
 - **Multiplayer casino:** public/private roulette, coinflip and dice tables, 16-character hashed invite codes, up to eight players and 50 spectators, 20-second rounds, live chat, shared animated results, recent history and spectator settlement.
 - **Player duels:** coinflip, dice and roulette challenges with accepted stakes, winner-takes-pot settlement and a roulette-zero push/refund.
 - **Casino history and rankings:** personal table-bet and slot-spin history, plus net-profit leaderboard across table bets, slots and player duels. All wagers use virtual coins only.
+- **Admin Command Centre:** database-backed custom roles and granular permissions; player search and detail records; reasoned wallet adjustments; warnings, chat mutes, suspensions and bans; role assignment; casino analytics and table closure; audit history; maintenance mode and feature flags. Direct writes to admin tables are revoked and admin mutations use permission-checked RPCs.
 - **Persistent wallet:** Supabase wallet balances, immutable transaction history, work-shift earnings (100–250 coins, one-hour cooldown), shop purchases, item sales and inventory.
 - **Security:** balance changes and game outcomes are database RPCs; direct client access to the internal balance-adjustment function is revoked. Economy RPCs validate the authenticated user and lock the wallet row before changing its balance.
 - **Themes:** Starry Void, Sakura and Deep Sea, with Inter body text, Pixelify Sans display typography and animated pixel-art backgrounds.
@@ -105,6 +106,6 @@ The branch now includes a first real playable and economy vertical slice:
 
 To use a persistent guest wallet, anonymous sign-ins must be enabled in Supabase Auth. The site will create an anonymous Supabase account without asking for an email or password. A normal registered account also works. Local chess does not require an account.
 
-**Still not implemented:** server-authoritative online chess moves/clocks/results, public matchmaking, starting a playable match from a lobby, the four-player chess rules engine (FFA/2v2), custom starting positions and all-queen variants, Stockfish analysis, account-synced board presets, profile frames/titles, personal banner uploads, and the remaining social/community systems. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
+**Still not implemented:** server-authoritative online chess moves/clocks/results, public matchmaking, starting a playable match from a lobby, the four-player chess rules engine (FFA/2v2), custom starting positions and all-queen variants, Stockfish analysis, account-synced board presets, profile frames/titles, personal banner uploads, and the remaining social/community systems. The admin interface still needs a full browser-based end-to-end run with separate admin and ordinary-player accounts before public launch. Those must be built as real server-authoritative features before being advertised as live. The CPU is a lightweight legal-move opponent, not Stockfish.
 
-Casino coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist. See [Casino rules, odds and architecture](docs/casino.md).
+Casino coins have no real-world value. No deposits, withdrawals, cash prizes or paid competitive advantages exist. See [Casino rules, odds and architecture](docs/casino.md) and the [Admin Command Centre guide](docs/admin.md).
