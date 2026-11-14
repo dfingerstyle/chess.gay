@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import './CasinoMultiplayer.css';
 import CasinoStage, { type CasinoVisualResult } from './CasinoStage';
+import RouletteBetTable from './RouletteBetTable';
 
 type Game = 'roulette' | 'coinflip' | 'dice';
 type CasinoTable = {
@@ -347,8 +348,7 @@ export default function CasinoMultiplayer({ user, balance, onBalanceChange, soun
               {(!round||round.status!=='betting')&&isHost&&selectedTable.status!=='closed'&&<button className="casino-gold-button" onClick={startRound} disabled={busy}>START NEXT ROUND · 20 SECOND BETTING</button>}
               {round?.status==='betting'&&!isSpectator&&(
                 <form className="casino-bet-form" onSubmit={placeBet}>
-                  {selectedTable.game_type==='roulette'&&<><label>BET TYPE<select value={betType} onChange={e=>{setBetType(e.target.value);setBetChoice((ROULETTE_CHOICES[e.target.value]||[])[0]||'red')}}><option value="colour">Colour</option><option value="number">Single number</option><option value="parity">Odd / even</option><option value="range">Low / high</option><option value="dozen">Dozens</option><option value="column">Columns</option></select></label></>}
-                  <label>YOUR PICK<select value={betChoice} onChange={e=>setBetChoice(e.target.value)}>{choices.map(choice=><option key={choice} value={choice}>{labelChoice(choice)}</option>)}</select></label>
+                  {selectedTable.game_type==='roulette'?<div className="casino-table-roulette-pick"><RouletteBetTable selectedType={betType} selectedChoice={betChoice} onSelect={(type,choice)=>{setBetType(type);setBetChoice(choice)}}/><p className="casino-bet-odds">{betType==='number'?'1/37 · 2.70% chance · 35:1 profit':betType==='dozen'||betType==='column'?'12/37 · 32.43% chance · 2:1 profit':'18/37 · 48.65% chance · 1:1 profit'} · 2.70% house edge</p></div>:<label>YOUR PICK<select value={betChoice} onChange={e=>setBetChoice(e.target.value)}>{choices.map(choice=><option key={choice} value={choice}>{labelChoice(choice)}</option>)}</select><small>50% chance · 1:1 profit</small></label>}
                   <label>STAKE<input type="number" min={selectedTable.min_bet} max={selectedTable.max_bet} step="1" value={stake} onChange={e=>setStake(e.target.value)}/></label>
                   <button className="casino-gold-button" disabled={busy||secondsLeft<=0}>PLACE BET</button>
                 </form>
