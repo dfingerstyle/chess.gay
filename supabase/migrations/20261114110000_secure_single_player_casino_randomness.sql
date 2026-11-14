@@ -31,7 +31,7 @@ begin
   if v_balance < p_bet then raise exception 'not enough coins' using errcode = 'P0001'; end if;
 
   if p_game = 'coinflip' then
-    if p_choice not in ('heads', 'tails') then
+    if p_choice is null or p_choice not in ('heads', 'tails') then
       raise exception 'choose heads or tails' using errcode = '22023';
     end if;
     -- 128 accepted byte values map evenly to the two sides.
@@ -42,7 +42,7 @@ begin
     v_outcome := case when v_byte < 64 then 'heads' else 'tails' end;
     v_won := p_choice = v_outcome;
   elsif p_game = 'dice' then
-    if p_choice not in ('low', 'high') then
+    if p_choice is null or p_choice not in ('low', 'high') then
       raise exception 'choose low or high' using errcode = '22023';
     end if;
     -- 252 accepted byte values divide evenly into six outcomes.
@@ -55,7 +55,7 @@ begin
     v_won := (p_choice = 'low' and v_roll between 1 and 3)
       or (p_choice = 'high' and v_roll between 4 and 6);
   elsif p_game = 'roulette' then
-    if p_choice not in ('red', 'black') then
+    if p_choice is null or p_choice not in ('red', 'black') then
       raise exception 'choose red or black' using errcode = '22023';
     end if;
     -- 222 accepted byte values divide evenly into 37 pockets.
