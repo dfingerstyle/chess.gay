@@ -57,7 +57,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
     const timer = window.setTimeout(() => {
       setRevealed(result);
       setRevealing(false);
-      if (soundRef.current.enabled) playCasinoCue(result.won === undefined ? 'win' : result.won ? 'win' : 'loss', soundRef.current.volume);
+      if (soundRef.current.enabled && result.won !== undefined) playCasinoCue(result.won ? 'win' : 'loss', soundRef.current.volume);
       completionRef.current?.();
     }, duration);
     return () => window.clearTimeout(timer);
