@@ -92,18 +92,18 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     if(error)setNotice(error.message);else setPlayers((data||[]) as Player[]);
   }
   async function loadPlayerDetail(player:Player){
-    if(!supabase)return;
+    if(!client)return;
     setSelectedPlayer(player);
-    const {data,error}=await supabase.rpc('admin_get_player_detail',{p_user_id:player.user_id});
+    const {data,error}=await client.rpc('admin_get_player_detail',{p_user_id:player.user_id});
     if(error)setNotice(error.message);else setDetail(data as Detail);
   }
   async function loadRoles(){
-    if(!supabase)return;
+    if(!client)return;
     const [roleResult,permissionResult,linkResult,userRoleResult]=await Promise.all([
       client.from('admin_roles').select('id,role_key,name,description,is_system').order('name'),
       client.from('admin_permissions').select('permission_key,category,label,description').order('category').order('label'),
       client.from('admin_role_permissions').select('role_id,permission_key'),
-      supabase.from('admin_user_roles').select('role_id'),
+      client.from('admin_user_roles').select('role_id'),
     ]);
     if(roleResult.error||permissionResult.error||linkResult.error||userRoleResult.error){setNotice(roleResult.error?.message||permissionResult.error?.message||linkResult.error?.message||userRoleResult.error?.message||'Could not load roles.');return;}
     const links=(linkResult.data||[]) as Array<{role_id:string;permission_key:string}>;
@@ -118,26 +118,26 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     if(!selectedRoleId&&next.length)setSelectedRoleId(next[0].id);
   }
   async function loadModeration(){
-    if(!supabase)return;
-    const {data,error}=await supabase.from('admin_moderation_actions').select('id,target_user_id,actor_id,action_type,reason,status,created_at,expires_at,revoked_at').order('created_at',{ascending:false}).limit(100);
+    if(!client)return;
+    const {data,error}=await client.from('admin_moderation_actions').select('id,target_user_id,actor_id,action_type,reason,status,created_at,expires_at,revoked_at').order('created_at',{ascending:false}).limit(100);
     if(error)setNotice(error.message);else setModeration((data||[]) as Moderation[]);
   }
   async function loadAudit(){
-    if(!supabase)return;
-    const {data,error}=await supabase.from('admin_audit_logs').select('id,actor_id,action,target_type,target_id,reason,metadata,created_at').order('created_at',{ascending:false}).limit(100);
+    if(!client)return;
+    const {data,error}=await client.from('admin_audit_logs').select('id,actor_id,action,target_type,target_id,reason,metadata,created_at').order('created_at',{ascending:false}).limit(100);
     if(error)setNotice(error.message);else setAudit((data||[]) as Audit[]);
   }
   async function loadEconomy(){
-    if(!supabase)return;
-    const {data,error}=await supabase.rpc('admin_get_economy_overview');
+    if(!client)return;
+    const {data,error}=await client.rpc('admin_get_economy_overview');
     if(error)setNotice(error.message);else setEconomy((data||{}) as Record<string,number>);
   }
   async function loadCasino(){
-    if(!supabase)return;
+    if(!client)return;
     const [summary,activity,tables]=await Promise.all([
-      supabase.rpc('admin_get_casino_overview'),
-      supabase.rpc('admin_get_recent_casino_activity',{p_limit:40}),
-      supabase.rpc('admin_get_casino_tables'),
+      client.rpc('admin_get_casino_overview'),
+      client.rpc('admin_get_recent_casino_activity',{p_limit:40}),
+      client.rpc('admin_get_casino_tables'),
     ]);
     if(summary.error||activity.error||tables.error){setNotice(summary.error?.message||activity.error?.message||tables.error?.message||'Could not load casino analytics.');return;}
     setCasino((summary.data||{}) as Record<string,number>);
@@ -145,10 +145,10 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     setCasinoTables((tables.data||[]) as CasinoTable[]);
   }
   async function loadSettings(){
-    if(!supabase)return;
+    if(!client)return;
     const [settingResult,flagResult]=await Promise.all([
-      supabase.from('admin_system_settings').select('setting_key,value,description').order('setting_key'),
-      supabase.from('admin_feature_flags').select('flag_key,enabled,description').order('flag_key'),
+      client.from('admin_system_settings').select('setting_key,value,description').order('setting_key'),
+      client.from('admin_feature_flags').select('flag_key,enabled,description').order('flag_key'),
     ]);
     if(settingResult.error||flagResult.error){setNotice(settingResult.error?.message||flagResult.error?.message||'Could not load settings.');return;}
     const nextSettings=(settingResult.data||[]) as Array<{setting_key:string;value:unknown;description:string}>;
@@ -179,99 +179,99 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function adjustWallet(event:FormEvent){
     event.preventDefault();
-    if(!supabase||!selectedPlayer)return;
+    if(!client||!selectedPlayer)return;
     const proposedDelta=Number(walletDelta);
     if(Math.abs(proposedDelta)>1000&&!window.confirm('Confirm this large virtual-coin balance adjustment?'))return;
     await runAction(async()=>{
       const delta=Number(walletDelta);
       if(!Number.isInteger(delta)||delta===0)throw new Error('Enter a non-zero whole coin amount.');
-      const {data,error}=await supabase.rpc('admin_adjust_wallet',{p_user_id:selectedPlayer.user_id,p_delta:delta,p_reason:walletReason});
+      const {data,error}=await client.rpc('admin_adjust_wallet',{p_user_id:selectedPlayer.user_id,p_delta:delta,p_reason:walletReason});
       if(error)throw error;
       setNotice('Wallet updated. New balance: '+fmt(Number((data as {balance:number}).balance))+' coins.');
       setWalletReason('');await loadPlayerDetail(selectedPlayer);await loadPlayers();
     });
   }
   async function assignRole(event:FormEvent){
-    event.preventDefault();if(!supabase||!selectedPlayer||!roleToAssign)return;
+    event.preventDefault();if(!client||!selectedPlayer||!roleToAssign)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_assign_role',{p_user_id:selectedPlayer.user_id,p_role_id:roleToAssign,p_reason:roleReason});
+      const {error}=await client.rpc('admin_assign_role',{p_user_id:selectedPlayer.user_id,p_role_id:roleToAssign,p_reason:roleReason});
       if(error)throw error;setRoleReason('');await loadRoles();await loadPlayers();await loadPlayerDetail(selectedPlayer);setNotice('Role assigned.');
     });
   }
   async function removeRole(roleId:string){
-    if(!supabase||!selectedPlayer)return;
+    if(!client||!selectedPlayer)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_remove_role',{p_user_id:selectedPlayer.user_id,p_role_id:roleId,p_reason:roleReason||'Role removed by owner through the admin panel.'});
+      const {error}=await client.rpc('admin_remove_role',{p_user_id:selectedPlayer.user_id,p_role_id:roleId,p_reason:roleReason||'Role removed by owner through the admin panel.'});
       if(error)throw error;await loadRoles();await loadPlayers();await loadPlayerDetail(selectedPlayer);setNotice('Role removed.');
     });
   }
   async function createRole(event:FormEvent){
-    event.preventDefault();if(!supabase)return;
+    event.preventDefault();if(!client)return;
     await runAction(async()=>{
-      const {data,error}=await supabase.rpc('admin_create_role',{p_key:roleKey.trim(),p_name:roleName.trim(),p_description:roleDescription.trim()});
+      const {data,error}=await client.rpc('admin_create_role',{p_key:roleKey.trim(),p_name:roleName.trim(),p_description:roleDescription.trim()});
       if(error)throw error;setRoleKey('');setRoleName('');setRoleDescription('');await loadRoles();setSelectedRoleId(String((data as {id:string}).id));setNotice('Custom role created.');
     });
   }
   async function savePermissions(){
-    if(!supabase||!selectedRoleId)return;
+    if(!client||!selectedRoleId)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_set_role_permissions',{p_role_id:selectedRoleId,p_permissions:selectedPermissions});
+      const {error}=await client.rpc('admin_set_role_permissions',{p_role_id:selectedRoleId,p_permissions:selectedPermissions});
       if(error)throw error;await loadRoles();setNotice('Role permissions saved.');
     });
   }
   async function deleteRole(){
-    if(!supabase||!selectedRoleId)return;
+    if(!client||!selectedRoleId)return;
     const role=roles.find(item=>item.id===selectedRoleId);if(!role)return;
     if(!window.confirm('Delete this custom role? This cannot be undone.'))return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_delete_role',{p_role_id:selectedRoleId,p_reason:'Custom role deleted after review.'});
+      const {error}=await client.rpc('admin_delete_role',{p_role_id:selectedRoleId,p_reason:'Custom role deleted after review.'});
       if(error)throw error;setSelectedRoleId('');await loadRoles();setNotice('Role deleted.');
     });
   }
   async function moderate(event:FormEvent){
-    event.preventDefault();if(!supabase||!selectedPlayer)return;
+    event.preventDefault();if(!client||!selectedPlayer)return;
     if(['suspend','ban'].includes(moderationAction)&&!window.confirm('Confirm this account restriction? The player will lose access to the platform.'))return;
     await runAction(async()=>{
       const duration=moderationAction==='warning'||(moderationAction==='ban'&&!moderationDuration.trim())?null:Number(moderationDuration);
-      const {error}=await supabase.rpc('admin_moderate_player',{p_user_id:selectedPlayer.user_id,p_action:moderationAction,p_reason:moderationReason,p_duration_minutes:duration});
+      const {error}=await client.rpc('admin_moderate_player',{p_user_id:selectedPlayer.user_id,p_action:moderationAction,p_reason:moderationReason,p_duration_minutes:duration});
       if(error)throw error;setModerationReason('');await loadModeration();await loadPlayerDetail(selectedPlayer);setNotice('Moderation action recorded.');
     });
   }
   async function revokeAction(actionId:string){
-    if(!supabase)return;
+    if(!client)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_revoke_moderation_action',{p_action_id:actionId,p_reason:'Restriction revoked after moderator review.'});
+      const {error}=await client.rpc('admin_revoke_moderation_action',{p_action_id:actionId,p_reason:'Restriction revoked after moderator review.'});
       if(error)throw error;await loadModeration();if(selectedPlayer)await loadPlayerDetail(selectedPlayer);setNotice('Restriction revoked.');
     });
   }
   async function addNote(event:FormEvent){
-    event.preventDefault();if(!supabase||!selectedPlayer)return;
+    event.preventDefault();if(!client||!selectedPlayer)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_add_player_note',{p_user_id:selectedPlayer.user_id,p_note:noteDraft});
+      const {error}=await client.rpc('admin_add_player_note',{p_user_id:selectedPlayer.user_id,p_note:noteDraft});
       if(error)throw error;setNoteDraft('');await loadPlayerDetail(selectedPlayer);setNotice('Internal note saved.');
     });
   }
   async function saveSetting(key:string,value:unknown){
-    if(!supabase)return;
+    if(!client)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_update_system_setting',{p_key:key,p_value:value});
+      const {error}=await client.rpc('admin_update_system_setting',{p_key:key,p_value:value});
       if(error)throw error;await loadSettings();onConfigChanged();setNotice('Platform setting updated.');
     });
   }
   async function closeCasinoTable(table:CasinoTable){
-    if(!supabase)return;
+    if(!client)return;
     const reason=window.prompt('Reason for closing '+table.table_name+' (at least 8 characters):');
     if(!reason||reason.trim().length<8)return;
     if(!window.confirm('Close this casino table? An open betting round must settle first.'))return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_close_casino_table',{p_table_id:table.table_id,p_reason:reason.trim()});
+      const {error}=await client.rpc('admin_close_casino_table',{p_table_id:table.table_id,p_reason:reason.trim()});
       if(error)throw error;await loadCasino();setNotice('Casino table closed.');
     });
   }
   async function toggleFlag(key:string,enabled:boolean){
-    if(!supabase)return;
+    if(!client)return;
     await runAction(async()=>{
-      const {error}=await supabase.rpc('admin_update_feature_flag',{p_key:key,p_enabled:enabled});
+      const {error}=await client.rpc('admin_update_feature_flag',{p_key:key,p_enabled:enabled});
       if(error)throw error;await loadSettings();onConfigChanged();setNotice('Feature flag updated.');
     });
   }
