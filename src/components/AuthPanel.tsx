@@ -59,6 +59,7 @@ export default function AuthPanel({ user, onClose, onSignedOut, onGuestRegistere
         const { error: profileError } = await supabase.from('profiles').update({ username: cleanUsername, display_name: cleanUsername }).eq('id', account.id);
         if (profileError?.code === '23505') throw new Error('That username is already taken. Choose another one.');
         if (profileError) throw profileError;
+        try { localStorage.setItem('chessgay:guest-name', cleanUsername); } catch { /* The Supabase profile remains the saved username. */ }
         onGuestRegistered(cleanUsername);
         setMessage('Username saved. You can play without an email; this guest account stays on this device unless you later add a recovery sign-in.');
         onClose();
