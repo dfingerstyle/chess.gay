@@ -168,7 +168,11 @@ The current development branch has moved beyond the original static foundation f
 - Local standard chess with legal move generation and validation, captures, castling, en passant, promotion, check, checkmate, stalemate, insufficient-material draws, threefold-repetition claims, fivefold-repetition automatic draws, 50-move claims and 75-move automatic draws.
 - Playable pass-and-play and a lightweight CPU opponent, selectable time controls, clocks, move list, undo, resignation and board orientation.
 - A persistent Supabase wallet for authenticated users and anonymous guest sessions, plus transaction history.
-- Server-side coinflip, high/low dice and European-style red/black roulette. Bets are 1–5,000 virtual coins; each round is resolved in a database function and the balance change is recorded atomically.
+- **Casino hub:** dedicated animated casino lobby with European roulette, coin flip, dice and three-reel slots. Roulette has a 2.70% house edge / 97.30% RTP; coin flip and dice are fair 50/50; slots have a 95.83% theoretical RTP / 4.17% house edge with a published paytable.
+- **Multiplayer casino:** public/private roulette, coinflip and dice tables; hashed 16-character invite codes; up to eight players and 50 spectators; 20-second betting rounds; live chat; animated shared results; recent round history; and spectator-triggered settlement.
+- **Player duels:** coinflip, dice and red/black roulette challenges. Stakes are charged only after acceptance; the winner receives the pot; roulette zero refunds both stakes.
+- **Casino social/history:** personal table-bet and slot-spin history, net-profit leaderboard across table bets, slots and player duels, synthesized sound effects and optional ambient audio.
+- **Casino security:** server-generated outcomes, wallet locks and ledger adjustments, RLS, authenticated-only RPCs, no direct client writes to sensitive tables, private invite entropy and server-side rate limits.
 - A work-shift earning action (100–250 coins, one-hour cooldown), server-side shop purchases and sales, and persistent inventory.
 - Starry Void, Sakura and Deep Sea themes, Pixelify Sans / Inter typography and animated pixel-art backgrounds.
 - Eight-destination hybrid world hub.
