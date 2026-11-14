@@ -25,5 +25,7 @@ jobs:
         run: npm install
       - name: Audit dependencies
         run: npm audit --audit-level=high
+      - name: Verify core platform preservation
+        run: npm run verify:preservation
       - name: Type-check and build
         run: npm run build
