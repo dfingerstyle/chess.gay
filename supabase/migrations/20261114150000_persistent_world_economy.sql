@@ -173,8 +173,12 @@ begin
 
     if v_cycles > 0 then
       v_amount := v_asset.income_per_cycle * v_asset.level * v_cycles;
+      -- Keep only the incomplete current cycle; discard whole-cycle backlog older than the 24h cap.
       update public.player_economy_assets
-      set last_claim_at = v_claimed_at
+      set last_claim_at = v_claimed_at - (
+        (extract(epoch from (v_claimed_at - v_asset.last_claim_at))::bigint
+          % (v_asset.cycle_hours::bigint * 3600)) * interval '1 second'
+      )
       where user_id = v_uid and asset_key = v_asset.asset_key;
 
       v_total := v_total + v_amount;
