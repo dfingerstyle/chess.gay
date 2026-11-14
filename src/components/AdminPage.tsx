@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import './AdminPage.css';
 
-type Tab = 'overview'|'players'|'roles'|'moderation'|'economy'|'casino'|'audit'|'settings';
+type Tab = 'overview'|'players'|'roles'|'moderation'|'economy'|'casino'|'security'|'audit'|'settings';
 type Access = { is_admin:boolean; roles:Array<{id:string;key:string;name:string}>; permissions:string[] };
 type Player = { user_id:string; username:string; display_name:string|null; avatar_url:string|null; balance:number; xp:number; level:number; created_at:string; last_sign_in_at:string|null; banned_until:string|null; email:string|null; role_names:string[] };
 type Permission = { permission_key:string; category:string; label:string; description:string };
@@ -48,6 +48,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   const [casino,setCasino]=useState<Record<string,number>>({});
   const [casinoActivity,setCasinoActivity]=useState<Array<Record<string,unknown>>>([]);
   const [casinoTables,setCasinoTables]=useState<CasinoTable[]>([]);
+  const [security,setSecurity]=useState<{banned_accounts:number;active_mutes:number;admin_accounts:number;custom_roles:number;audit_actions_24h:number;recent_restrictions:Array<Record<string,unknown>>}>({banned_accounts:0,active_mutes:0,admin_accounts:0,custom_roles:0,audit_actions_24h:0,recent_restrictions:[]});
   const [settings,setSettings]=useState<Array<{setting_key:string;value:unknown;description:string}>>([]);
   const [flags,setFlags]=useState<Array<{flag_key:string;enabled:boolean;description:string}>>([]);
   const [walletDelta,setWalletDelta]=useState('100');
@@ -69,6 +70,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     {id:'moderation' as Tab,label:'Moderation',icon:'⚑',permission:'moderation.view'},
     {id:'economy' as Tab,label:'Economy',icon:'◉',permission:'economy.view'},
     {id:'casino' as Tab,label:'Casino',icon:'🎰',permission:'casino.view'},
+    {id:'security' as Tab,label:'Security',icon:'⛨',permission:'security.view'},
     {id:'audit' as Tab,label:'Audit trail',icon:'▤',permission:'audit.view'},
     {id:'settings' as Tab,label:'Settings',icon:'⚙',permission:'settings.view'},
   ].filter(item=>can(item.permission)||(item.id==='roles'&&can('roles.manage'))),[access]);
@@ -129,6 +131,11 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     const {data,error}=await client.from('admin_audit_logs').select('id,actor_id,action,target_type,target_id,reason,metadata,created_at').order('created_at',{ascending:false}).limit(100);
     if(error)setNotice(error.message);else setAudit((data||[]) as Audit[]);
   }
+  async function loadSecurity(){
+    if(!client)return;
+    const {data,error}=await client.rpc('admin_get_security_overview');
+    if(error)setNotice(error.message);else setSecurity((data||{}) as typeof security);
+  }
   async function loadEconomy(){
     if(!client)return;
     const {data,error}=await client.rpc('admin_get_economy_overview');
@@ -166,6 +173,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
     if(next==='moderation')await loadModeration();
     if(next==='economy')await loadEconomy();
     if(next==='casino')await loadCasino();
+    if(next==='security')await loadSecurity();
     if(next==='audit')await loadAudit();
     if(next==='settings')await loadSettings();
   }
@@ -367,6 +375,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
 
         {tab==='casino'&&<div className="admin-content"><SectionHead eyebrow="VIRTUAL CASINO" title="Casino operations" detail="Review house-game activity and player-versus-player results. Outcomes and odds are not editable here."/><div className="admin-stat-grid"><Stat label="ACTIVE TABLES" value={fmt(casino.active_tables||0)}/><Stat label="ACTIVE ROUNDS" value={fmt(casino.active_rounds||0)}/><Stat label="TABLE BETS" value={fmt(casino.table_bets||0)}/><Stat label="TABLE WAGERED" value={fmt(casino.table_wagered||0)}/><Stat label="TABLE PAYOUTS" value={fmt(casino.table_payouts||0)}/><Stat label="TABLE NET" value={fmt(casino.table_net||0)}/><Stat label="SLOT SPINS" value={fmt(casino.slot_spins||0)}/><Stat label="SLOT NET" value={fmt(casino.slot_net||0)}/><Stat label="PLAYER DUELS" value={fmt(casino.player_challenges||0)}/></div><div className="admin-panel"><div className="admin-panel-heading">TABLE MANAGEMENT <span>{casinoTables.length} TABLES</span></div>{casinoTables.length===0&&<p className="admin-empty">No casino tables currently exist.</p>}{casinoTables.map(table=><div className="admin-list-row" key={table.table_id}><span><b>{table.table_name} · {table.game_type.toUpperCase()}</b><small>{table.visibility} · host @{table.host_name||table.host_id.slice(0,8)} · {table.player_count}/{table.max_players} players · {table.spectator_count} spectators · bets {fmt(table.min_bet)}–{fmt(table.max_bet)} · {date(table.created_at)}</small></span><span className={'admin-status '+(table.status==='closed'?'revoked':'active')}>{table.status.toUpperCase()}</span>{table.status!=='closed'&&can('casino.manage')&&<button className="admin-mini-button" onClick={()=>void closeCasinoTable(table)} disabled={busy}>CLOSE TABLE</button>}</div>)}</div><div className="admin-panel"><div className="admin-panel-heading">RECENT CASINO ACTIVITY <span>{casinoActivity.length}</span></div>{casinoActivity.length===0&&<p className="admin-empty">No casino activity recorded yet.</p>}{casinoActivity.map((item,index)=><div className="admin-list-row" key={String(item.kind)+'-'+index}><span><b>{String(item.kind).replace('_',' ').toUpperCase()} · {String(item.game_type||'')}</b><small>Player {String(item.user_id||'').slice(0,8)}… · {String(item.detail||'')} · {String(item.result||'')} · {date(String(item.created_at||''))}</small></span><strong>{fmt(Number(item.stake||0))} wagered</strong><b className={Number(item.net||0)>=0?'positive':'negative'}>{Number(item.net)>0?'+':''}{fmt(Number(item.net||0))}</b></div>)}</div></div>}
 
+        {tab==='security'&&<div className="admin-content"><SectionHead eyebrow="TRUST & SAFETY" title="Security overview" detail="Account restrictions, staff access and recent moderation activity. All privileged operations remain server-checked."/><div className="admin-stat-grid"><Stat label="BANNED ACCOUNTS" value={fmt(security.banned_accounts||0)}/><Stat label="ACTIVE CHAT MUTES" value={fmt(security.active_mutes||0)}/><Stat label="STAFF ACCOUNTS" value={fmt(security.admin_accounts||0)}/><Stat label="CUSTOM ROLES" value={fmt(security.custom_roles||0)}/><Stat label="ADMIN ACTIONS · 24H" value={fmt(security.audit_actions_24h||0)}/></div><div className="admin-panel"><div className="admin-panel-heading">RECENT ACCOUNT RESTRICTIONS <span>{security.recent_restrictions.length}</span></div>{security.recent_restrictions.length===0&&<p className="admin-empty">No recent account restrictions.</p>}{security.recent_restrictions.map((item,index)=><div className="admin-list-row" key={String(item.id||index)}><span><b>{String(item.action_type||'').toUpperCase()} · @{String(item.target_username||String(item.target_user_id||'').slice(0,8))}</b><small>{String(item.reason||'')} · {date(String(item.created_at||''))} · by @{String(item.actor_username||String(item.actor_id||'').slice(0,8))}</small></span><span className={'admin-status '+(item.status==='active'?'active':'revoked')}>{String(item.status||'')}</span></div>)}</div></div>}
         {tab==='audit'&&<div className="admin-content"><SectionHead eyebrow="IMMUTABLE HISTORY" title="Audit trail" detail="Sensitive admin actions are appended with actor, target, reason and metadata. Logs cannot be edited from the client."/><div className="admin-panel"><div className="admin-panel-heading">RECENT ADMIN ACTIONS <span>{audit.length}</span></div>{audit.map(item=><div className="admin-list-row audit-row" key={item.id}><span><b>{item.action}</b><small>{item.target_type} · {item.target_id||'—'} · {item.reason}</small><small>{date(item.created_at)} · actor {item.actor_id?.slice(0,8)||'system'}…</small></span><code>#{item.id}</code></div>)}</div></div>}
 
         {tab==='settings'&&<div className="admin-content"><SectionHead eyebrow="PLATFORM CONTROL" title="Settings & feature flags" detail="Maintenance mode and feature switches are audited. Owner-only controls are enforced by the database."/><div className="admin-panel admin-form"><div className="admin-panel-heading">MAINTENANCE MODE <span>OWNER CONTROL</span></div>{settings.filter(item=>item.setting_key==='maintenance_mode').map(item=><label className="admin-toggle-row" key={item.setting_key}><span><b>Enable maintenance screen</b><small>{item.description}</small></span><input type="checkbox" checked={item.value===true||item.value==='true'} disabled={!can('settings.manage')||busy} onChange={event=>void saveSetting(item.setting_key,event.target.checked)}/></label>)}<label>MAINTENANCE MESSAGE<textarea value={maintenanceMessage} onChange={event=>setMaintenanceMessage(event.target.value)} maxLength={300}/></label><button className="admin-button" disabled={!can('settings.manage')||busy} onClick={()=>void saveSetting('maintenance_message',maintenanceMessage)}>SAVE MESSAGE</button></div><div className="admin-panel"><div className="admin-panel-heading">FEATURE FLAGS <span>GLOBAL</span></div>{flags.map(flag=>{const unreleased=['chess_online_enabled','four_player_chess_enabled','tournaments_enabled'].includes(flag.flag_key);return <label className="admin-toggle-row" key={flag.flag_key}><span><b>{flag.flag_key.replaceAll('_',' ').toUpperCase()} {unreleased&&<i className="admin-unreleased">NOT RELEASED</i>}</b><small>{flag.description}</small></span><input type="checkbox" checked={flag.enabled} disabled={!can('settings.manage')||busy||(unreleased&&!flag.enabled)} onChange={event=>void toggleFlag(flag.flag_key,event.target.checked)}/></label>})}</div></div>}
