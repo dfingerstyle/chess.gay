@@ -23,6 +23,7 @@ function Stat({label,value,hint}:Metric){return <article className="admin-stat">
 function SectionHead({eyebrow,title,detail,action}:{eyebrow:string;title:string;detail?:string;action?:ReactNode}){return <div className="admin-section-head"><div><span className="admin-kicker">{eyebrow}</span><h2>{title}</h2>{detail&&<p>{detail}</p>}</div>{action}</div>}
 
 export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;onBack:()=>void;onConfigChanged:()=>void}){
+  const client=supabase;
   const [access,setAccess]=useState<Access|null>(null);
   const [checking,setChecking]=useState(true);
   const [tab,setTab]=useState<Tab>('overview');
@@ -71,9 +72,9 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   ].filter(item=>can(item.permission)),[access]);
 
   async function loadAccess(){
-    if(!supabase||!user||user.is_anonymous){setChecking(false);setAccess(null);return;}
+    if(!client||!user||user.is_anonymous){setChecking(false);setAccess(null);return;}
     setChecking(true);
-    const {data,error}=await supabase.rpc('admin_get_my_access');
+    const {data,error}=await client.rpc('admin_get_my_access');
     if(error){setNotice(error.message);setAccess(null);}
     else setAccess(data as Access);
     setChecking(false);
@@ -99,7 +100,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   async function loadRoles(){
     if(!supabase)return;
     const [roleResult,permissionResult,linkResult,userRoleResult]=await Promise.all([
-      supabase.from('admin_roles').select('id,role_key,name,description,is_system').order('name'),
+      client.from('admin_roles').select('id,role_key,name,description,is_system').order('name'),
       supabase.from('admin_permissions').select('permission_key,category,label,description').order('category').order('label'),
       supabase.from('admin_role_permissions').select('role_id,permission_key'),
       supabase.from('admin_user_roles').select('role_id'),
