@@ -175,6 +175,8 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   async function adjustWallet(event:FormEvent){
     event.preventDefault();
     if(!supabase||!selectedPlayer)return;
+    const proposedDelta=Number(walletDelta);
+    if(Math.abs(proposedDelta)>1000&&!window.confirm('Confirm this large virtual-coin balance adjustment?'))return;
     await runAction(async()=>{
       const delta=Number(walletDelta);
       if(!Number.isInteger(delta)||delta===0)throw new Error('Enter a non-zero whole coin amount.');
@@ -215,6 +217,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   async function deleteRole(){
     if(!supabase||!selectedRoleId)return;
     const role=roles.find(item=>item.id===selectedRoleId);if(!role)return;
+    if(!window.confirm('Delete this custom role? This cannot be undone.'))return;
     await runAction(async()=>{
       const {error}=await supabase.rpc('admin_delete_role',{p_role_id:selectedRoleId,p_reason:'Custom role deleted after review.'});
       if(error)throw error;setSelectedRoleId('');await loadRoles();setNotice('Role deleted.');
@@ -222,6 +225,7 @@ export default function AdminPage({user,onBack,onConfigChanged}:{user:User|null;
   }
   async function moderate(event:FormEvent){
     event.preventDefault();if(!supabase||!selectedPlayer)return;
+    if(['suspend','ban'].includes(moderationAction)&&!window.confirm('Confirm this account restriction? The player will lose access to the platform.'))return;
     await runAction(async()=>{
       const duration=moderationAction==='warning'||(moderationAction==='ban'&&!moderationDuration.trim())?null:Number(moderationDuration);
       const {error}=await supabase.rpc('admin_moderate_player',{p_user_id:selectedPlayer.user_id,p_action:moderationAction,p_reason:moderationReason,p_duration_minutes:duration});
