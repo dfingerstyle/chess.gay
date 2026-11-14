@@ -561,8 +561,10 @@ export default function App() {
       {page === 'farm' && <FarmPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} onShop={() => setPage('shop')} />}
       {page === 'fishing' && <FishingPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
       {page === 'work' && <WorkPage user={user} onBack={() => setPage('dashboard')} onStartGuest={() => { void startGuestSession(); }} />}
-      {(page === 'casino' || page === 'shop') && <ArcadePage page={page} user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
-      {['learn','community','tournaments','admin','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
+      {page === 'shop' && <ArcadePage page="shop" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />}
+      {page === 'casino' && (featureFlags.casino_enabled === false ? <section className="app-page"><button className="back-link" onClick={() => setPage('dashboard')}>← BACK</button><PageHeading eyebrow="CASINO" title={<>Temporarily <em>unavailable.</em></>} description="The virtual casino is currently disabled by platform administration." /></section> : <ArcadePage page="casino" user={user} onBack={() => setPage('dashboard')} onSignIn={() => setAuthOpen(true)} onNavigate={setPage} />)}
+      {['learn','community','tournaments','studio'].includes(page) && <FeaturePage page={page} onBack={() => setPage('dashboard')} onRegister={() => setAuthOpen(true)} showRegister={Boolean(!user || user.is_anonymous)} onEditProfile={() => setEditorOpen(true)} canEditProfile={Boolean(myProfile)} />}
+      {page === 'admin' && <AdminPage user={user} onBack={() => setPage('dashboard')} onConfigChanged={() => { void refreshPlatformConfig(); }} />}
       {page === 'discover' && <Discover profiles={profiles} loading={directoryLoading} error={directoryError} onOpenProfile={openProfile} />}
       {page === 'profile' && selectedProfile && <PublicProfile profile={selectedProfile} onBack={() => setPage('discover')} />}
       {page === 'profile' && !selectedProfile && <section className="app-page"><button className="back-link" onClick={() => setPage('discover')}>← BACK</button><p>Choose a player to view their profile.</p></section>}
