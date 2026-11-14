@@ -387,9 +387,10 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    if (!supabase) { setPlatformConfigLoading(false); return; }
+    const client = supabase;
+    if (!client) { setPlatformConfigLoading(false); return; }
     const loadConfig = async () => {
-      const { data, error } = await supabase.rpc('get_public_platform_config');
+      const { data, error } = await client.rpc('get_public_platform_config');
       if (!active) return;
       if (!error && data) setPlatformConfig(data as {maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>});
       setPlatformConfigLoading(false);
@@ -400,7 +401,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!user || user.is_anonymous || !supabase) {
+    const client = supabase;
+    if (!user || user.is_anonymous || !client) {
       setAdminAccess(null);
       setAccountStatus(null);
       setAccountStatusError('');
@@ -411,8 +413,8 @@ export default function App() {
     setAccountStatusLoading(true);
     const refreshAccess = async () => {
       const [accessResult,statusResult] = await Promise.all([
-        supabase.rpc('admin_get_my_access'),
-        supabase.rpc('admin_get_my_account_status'),
+        client.rpc('admin_get_my_access'),
+        client.rpc('admin_get_my_account_status'),
       ]);
       if (!active) return;
       if (accessResult.error) setAdminAccess(null);
@@ -433,8 +435,9 @@ export default function App() {
   const featureFlags = platformConfig?.feature_flags || {};
   const maintenanceMode = Boolean(platformConfig?.maintenance_mode && !isAdmin);
   const refreshPlatformConfig = async () => {
-    if (!supabase) return;
-    const { data, error } = await supabase.rpc('get_public_platform_config');
+    const client = supabase;
+    if (!client) return;
+    const { data, error } = await client.rpc('get_public_platform_config');
     if (!error && data) setPlatformConfig(data as {maintenance_mode:boolean;maintenance_message:string;feature_flags:Record<string,boolean>});
   };
 
