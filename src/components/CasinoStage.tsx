@@ -3,13 +3,15 @@ import type { CSSProperties } from 'react';
 import './CasinoStage.css';
 import { playCasinoCue } from '../lib/casinoAudio';
 
-export type CasinoGame = 'roulette' | 'coinflip' | 'dice';
+export type CasinoGame = 'roulette' | 'coinflip' | 'dice' | 'slots';
 export type CasinoVisualResult = {
   outcome: string;
   won?: boolean;
   net?: number;
   payout_multiplier?: number;
   win_probability?: string;
+  symbols?: string[];
+  payout_multiplier?: number;
 };
 
 const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
@@ -53,7 +55,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
     setRevealed(null);
     setRevealing(true);
     if (soundRef.current.enabled) playCasinoCue(game, soundRef.current.volume);
-    const duration = game === 'roulette' ? 4700 : 1900;
+    const duration = game === 'roulette' ? 4700 : game === 'slots' ? 3200 : 1900;
     const timer = window.setTimeout(() => {
       setRevealed(result);
       setRevealing(false);
@@ -75,7 +77,7 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
         <span className="casino-live-dot" />
         <span>{revealing ? 'RESULT IN MOTION' : revealed ? 'ROUND COMPLETE' : 'TABLE READY'}</span>
         <span className="casino-stage-rule" />
-        <small>{game === 'roulette' ? 'EUROPEAN · SINGLE ZERO' : game === 'coinflip' ? 'FAIR COIN · 50/50' : 'SIX-SIDED DIE'}</small>
+        <small>{game === 'roulette' ? 'EUROPEAN · SINGLE ZERO' : game === 'coinflip' ? 'FAIR COIN · 50/50' : game === 'dice' ? 'SIX-SIDED DIE' : 'THREE REELS · FIXED PAYTABLE'}</small>
       </div>
 
       {game === 'roulette' && (
@@ -112,14 +114,27 @@ export default function CasinoStage({ game, result, animationKey, onAnimationCom
         </div>
       )}
 
+      {game === 'slots' && (
+        <div className="slot-scene">
+          <div className="slot-machine">
+            <div className="slot-machine-header"><span>THE MIDNIGHT</span><b>777</b><span>CLUB</span></div>
+            <div className="slot-reels">
+              {[0,1,2].map(index=><div className={revealing?'slot-reel is-spinning':'slot-reel'} style={{'--reel-delay':(index*0.16)+'s'} as CSSProperties} key={index}><span>{revealing?['🍒','🔔','💎'][index]:revealed?.symbols?.[index]||'?'}</span></div>)}
+            </div>
+            <div className="slot-machine-payline"><i/> WIN LINE <i/></div>
+            <div className="slot-machine-footer">MATCH THREE · HIT THE JACKPOT</div>
+          </div>
+        </div>
+      )}
+
       <div className="casino-stage-result" aria-live="polite">
         {revealing ? (
           <><span className="stage-result-kicker">THE HOUSE IS WAITING</span><strong className="stage-result-wait">...</strong><small>Revealing the server-generated result</small></>
         ) : revealed ? (
           <>
             <span className="stage-result-kicker">{revealed.won === undefined ? 'ROUND RESULT' : revealed.won ? 'LUCK FAVOURED YOU' : 'BETTER LUCK NEXT ROUND'}</span>
-            <strong className={game === 'roulette' ? `stage-result-number ${wheelColour}` : 'stage-result-number'}>{game === 'roulette' ? number : game === 'coinflip' ? coinSide : dieNumber}</strong>
-            <small>{game === 'roulette' ? wheelColour.toUpperCase() : game === 'coinflip' ? 'COIN FLIP' : dieNumber <= 3 ? 'LOW' : 'HIGH'}</small>
+            <strong className={game === 'roulette' ? `stage-result-number ${wheelColour}` : game === 'slots' ? 'stage-result-number slot-result-symbols' : 'stage-result-number'}>{game === 'roulette' ? number : game === 'coinflip' ? coinSide : game === 'slots' ? (revealed.symbols||[]).join(' ') : dieNumber}</strong>
+            <small>{game === 'roulette' ? wheelColour.toUpperCase() : game === 'coinflip' ? 'COIN FLIP' : game === 'slots' ? (revealed.payout_multiplier ? 'TOTAL PAYOUT · '+revealed.payout_multiplier+'×' : 'NO MATCH') : dieNumber <= 3 ? 'LOW' : 'HIGH'}</small>
             {typeof revealed.net === 'number' && <b className={revealed.net >= 0 ? 'stage-result-profit' : 'stage-result-loss'}>{revealed.net > 0 ? '+' : ''}{revealed.net.toLocaleString()} COINS</b>}
           </>
         ) : (
