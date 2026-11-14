@@ -16,10 +16,10 @@ const checks = [
   ['Casino retains audio controls', 'src/components/ArcadePage.tsx', /primeCasinoAudio|setCasinoAmbience/],
   ['Chess rules engine remains present', 'src/lib/chess.ts', /getLegalMoves|legalMoves/],
   ['Authentication only creates anonymous guest sessions', 'src/components/AuthPanel.tsx', /signInAnonymously/],
-  ['Email/password signup is removed', 'src/components/AuthPanel.tsx', /signUp\s*\(/],
-  ['Email/password login is removed', 'src/components/AuthPanel.tsx', /signInWithPassword\s*\(/],
-  ['Email password-reset flow is removed', 'src/components/AuthPanel.tsx', /resetPasswordForEmail\s*\(/],
-  ['Email identity linking is removed', 'src/components/AuthPanel.tsx', /updateUser\s*\(\s*\{\s*email/],
+  ['Email/password signup is removed', 'src/components/AuthPanel.tsx', /signUp\s*\(/, false],
+  ['Email/password login is removed', 'src/components/AuthPanel.tsx', /signInWithPassword\s*\(/, false],
+  ['Email password-reset flow is removed', 'src/components/AuthPanel.tsx', /resetPasswordForEmail\s*\(/, false],
+  ['Email identity linking is removed', 'src/components/AuthPanel.tsx', /updateUser\s*\(\s*\{\s*email/, false],
 ];
 
 const failures = [];
